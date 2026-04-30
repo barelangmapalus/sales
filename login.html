@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Login - BMpro Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #2c3e50, #3498db);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .login-container {
+      max-width: 400px;
+      width: 100%;
+    }
+    .login-card {
+      background: white;
+      border-radius: 30px;
+      padding: 40px 30px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .logo {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #2c3e50, #3498db);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .logo i { font-size: 2.5rem; color: white; }
+    h2 { color: #2c3e50; margin-bottom: 8px; }
+    p { color: #666; font-size: 0.8rem; margin-bottom: 30px; }
+    .input-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .input-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #555;
+      margin-bottom: 6px;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-family: 'Poppins', sans-serif;
+      transition: all 0.2s;
+    }
+    .input-group input:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
+    }
+    button {
+      width: 100%;
+      background: linear-gradient(135deg, #2c3e50, #3498db);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    button:active { transform: scale(0.98); }
+    .error-msg {
+      color: #e74c3c;
+      font-size: 0.75rem;
+      margin-top: 12px;
+      display: none;
+    }
+    .loading { display: none; }
+    .demo-info {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+      font-size: 0.7rem;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <div class="logo">
+        <i class="fas fa-building"></i>
+      </div>
+      <h2>BMpro Admin</h2>
+      <p>Login untuk mengelola properti</p>
+      
+      <div class="input-group">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="Masukkan username">
+      </div>
+      
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Masukkan password">
+      </div>
+      
+      <button id="loginBtn" onclick="doLogin()">
+        <i class="fas fa-sign-in-alt"></i> Login
+      </button>
+      
+      <div class="error-msg" id="errorMsg"></div>
+      
+      <div class="demo-info">
+        <strong>Demo Akun:</strong><br>
+        Admin: admin / admin123<br>
+        User: user1 / user123<br>
+        Sales: sales1 / sales123
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Konfigurasi Login Script URL (Ganti dengan URL login script Anda)
+    const LOGIN_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzQENACW_HpiT4xzL7MaWuAffLBlWP4jlZ4RBKqrVx_EG-h4o26y4WKLosok5C69jU9Ow/exec';
+    
+    async function doLogin() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const errorMsg = document.getElementById('errorMsg');
+      const loginBtn = document.getElementById('loginBtn');
+      
+      if (!username || !password) {
+        errorMsg.style.display = 'block';
+        errorMsg.innerHTML = 'Username dan password wajib diisi!';
+        return;
+      }
+      
+      errorMsg.style.display = 'none';
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Memproses...';
+      
+      try {
+        const formData = new URLSearchParams();
+        formData.append('action', 'login');
+        formData.append('username', username);
+        formData.append('password', password);
+        
+        const response = await fetch(LOGIN_SCRIPT_URL, {
+          method: 'POST',
+          body: formData,
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          // Simpan session
+          localStorage.setItem('bmpro_user', JSON.stringify({
+            username: result.data.username,
+            role: result.data.role,
+            token: result.data.token,
+            loginTime: new Date().toISOString()
+          }));
+          
+          // Redirect berdasarkan role
+          if (result.data.role === 'admin') {
+            window.location.href = 'admin_form.html';
+          } else if (result.data.role === 'sales') {
+            window.location.href = 'admin_form.html';
+          } else {
+            window.location.href = 'index.html';
+          }
+        } else {
+          errorMsg.style.display = 'block';
+          errorMsg.innerHTML = result.message;
+        }
+        
+      } catch (error) {
+        errorMsg.style.display = 'block';
+        errorMsg.innerHTML = 'Gagal terhubung ke server. Coba lagi.';
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+      }
+    }
+    
+    // Cek apakah sudah login
+    function checkLogin() {
+      const user = localStorage.getItem('bmpro_user');
+      if (user) {
+        const userData = JSON.parse(user);
+        if (userData.role === 'admin' || userData.role === 'sales') {
+          window.location.href = 'admin_form.html';
+        } else {
+          window.location.href = 'index.html';
+        }
+      }
+    }
+    
+    document.getElementById('password').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') doLogin();
+    });
+    
+    checkLogin();
+  </script>
+</body>
+</html>
