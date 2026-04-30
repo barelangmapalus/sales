@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Admin Form - BMpro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f5f7fb;
+      padding: 20px;
+      padding-bottom: 80px;
+    }
+    .form-container { max-width: 600px; margin: 0 auto; }
+    .form-card {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    .form-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f0f0f0;
+      padding: 8px 15px;
+      border-radius: 30px;
+      font-size: 0.75rem;
+    }
+    .user-info i { color: #3498db; }
+    .logout-btn {
+      background: none;
+      border: none;
+      color: #e74c3c;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #555;
+      margin-bottom: 6px;
+    }
+    .form-group label .required { color: #e74c3c; margin-left: 4px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-family: 'Poppins', sans-serif;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
+    }
+    .image-upload-area {
+      border: 2px dashed #ddd;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      background: #fafafa;
+    }
+    .image-upload-area i { font-size: 2rem; color: #aaa; }
+    .image-upload-area p { font-size: 0.75rem; color: #888; }
+    .image-preview {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .image-preview-item {
+      position: relative;
+      width: 70px;
+      height: 70px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #f0f0f0;
+    }
+    .image-preview-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .image-preview-item .remove-btn {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      background: rgba(0,0,0,0.6);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 10px;
+      cursor: pointer;
+    }
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, #2c3e50, #3498db);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .error-text { color: #e74c3c; font-size: 0.7rem; margin-top: 4px; display: none; }
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      visibility: hidden;
+    }
+    .loading-content {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+    }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 16px 20px;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      text-decoration: none;
+      color: #888;
+      font-size: 0.7rem;
+    }
+    .nav-item.active { color: #3498db; }
+    .nav-item i { font-size: 1.2rem; }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <div class="form-card">
+      <div class="form-title">
+        <span><i class="fas fa-building"></i> Tambah Properti</span>
+        <div class="user-info" id="userInfo">
+          <i class="fas fa-user"></i>
+          <span id="usernameDisplay"></span>
+          <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+      </div>
+      
+      <!-- Form fields (sama seperti sebelumnya) -->
+      <div class="form-group">
+        <label>Kategori Properti <span class="required">*</span></label>
+        <select id="categorySelect">
+          <option value="">-- Pilih Kategori --</option>
+          <option value="primary">🏠 Primary</option>
+          <option value="secondary">🏡 Secondary</option>
+          <option value="rent">🔑 Rent</option>
+        </select>
+        <div class="error-text" id="categoryError">Kategori wajib dipilih</div>
+      </div>
+      
+      <div id="formFields" style="display: none;">
+        <div class="form-group">
+          <label>Nama Sales <span class="required">*</span></label>
+          <input type="text" id="salesName" placeholder="Nama sales">
+          <div class="error-text" id="salesError">Wajib diisi</div>
+        </div>
+        
+        <div class="form-group">
+          <label>Nama Properti <span class="required">*</span></label>
+          <input type="text" id="propertyName" placeholder="Nama properti">
+          <div class="error-text" id="propertyError">Wajib diisi</div>
+        </div>
+        
+        <div class="form-group">
+          <label>Harga <span class="required">*</span></label>
+          <input type="text" id="price" placeholder="Rp 850.000.000">
+          <div class="error-text" id="priceError">Wajib diisi</div>
+        </div>
+        
+        <div class="form-group">
+          <label>Kontak (WhatsApp) <span class="required">*</span></label>
+          <input type="tel" id="contact" placeholder="081234567890">
+          <div class="error-text" id="contactError">Minimal 10 digit</div>
+        </div>
+        
+        <div class="form-group">
+          <label>KT <span class="required">*</span></label>
+          <input type="number" id="kt" placeholder="Jumlah kamar tidur">
+          <div class="error-text" id="ktError">Wajib diisi</div>
+        </div>
+        
+        <div class="form-group">
+          <label>KM <span class="required">*</span></label>
+          <input type="number" id="km" placeholder="Jumlah kamar mandi">
+          <div class="error-text" id="kmError">Wajib diisi</div>
+        </div>
+        
+        <div class="form-group">
+          <label>LT (m²) <span class="required">*</span></label>
+          <input type="number" id="lt" placeholder="Luas tanah">
+          <div class="error-text" id="ltError">Wajib diisi</div>
+        </div>
+        
+        <div class="form-group">
+          <label>Lokasi <span class="required">*</span></label>
+          <input type="text" id="location" placeholder="Lokasi properti">
+          <div class="error-text" id="locationError">Wajib diisi</div>
+        </div>
+        
+        <div class="form-group">
+          <label>Spesifikasi <span class="required">*</span></label>
+          <textarea id="specification" rows="3" placeholder="Detail spesifikasi"></textarea>
+          <div class="error-text" id="specError">Wajib diisi</div>
+        </div>
+        
+        <div class="form-group">
+          <label>Gambar Utama <span class="required">*</span></label>
+          <div class="image-upload-area" onclick="document.getElementById('mainImageInput').click()">
+            <i class="fas fa-camera"></i>
+            <p>Tap untuk upload gambar</p>
+          </div>
+          <input type="file" id="mainImageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(this, 'main')">
+          <div id="mainImagePreview" class="image-preview"></div>
+          <div class="error-text" id="mainImageError">Wajib diupload</div>
+        </div>
+        
+        <button class="btn-submit" id="submitBtn" onclick="submitProperty()">
+          <i class="fas fa-save"></i> Simpan Properti
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <nav class="bottom-nav">
+    <a href="admin_form.html" class="nav-item active"><i class="fas fa-plus-circle"></i><span>Tambah</span></a>
+    <a href="index.html" class="nav-item"><i class="fas fa-home"></i><span>Beranda</span></a>
+    <a href="#" class="nav-item" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+  </nav>
+  
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+      <i class="fas fa-spinner fa-pulse"></i>
+      <p>Menyimpan data...</p>
+    </div>
+  </div>
+  
+  <script>
+    // Konfigurasi (ambil dari login script)
+    const LOGIN_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxbw_a7vyqv-fT82Qp_xml3tB_7ih877VeJiuW_eyRRgoEuSQWQ1ZESEbw4j9EFf7U3gg/exec';
+    let DATA_SCRIPT_URL = '';
+    
+    // Folder ID
+    const FOLDER_IDS = {
+      primary: '10mZumMZTUW2piz9af9i4s-cUVm4hLQSA',
+      secondary: '1cpeN9k2h_kG61yVBd_MXxLDlZ7qG5xfO',
+      rent: '1qRC_K4cubitRK3FaZei-XIf3gJL4qsle'
+    };
+    
+    let uploadedImages = { main: null, img2: null, img3: null, img4: null, img5: null };
+    let currentUser = null;
+    
+    // Cek login saat load
+    async function checkAuth() {
+      const userStr = localStorage.getItem('bmpro_user');
+      if (!userStr) {
+        window.location.href = 'login.html';
+        return false;
+      }
+      
+      currentUser = JSON.parse(userStr);
+      if (currentUser.role !== 'admin' && currentUser.role !== 'sales') {
+        window.location.href = 'index.html';
+        return false;
+      }
+      
+      document.getElementById('usernameDisplay').innerText = currentUser.username;
+      
+      // Ambil URL data script dari config
+      await loadDataScriptUrl();
+      
+      return true;
+    }
+    
+    async function loadDataScriptUrl() {
+      try {
+        const formData = new URLSearchParams();
+        formData.append('action', 'getScriptUrl');
+        
+        const response = await fetch(LOGIN_SCRIPT_URL, {
+          method: 'POST',
+          body: formData,
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        });
+        
+        const result = await response.json();
+        if (result.success && result.data.url) {
+          DATA_SCRIPT_URL = result.data.url;
+        }
+      } catch (error) {
+        console.error('Error loading script URL:', error);
+      }
+    }
+    
+    function logout() {
+      localStorage.removeItem('bmpro_user');
+      window.location.href = 'login.html';
+    }
+    
+    document.getElementById('categorySelect').addEventListener('change', function() {
+      if (this.value) {
+        document.getElementById('formFields').style.display = 'block';
+        document.getElementById('categoryError').style.display = 'none';
+      } else {
+        document.getElementById('formFields').style.display = 'none';
+      }
+    });
+    
+    async function handleImageUpload(input, imageKey) {
+      const file = input.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        uploadedImages[imageKey] = {
+          dataUrl: e.target.result,
+          name: file.name
+        };
+        
+        // Tampilkan preview
+        const previewDiv = document.getElementById(`${imageKey}Preview`);
+        previewDiv.innerHTML = `
+          <div class="image-preview-item">
+            <img src="${e.target.result}" alt="Preview">
+            <button class="remove-btn" onclick="removeImage('${imageKey}')">&times;</button>
+          </div>
+        `;
+        
+        if (imageKey === 'main') {
+          document.getElementById('mainImageError').style.display = 'none';
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+    
+    function removeImage(imageKey) {
+      uploadedImages[imageKey] = null;
+      document.getElementById(`${imageKey}Preview`).innerHTML = '';
+      if (imageKey === 'main') {
+        document.getElementById('mainImageError').style.display = 'block';
+      }
+    }
+    
+    function formatPhoneNumber(phone) {
+      let cleaned = phone.replace(/\D/g, '');
+      if (cleaned.startsWith('62')) {
+        cleaned = '0' + cleaned.substring(2);
+      }
+      if (!cleaned.startsWith('0') && cleaned.length >= 10) {
+        cleaned = '0' + cleaned;
+      }
+      return cleaned;
+    }
+    
+    function validateForm() {
+      let isValid = true;
+      
+      if (!document.getElementById('categorySelect').value) {
+        document.getElementById('categoryError').style.display = 'block';
+        isValid = false;
+      }
+      if (!document.getElementById('salesName').value.trim()) {
+        document.getElementById('salesError').style.display = 'block';
+        isValid = false;
+      }
+      if (!document.getElementById('propertyName').value.trim()) {
+        document.getElementById('propertyError').style.display = 'block';
+        isValid = false;
+      }
+      if (!document.getElementById('price').value.trim()) {
+        document.getElementById('priceError').style.display = 'block';
+        isValid = false;
+      }
+      if (!document.getElementById('contact').value.trim() || document.getElementById('contact').value.replace(/\D/g, '').length < 10) {
+        document.getElementById('contactError').style.display = 'block';
+        isValid = false;
+      }
+      if (!document.getElementById('kt').value) {
+        document.getElementById('ktError').style.display = 'block';
+        isValid = false;
+      }
+      if (!document.getElementById('km').value) {
+        document.getElementById('kmError').style.display = 'block';
+        isValid = false;
+      }
+      if (!document.getElementById('lt').value) {
+        document.getElementById('ltError').style.display = 'block';
+        isValid = false;
+      }
+      if (!document.getElementById('location').value.trim()) {
+        document.getElementById('locationError').style.display = 'block';
+        isValid = false;
+      }
+      if (!document.getElementById('specification').value.trim()) {
+        document.getElementById('specError').style.display = 'block';
+        isValid = false;
+      }
+      if (!uploadedImages.main) {
+        document.getElementById('mainImageError').style.display = 'block';
+        isValid = false;
+      }
+      
+      // Sembunyikan error yang sudah valid
+      const errorIds = ['salesError', 'propertyError', 'priceError', 'contactError', 'ktError', 'kmError', 'ltError', 'locationError', 'specError'];
+      errorIds.forEach(id => {
+        if (document.getElementById(id).style.display === 'block' && document.getElementById(id.split('Error')[0]).value.trim()) {
+          document.getElementById(id).style.display = 'none';
+        }
+      });
+      
+      return isValid;
+    }
+    
+    async function submitProperty() {
+      if (!validateForm()) {
+        alert('Harap lengkapi semua field yang wajib diisi!');
+        return;
+      }
+      
+      if (!DATA_SCRIPT_URL) {
+        alert('Data script URL belum dikonfigurasi. Hubungi admin.');
+        return;
+      }
+      
+      document.getElementById('loadingOverlay').style.visibility = 'visible';
+      document.getElementById('submitBtn').disabled = true;
+      
+      const category = document.getElementById('categorySelect').value;
+      const timestamp = new Date().toLocaleString('id-ID');
+      
+      const formData = new URLSearchParams();
+      formData.append('timestamp', timestamp);
+      formData.append('category', category);
+      formData.append('sales', document.getElementById('salesName').value.trim());
+      formData.append('nama property', document.getElementById('propertyName').value.trim());
+      formData.append('harga', document.getElementById('price').value.trim());
+      formData.append('kontak', formatPhoneNumber(document.getElementById('contact').value.trim()));
+      formData.append('kt', document.getElementById('kt').value);
+      formData.append('km', document.getElementById('km').value);
+      formData.append('lt', document.getElementById('lt').value);
+      formData.append('lokasi', document.getElementById('location').value.trim());
+      formData.append('spesifikasi', document.getElementById('specification').value.trim());
+      formData.append('gambar utama', uploadedImages.main?.dataUrl || '');
+      formData.append('gambar2', uploadedImages.img2?.dataUrl || '');
+      formData.append('gambar3', uploadedImages.img3?.dataUrl || '');
+      formData.append('gambar4', uploadedImages.img4?.dataUrl || '');
+      formData.append('gambar5', uploadedImages.img5?.dataUrl || '');
+      
+      try {
+        const response = await fetch(DATA_SCRIPT_URL, {
+          method: 'POST',
+          body: formData,
+          mode: 'no-cors'
+        });
+        
+        alert('✅ Properti berhasil ditambahkan!');
+        
+        // Reset form
+        document.getElementById('salesName').value = '';
+        document.getElementById('propertyName').value = '';
+        document.getElementById('price').value = '';
+        document.getElementById('contact').value = '';
+        document.getElementById('kt').value = '';
+        document.getElementById('km').value = '';
+        document.getElementById('lt').value = '';
+        document.getElementById('location').value = '';
+        document.getElementById('specification').value = '';
+        uploadedImages = { main: null, img2: null, img3: null, img4: null, img5: null };
+        document.querySelectorAll('.image-preview').forEach(div => div.innerHTML = '');
+        document.getElementById('categorySelect').value = '';
+        document.getElementById('formFields').style.display = 'none';
+        
+      } catch (error) {
+        alert('❌ Gagal menyimpan: ' + error.message);
+      } finally {
+        document.getElementById('loadingOverlay').style.visibility = 'hidden';
+        document.getElementById('submitBtn').disabled = false;
+      }
+    }
+    
+    checkAuth();
+  </script>
+</body>
+</html>
