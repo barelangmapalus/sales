@@ -123,15 +123,16 @@
       <div class="demo-info">
         <strong>Demo Akun:</strong><br>
         Admin: admin / admin123<br>
-        User: user1 / user123<br>
         Sales: sales1 / sales123
       </div>
     </div>
   </div>
   
   <script>
-    // Konfigurasi Login Script URL (Ganti dengan URL login script Anda)
-    const LOGIN_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzq5H0ajEvchFxavZw5238rKOo_Qy0TH7j5Lg_bYvlXijf7KOZ4aEQ0FIIhSw4bMJPwrQ/exec';
+    // =====================================================
+    // GANTI URL INI DENGAN URL APPS SCRIPT YANG VALID!
+    // =====================================================
+    const LOGIN_SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_ACTUAL_SCRIPT_ID/exec';
     
     async function doLogin() {
       const username = document.getElementById('username').value.trim();
@@ -172,13 +173,16 @@
             loginTime: new Date().toISOString()
           }));
           
-          // Redirect berdasarkan role
-          if (result.data.role === 'admin') {
-            window.location.href = 'admin_form.html';
-          } else if (result.data.role === 'sales') {
+          // Redirect berdasarkan role (HANYA admin dan sales)
+          if (result.data.role === 'admin' || result.data.role === 'sales') {
             window.location.href = 'admin_form.html';
           } else {
-            window.location.href = 'index.html';
+            // Jika role selain admin/sales, tetap arahkan ke admin_form (atau kasih pesan)
+            errorMsg.style.display = 'block';
+            errorMsg.innerHTML = 'Akun Anda tidak memiliki akses ke panel admin.';
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+            return;
           }
         } else {
           errorMsg.style.display = 'block';
@@ -186,11 +190,14 @@
         }
         
       } catch (error) {
+        console.error('Login error:', error);
         errorMsg.style.display = 'block';
-        errorMsg.innerHTML = 'Gagal terhubung ke server. Coba lagi.';
+        errorMsg.innerHTML = 'Gagal terhubung ke server. Periksa URL Apps Script.';
       } finally {
         loginBtn.disabled = false;
-        loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+        if (loginBtn.innerHTML !== '<i class="fas fa-sign-in-alt"></i> Login') {
+          loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+        }
       }
     }
     
@@ -201,8 +208,6 @@
         const userData = JSON.parse(user);
         if (userData.role === 'admin' || userData.role === 'sales') {
           window.location.href = 'admin_form.html';
-        } else {
-          window.location.href = 'index.html';
         }
       }
     }
