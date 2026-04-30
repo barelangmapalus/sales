@@ -34,13 +34,41 @@
       border-radius: 30px;
       font-weight: 600;
     }
+    .debug {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #999;
+      text-align: left;
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
   <div class="card">
     <h1>🔐 Panel Admin & Sales</h1>
     <p>Sistem manajemen properti BMpro</p>
-    <a href="login.html" class="btn">Login ke Panel</a>
+    <a href="login.html" class="btn" id="loginBtn">Login ke Panel</a>
+    
+    <div class="debug" id="debugInfo">
+      🔍 Memeriksa file login.html...
+    </div>
   </div>
+
+  <script>
+    // Cek apakah login.html bisa diakses
+    fetch('login.html', { method: 'HEAD' })
+      .then(response => {
+        if (response.ok) {
+          document.getElementById('debugInfo').innerHTML = '✅ File login.html ditemukan. Klik tombol di atas untuk login.';
+        } else {
+          document.getElementById('debugInfo').innerHTML = '❌ File login.html TIDAK DITEMUKAN (HTTP ' + response.status + '). Periksa apakah file sudah diupload ke repository.';
+        }
+      })
+      .catch(error => {
+        document.getElementById('debugInfo').innerHTML = '❌ Gagal memeriksa login.html: ' + error.message;
+      });
+  </script>
 </body>
 </html>
