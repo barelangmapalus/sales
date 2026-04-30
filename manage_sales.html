@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Manajemen Sales - BMpro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f5f7fb;
+      padding: 20px;
+      padding-bottom: 80px;
+    }
+    .container { max-width: 600px; margin: 0 auto; }
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    h2 { font-size: 1.3rem; color: #2c3e50; }
+    .form-group { margin-bottom: 15px; }
+    label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #555;
+      margin-bottom: 5px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      font-size: 0.85rem;
+    }
+    button {
+      background: linear-gradient(135deg, #2c3e50, #3498db);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+    }
+    .sales-list {
+      list-style: none;
+    }
+    .sales-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+    }
+    .sales-info h4 { font-size: 0.9rem; }
+    .sales-info p { font-size: 0.7rem; color: #888; }
+    .delete-btn {
+      background: #e74c3c;
+      padding: 8px 12px;
+      font-size: 0.7rem;
+      width: auto;
+    }
+    .back-btn {
+      background: #95a5a6;
+      margin-top: 10px;
+    }
+    .success-msg { color: green; font-size: 0.75rem; margin-top: 10px; display: none; }
+    .error-msg { color: red; font-size: 0.75rem; margin-top: 10px; display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <h2><i class="fas fa-users"></i> Manajemen Sales</h2>
+        <button onclick="logout()" style="width: auto; padding: 8px 15px; background: #95a5a6;">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+      
+      <div class="form-group">
+        <label>Username Sales</label>
+        <input type="text" id="newUsername" placeholder="contoh: sales_john">
+      </div>
+      
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="newPassword" placeholder="Password untuk sales">
+      </div>
+      
+      <button onclick="addSales()">
+        <i class="fas fa-plus"></i> Tambah Sales
+      </button>
+      
+      <div id="successMsg" class="success-msg"></div>
+      <div id="errorMsg" class="error-msg"></div>
+    </div>
+    
+    <div class="card">
+      <h3 style="margin-bottom: 15px;"><i class="fas fa-list"></i> Daftar Sales</h3>
+      <div id="salesList">
+        <div style="text-align: center; padding: 20px;">
+          <i class="fas fa-spinner fa-pulse"></i> Memuat...
+        </div>
+      </div>
+    </div>
+    
+    <button class="back-btn" onclick="goBack()">
+      <i class="fas fa-arrow-left"></i> Kembali ke Admin Form
+    </button>
+  </div>
+  
+  <script>
+    const LOGIN_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzQENACW_HpiT4xzL7MaWuAffLBlWP4jlZ4RBKqrVx_EG-h4o26y4WKLosok5C69jU9Ow/exec';
+    let currentToken = null;
+    
+    async function checkAuth() {
+      const userStr = localStorage.getItem('bmpro_user');
+      if (!userStr) {
+        window.location.href = 'login.html';
+        return false;
+      }
+      
+      const user = JSON.parse(userStr);
+      if (user.role !== 'admin') {
+        alert('Hanya admin yang dapat mengakses halaman ini!');
+        window.location.href = 'admin_form.html';
+        return false;
+      }
+      
+      currentToken = user.token;
+      loadSalesList();
+      return true;
+    }
+    
+    async function addSales() {
+      const username = document.getElementById('newUsername').value.trim();
+      const password = document.getElementById('newPassword').value.trim();
+      
+      if (!username || !password) {
+        showError('Username dan password wajib diisi!');
+        return;
+      }
+      
+      const formData = new URLSearchParams();
+      formData.append('action', 'addSales');
+      formData.append('username', username);
+      formData.append('password', password);
+      formData.append('token', currentToken);
+      
+      try {
+        const response = await fetch(LOGIN_SCRIPT_URL, {
+          method: 'POST',
+          body: formData,
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          showSuccess(result.message);
+          document.getElementById('newUsername').value = '';
+          document.getElementById('newPassword').value = '';
+          loadSalesList();
+        } else {
+          showError(result.message);
+        }
+      } catch (error) {
+        showError('Gagal menambah sales');
+      }
+    }
+    
+    async function loadSalesList() {
+      const formData = new URLSearchParams();
+      formData.append('action', 'getAllSales');
+      formData.append('token', currentToken);
+      
+      try {
+        const response = await fetch(LOGIN_SCRIPT_URL, {
+          method: 'POST',
+          body: formData,
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          displaySalesList(result.data);
+        } else {
+          document.getElementById('salesList').innerHTML = '<p style="text-align:center">Belum ada sales</p>';
+        }
+      } catch (error) {
+        document.getElementById('salesList').innerHTML = '<p style="text-align:center">Gagal memuat data</p>';
+      }
+    }
+    
+    function displaySalesList(sales) {
+      if (!sales || sales.length === 0) {
+        document.getElementById('salesList').innerHTML = '<p style="text-align:center">Belum ada sales</p>';
+        return;
+      }
+      
+      const html = `
+        <ul class="sales-list">
+          ${sales.map(sale => `
+            <li class="sales-item">
+              <div class="sales-info">
+                <h4><i class="fas fa-user"></i> ${sale.username}</h4>
+                <p>Dibuat: ${new Date(sale.created_at).toLocaleDateString('id-ID')}</p>
+              </div>
+              <button class="delete-btn" onclick="deleteSales('${sale.username}')">
+                <i class="fas fa-trash"></i> Hapus
+              </button>
+            </li>
+          `).join('')}
+        </ul>
+      `;
+      document.getElementById('salesList').innerHTML = html;
+    }
+    
+    async function deleteSales(username) {
+      if (!confirm(`Hapus sales "${username}"?`)) return;
+      
+      const formData = new URLSearchParams();
+      formData.append('action', 'deleteSales');
+      formData.append('username', username);
+      formData.append('token', currentToken);
+      
+      try {
+        const response = await fetch(LOGIN_SCRIPT_URL, {
+          method: 'POST',
+          body: formData,
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          showSuccess(result.message);
+          loadSalesList();
+        } else {
+          showError(result.message);
+        }
+      } catch (error) {
+        showError('Gagal menghapus sales');
+      }
+    }
+    
+    function showSuccess(msg) {
+      const el = document.getElementById('successMsg');
+      el.innerHTML = '<i class="fas fa-check-circle"></i> ' + msg;
+      el.style.display = 'block';
+      setTimeout(() => el.style.display = 'none', 3000);
+    }
+    
+    function showError(msg) {
+      const el = document.getElementById('errorMsg');
+      el.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + msg;
+      el.style.display = 'block';
+      setTimeout(() => el.style.display = 'none', 3000);
+    }
+    
+    function logout() {
+      localStorage.removeItem('bmpro_user');
+      window.location.href = 'login.html';
+    }
+    
+    function goBack() {
+      window.location.href = 'admin_form.html';
+    }
+    
+    checkAuth();
+  </script>
+</body>
+</html>
