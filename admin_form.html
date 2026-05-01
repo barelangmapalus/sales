@@ -482,12 +482,14 @@
       formData.append('lt', document.getElementById('lt').value);
       formData.append('lokasi', document.getElementById('location').value.trim());
       formData.append('spesifikasi', document.getElementById('specification').value.trim());
-      formData.append('gambar utama', uploadedImages.main?.dataUrl || '');
-      formData.append('gambar2', uploadedImages.img2?.dataUrl || '');
-      formData.append('gambar3', uploadedImages.img3?.dataUrl || '');
-      formData.append('gambar4', uploadedImages.img4?.dataUrl || '');
-      formData.append('gambar5', uploadedImages.img5?.dataUrl || '');
+
       
+      formData.append('gambar utama', '');
+      formData.append('gambar2', '');
+      formData.append('gambar3', '');
+      formData.append('gambar4', '');
+      formData.append('gambar5', '');
+            
       try {
         const response = await fetch(DATA_SCRIPT_URL, {
           method: 'POST',
