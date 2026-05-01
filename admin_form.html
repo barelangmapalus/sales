@@ -179,7 +179,6 @@
         </div>
       </div>
       
-      <!-- Form fields (sama seperti sebelumnya) -->
       <div class="form-group">
         <label>Kategori Properti <span class="required">*</span></label>
         <select id="categorySelect">
@@ -246,6 +245,7 @@
           <div class="error-text" id="specError">Wajib diisi</div>
         </div>
         
+        <!-- Gambar Utama (WAJIB) -->
         <div class="form-group">
           <label>Gambar Utama <span class="required">*</span></label>
           <div class="image-upload-area" onclick="document.getElementById('mainImageInput').click()">
@@ -255,6 +255,50 @@
           <input type="file" id="mainImageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(this, 'main')">
           <div id="mainImagePreview" class="image-preview"></div>
           <div class="error-text" id="mainImageError">Wajib diupload</div>
+        </div>
+        
+        <!-- Gambar 2 (Opsional) -->
+        <div class="form-group">
+          <label>Gambar 2 (Opsional)</label>
+          <div class="image-upload-area" onclick="document.getElementById('image2Input').click()">
+            <i class="fas fa-camera"></i>
+            <p>Tap untuk upload gambar</p>
+          </div>
+          <input type="file" id="image2Input" accept="image/*" style="display: none;" onchange="handleImageUpload(this, 'img2')">
+          <div id="img2Preview" class="image-preview"></div>
+        </div>
+        
+        <!-- Gambar 3 (Opsional) -->
+        <div class="form-group">
+          <label>Gambar 3 (Opsional)</label>
+          <div class="image-upload-area" onclick="document.getElementById('image3Input').click()">
+            <i class="fas fa-camera"></i>
+            <p>Tap untuk upload gambar</p>
+          </div>
+          <input type="file" id="image3Input" accept="image/*" style="display: none;" onchange="handleImageUpload(this, 'img3')">
+          <div id="img3Preview" class="image-preview"></div>
+        </div>
+        
+        <!-- Gambar 4 (Opsional) -->
+        <div class="form-group">
+          <label>Gambar 4 (Opsional)</label>
+          <div class="image-upload-area" onclick="document.getElementById('image4Input').click()">
+            <i class="fas fa-camera"></i>
+            <p>Tap untuk upload gambar</p>
+          </div>
+          <input type="file" id="image4Input" accept="image/*" style="display: none;" onchange="handleImageUpload(this, 'img4')">
+          <div id="img4Preview" class="image-preview"></div>
+        </div>
+        
+        <!-- Gambar 5 (Opsional) -->
+        <div class="form-group">
+          <label>Gambar 5 (Opsional)</label>
+          <div class="image-upload-area" onclick="document.getElementById('image5Input').click()">
+            <i class="fas fa-camera"></i>
+            <p>Tap untuk upload gambar</p>
+          </div>
+          <input type="file" id="image5Input" accept="image/*" style="display: none;" onchange="handleImageUpload(this, 'img5')">
+          <div id="img5Preview" class="image-preview"></div>
         </div>
         
         <button class="btn-submit" id="submitBtn" onclick="submitProperty()">
@@ -278,21 +322,12 @@
   </div>
   
   <script>
-    // Konfigurasi (ambil dari login script)
-    const LOGIN_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx6lPpHqoNMYv6VdgzWYO1OBt6KJhJEHnXWg9GYuyW5b2KYDd6PBmzKhiF0tO1Hk00ceg/exec';
-    let DATA_SCRIPT_URL = '';
-    
-    // Folder ID
-    const FOLDER_IDS = {
-      primary: '10mZumMZTUW2piz9af9i4s-cUVm4hLQSA',
-      secondary: '1cpeN9k2h_kG61yVBd_MXxLDlZ7qG5xfO',
-      rent: '1qRC_K4cubitRK3FaZei-XIf3gJL4qsle'
-    };
+    // GANTI DENGAN URL APPS SCRIPT KAMU
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbysqWl9kQjmkPBKJiP_P1wk4qisK24CwZKyedtSv8f32wd_BXw1g9fflCq2dIQY-iX7_A/exec';
     
     let uploadedImages = { main: null, img2: null, img3: null, img4: null, img5: null };
     let currentUser = null;
     
-    // Cek login saat load
     async function checkAuth() {
       const userStr = localStorage.getItem('bmpro_user');
       if (!userStr) {
@@ -307,31 +342,7 @@
       }
       
       document.getElementById('usernameDisplay').innerText = currentUser.username;
-      
-      // Ambil URL data script dari config
-      await loadDataScriptUrl();
-      
       return true;
-    }
-    
-    async function loadDataScriptUrl() {
-      try {
-        const formData = new URLSearchParams();
-        formData.append('action', 'getScriptUrl');
-        
-        const response = await fetch(LOGIN_SCRIPT_URL, {
-          method: 'POST',
-          body: formData,
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-        });
-        
-        const result = await response.json();
-        if (result.success && result.data.url) {
-          DATA_SCRIPT_URL = result.data.url;
-        }
-      } catch (error) {
-        console.error('Error loading script URL:', error);
-      }
     }
     
     function logout() {
@@ -359,14 +370,15 @@
           name: file.name
         };
         
-        // Tampilkan preview
         const previewDiv = document.getElementById(`${imageKey}Preview`);
-        previewDiv.innerHTML = `
-          <div class="image-preview-item">
-            <img src="${e.target.result}" alt="Preview">
-            <button class="remove-btn" onclick="removeImage('${imageKey}')">&times;</button>
-          </div>
-        `;
+        if (previewDiv) {
+          previewDiv.innerHTML = `
+            <div class="image-preview-item">
+              <img src="${e.target.result}" alt="Preview">
+              <button class="remove-btn" onclick="removeImage('${imageKey}')">&times;</button>
+            </div>
+          `;
+        }
         
         if (imageKey === 'main') {
           document.getElementById('mainImageError').style.display = 'none';
@@ -377,7 +389,8 @@
     
     function removeImage(imageKey) {
       uploadedImages[imageKey] = null;
-      document.getElementById(`${imageKey}Preview`).innerHTML = '';
+      const previewDiv = document.getElementById(`${imageKey}Preview`);
+      if (previewDiv) previewDiv.innerHTML = '';
       if (imageKey === 'main') {
         document.getElementById('mainImageError').style.display = 'block';
       }
@@ -438,13 +451,12 @@
         isValid = false;
       }
       
-      // ❌ Validasi gambar dihapus (jadi tidak wajib)
-      // if (!uploadedImages.main) {
-      //   document.getElementById('mainImageError').style.display = 'block';
-      //   isValid = false;
-      // }
+      // Validasi gambar utama WAJIB
+      if (!uploadedImages.main) {
+        document.getElementById('mainImageError').style.display = 'block';
+        isValid = false;
+      }
       
-      // Sembunyikan error yang sudah valid
       const errorIds = ['salesError', 'propertyError', 'priceError', 'contactError', 'ktError', 'kmError', 'ltError', 'locationError', 'specError'];
       errorIds.forEach(id => {
         if (document.getElementById(id).style.display === 'block' && document.getElementById(id.split('Error')[0]).value.trim()) {
@@ -455,21 +467,9 @@
       return isValid;
     }
     
-
-
-
-
-
-
-
     async function submitProperty() {
       if (!validateForm()) {
         alert('Harap lengkapi semua field yang wajib diisi!');
-        return;
-      }
-      
-      if (!DATA_SCRIPT_URL) {
-        alert('Data script URL belum dikonfigurasi. Hubungi admin.');
         return;
       }
       
@@ -491,39 +491,45 @@
       formData.append('lt', document.getElementById('lt').value);
       formData.append('lokasi', document.getElementById('location').value.trim());
       formData.append('spesifikasi', document.getElementById('specification').value.trim());
-
-
-      formData.append('gambar utama', '');
-      formData.append('gambar2', '');
-      formData.append('gambar3', '');
-      formData.append('gambar4', '');
-      formData.append('gambar5', '');
-            
+      
+      // Kirim semua gambar (termasuk yang kosong)
+      formData.append('gambar utama', uploadedImages.main?.dataUrl || '');
+      formData.append('gambar2', uploadedImages.img2?.dataUrl || '');
+      formData.append('gambar3', uploadedImages.img3?.dataUrl || '');
+      formData.append('gambar4', uploadedImages.img4?.dataUrl || '');
+      formData.append('gambar5', uploadedImages.img5?.dataUrl || '');
+      
       try {
-        const response = await fetch(DATA_SCRIPT_URL, {
+        const response = await fetch(SCRIPT_URL, {
           method: 'POST',
-          body: formData,
-          mode: 'no-cors'
+          body: formData
         });
         
-        alert('✅ Properti berhasil ditambahkan!');
+        const result = await response.json();
         
-        // Reset form
-        document.getElementById('salesName').value = '';
-        document.getElementById('propertyName').value = '';
-        document.getElementById('price').value = '';
-        document.getElementById('contact').value = '';
-        document.getElementById('kt').value = '';
-        document.getElementById('km').value = '';
-        document.getElementById('lt').value = '';
-        document.getElementById('location').value = '';
-        document.getElementById('specification').value = '';
-        uploadedImages = { main: null, img2: null, img3: null, img4: null, img5: null };
-        document.querySelectorAll('.image-preview').forEach(div => div.innerHTML = '');
-        document.getElementById('categorySelect').value = '';
-        document.getElementById('formFields').style.display = 'none';
+        if (result.success) {
+          alert('✅ Properti berhasil ditambahkan!');
+          
+          // Reset form
+          document.getElementById('salesName').value = '';
+          document.getElementById('propertyName').value = '';
+          document.getElementById('price').value = '';
+          document.getElementById('contact').value = '';
+          document.getElementById('kt').value = '';
+          document.getElementById('km').value = '';
+          document.getElementById('lt').value = '';
+          document.getElementById('location').value = '';
+          document.getElementById('specification').value = '';
+          uploadedImages = { main: null, img2: null, img3: null, img4: null, img5: null };
+          document.querySelectorAll('.image-preview').forEach(div => div.innerHTML = '');
+          document.getElementById('categorySelect').value = '';
+          document.getElementById('formFields').style.display = 'none';
+        } else {
+          alert('❌ Gagal menyimpan: ' + (result.error || result.message));
+        }
         
       } catch (error) {
+        console.error('Error:', error);
         alert('❌ Gagal menyimpan: ' + error.message);
       } finally {
         document.getElementById('loadingOverlay').style.visibility = 'hidden';
