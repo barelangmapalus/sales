@@ -437,10 +437,12 @@
         document.getElementById('specError').style.display = 'block';
         isValid = false;
       }
-      if (!uploadedImages.main) {
-        document.getElementById('mainImageError').style.display = 'block';
-        isValid = false;
-      }
+      
+      // ❌ Validasi gambar dihapus (jadi tidak wajib)
+      // if (!uploadedImages.main) {
+      //   document.getElementById('mainImageError').style.display = 'block';
+      //   isValid = false;
+      // }
       
       // Sembunyikan error yang sudah valid
       const errorIds = ['salesError', 'propertyError', 'priceError', 'contactError', 'ktError', 'kmError', 'ltError', 'locationError', 'specError'];
@@ -453,6 +455,13 @@
       return isValid;
     }
     
+
+
+
+
+
+
+
     async function submitProperty() {
       if (!validateForm()) {
         alert('Harap lengkapi semua field yang wajib diisi!');
@@ -483,7 +492,7 @@
       formData.append('lokasi', document.getElementById('location').value.trim());
       formData.append('spesifikasi', document.getElementById('specification').value.trim());
 
-      
+
       formData.append('gambar utama', '');
       formData.append('gambar2', '');
       formData.append('gambar3', '');
