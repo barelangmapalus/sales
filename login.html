@@ -79,13 +79,16 @@
       transition: all 0.2s;
     }
     button:active { transform: scale(0.98); }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
     .error-msg {
       color: #e74c3c;
       font-size: 0.75rem;
       margin-top: 12px;
       display: none;
     }
-    .loading { display: none; }
     .demo-info {
       margin-top: 20px;
       padding-top: 20px;
@@ -121,9 +124,8 @@
       <div class="error-msg" id="errorMsg"></div>
       
       <div class="demo-info">
-        <strong>Demo Akun:</strong><br>
-        Admin: admin / admin123<br>
-        Sales: sales1 / sales123
+        <strong>Info Akun:</strong><br>
+        Gunakan akun yang sudah terdaftar di database
       </div>
     </div>
   </div>
@@ -132,7 +134,7 @@
     // =====================================================
     // GANTI URL INI DENGAN URL APPS SCRIPT YANG VALID!
     // =====================================================
-    const LOGIN_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyvozn3nlgCpNmnmSzeBGszSmH18TwJE-hYW1vtRxicYF-ZMOJ4cRN5tsZYF0F0piq5YA/exec';
+    const LOGIN_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzzRGScrbVOiSfrZ877ICpfSm_31_zHloALGDTQXsVQGRc_gqm8BFz5W5qu1imFbprIbw/exec';
     
     async function doLogin() {
       const username = document.getElementById('username').value.trim();
@@ -151,17 +153,22 @@
       loginBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Memproses...';
       
       try {
-        const formData = new URLSearchParams();
-        formData.append('action', 'login');
-        formData.append('username', username);
-        formData.append('password', password);
+        // 🔥 KIRIM REQUEST KE GAS (tanpa mode no-cors agar bisa baca response)
+        const payload = {
+          action: 'login',
+          username: username,
+          password: password
+        };
         
         const response = await fetch(LOGIN_SCRIPT_URL, {
           method: 'POST',
-          body: formData,
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+          headers: { 
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
         });
         
+        // 🔥 BACA RESPONSE DARI GAS
         const result = await response.json();
         
         if (result.success) {
@@ -173,31 +180,21 @@
             loginTime: new Date().toISOString()
           }));
           
-          // Redirect berdasarkan role (HANYA admin dan sales)
-          if (result.data.role === 'admin' || result.data.role === 'sales') {
-            window.location.href = 'admin_form.html';
-          } else {
-            // Jika role selain admin/sales, tetap arahkan ke admin_form (atau kasih pesan)
-            errorMsg.style.display = 'block';
-            errorMsg.innerHTML = 'Akun Anda tidak memiliki akses ke panel admin.';
-            loginBtn.disabled = false;
-            loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
-            return;
-          }
+          // Redirect ke admin_form
+          window.location.href = 'admin_form.html';
         } else {
           errorMsg.style.display = 'block';
-          errorMsg.innerHTML = result.message;
+          errorMsg.innerHTML = result.message || 'Username atau password salah!';
+          loginBtn.disabled = false;
+          loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
         }
         
       } catch (error) {
         console.error('Login error:', error);
         errorMsg.style.display = 'block';
         errorMsg.innerHTML = 'Gagal terhubung ke server. Periksa URL Apps Script.';
-      } finally {
         loginBtn.disabled = false;
-        if (loginBtn.innerHTML !== '<i class="fas fa-sign-in-alt"></i> Login') {
-          loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
-        }
+        loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
       }
     }
     
