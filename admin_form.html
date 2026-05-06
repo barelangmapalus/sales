@@ -354,328 +354,187 @@
   </div>
   
   <script>
-    // 🔥 UPDATE URL INI SETELAH DEPLOY GAS
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxtsvCHLatBOrt3U4aPQHhM8RLLvDXukJq_H_YthXerDY_axQDDPpqpPYSdY44QeFzh/exec';
+    // =====================================================
+    // 🔐 KONFIGURASI - GANTI URL INI DENGAN APPS SCRIPT YANG VALID!
+    // =====================================================
+    const LOGIN_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwrekom4eHfxmJTFPVBn-8OQ0tXlayJexISr0Jh1XKokH8oElivFpIEoiRvjSRS3w/exec';
     
-    // State untuk menyimpan base64 gambar
-    let uploadedImages = {
-      main: null,
-      img2: null,
-      img3: null,
-      img4: null,
-      img5: null
-    };
+    // Batasan percobaan login (security)
+    const MAX_ATTEMPTS = 5;
+    const BLOCK_DURATION = 5 * 60 * 1000; // 5 menit
     
-    let currentUser = null;
+    let loginAttempts = 0;
+    let blockUntil = null;
     
-    async function checkAuth() {
-      const userStr = localStorage.getItem('bmpro_user');
-      if (!userStr) { 
-        window.location.href = 'login.html'; 
-        return false; 
-      }
-      currentUser = JSON.parse(userStr);
-      if (currentUser.role !== 'admin' && currentUser.role !== 'sales') { 
-        window.location.href = 'index.html'; 
-        return false; 
-      }
-      const usernameDisplay = document.getElementById('usernameDisplay');
-      if (usernameDisplay) usernameDisplay.innerText = currentUser.username;
-      return true;
-    }
-    
-    function logout() { 
-      localStorage.removeItem('bmpro_user'); 
-      window.location.href = 'login.html'; 
-    }
-    
-    function initImageUploaders() {
-      const imageGrid = document.getElementById('imageGrid');
-      if (!imageGrid) return;
+    // =====================================================
+    // 🔐 FUNGSI LOGIN UTAMA - MENGGUNAKAN GET METHOD
+    // =====================================================
+    async function doLogin() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const errorMsg = document.getElementById('errorMsg');
+      const attemptAlert = document.getElementById('attemptAlert');
+      const loginBtn = document.getElementById('loginBtn');
       
-      const images = [
-        { id: 'main', label: 'Gambar Utama', icon: 'fa-star', required: true, badge: 'WAJIB' },
-        { id: 'img2', label: 'Gambar 2', icon: 'fa-image', required: false },
-        { id: 'img3', label: 'Gambar 3', icon: 'fa-image', required: false },
-        { id: 'img4', label: 'Gambar 4', icon: 'fa-image', required: false },
-        { id: 'img5', label: 'Gambar 5', icon: 'fa-image', required: false }
-      ];
+      // Bersihkan error sebelumnya
+      errorMsg.style.display = 'none';
+      attemptAlert.style.display = 'none';
       
-      imageGrid.innerHTML = images.map(img => `
-        <div class="image-card ${img.required ? 'primary' : ''}">
-          <div class="image-label">
-            <i class="fas ${img.icon}"></i> ${img.label}
-            ${img.badge ? `<span class="badge">${img.badge}</span>` : ''}
-          </div>
-          <div class="upload-area" onclick="document.getElementById('file-${img.id}').click()">
-            <i class="fas fa-cloud-upload-alt"></i>
-            <p>Tap pilih gambar</p>
-            <div class="file-size-info">Max 5MB | Akan dikompres</div>
-          </div>
-          <input type="file" id="file-${img.id}" accept="image/*" style="display: none;" onchange="previewAndCompress(this, '${img.id}')">
-          <div id="preview-${img.id}" class="image-preview"></div>
-        </div>
-      `).join('');
-    }
-    
-    // Preview dan kompres (tanpa upload ke server dulu)
-    async function previewAndCompress(input, imageKey) {
-      const file = input.files[0];
-      if (!file) return;
-      
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Ukuran gambar maksimal 5MB!');
-        input.value = '';
+      // Validasi input kosong
+      if (!username || !password) {
+        errorMsg.style.display = 'block';
+        errorMsg.innerHTML = '❌ Username dan password wajib diisi!';
         return;
       }
       
-      const previewDiv = document.getElementById(`preview-${imageKey}`);
-      if (!previewDiv) return;
+      // Validasi panjang karakter
+      if (username.length < 3 || password.length < 3) {
+        errorMsg.style.display = 'block';
+        errorMsg.innerHTML = '❌ Username dan password minimal 3 karakter!';
+        return;
+      }
       
-      previewDiv.innerHTML = `
-        <div class="image-preview-item">
-          <img src="#" alt="Preview" id="preview-img-${imageKey}">
-          <div class="upload-status uploading">⏫ Mengkompres...</div>
-          <button class="remove-image-btn" onclick="removeImage('${imageKey}')">&times;</button>
-        </div>
-      `;
+      // Cek apakah sedang dalam masa blokir
+      if (blockUntil && new Date().getTime() < blockUntil) {
+        const remainingMinutes = Math.ceil((blockUntil - new Date().getTime()) / 60000);
+        errorMsg.style.display = 'block';
+        errorMsg.innerHTML = `⚠️ Terlalu banyak percobaan gagal. Coba lagi dalam ${remainingMinutes} menit.`;
+        return;
+      } else if (blockUntil) {
+        blockUntil = null;
+        loginAttempts = 0;
+      }
+      
+      // Disable tombol selama proses
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Memproses...';
       
       try {
-        // Kompres gambar
-        const compressedBase64 = await compressImage(file);
-        const previewImg = document.getElementById(`preview-img-${imageKey}`);
-        if (previewImg) previewImg.src = compressedBase64;
+        // 🔥 MENGGUNAKAN GET METHOD UNTUK HINDARI CORS PREFLIGHT
+        const url = `${LOGIN_SCRIPT_URL}?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&t=${Date.now()}`;
         
-        // Update status
-        const statusDiv = previewDiv.querySelector('.upload-status');
-        if (statusDiv) {
-          statusDiv.textContent = '✓ Siap disimpan';
-          statusDiv.className = 'upload-status success';
-        }
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
         
-        // Simpan base64 ke state (akan dikirim saat submit)
-        uploadedImages[imageKey] = compressedBase64;
-        
-        if (imageKey === 'main') {
-          const mainError = document.getElementById('mainImageError');
-          if (mainError) mainError.style.display = 'none';
-        }
-      } catch (error) {
-        console.error('Compress error:', error);
-        previewDiv.innerHTML = `<div class="image-preview-item"><div class="upload-status error">✗ Gagal kompres</div><button class="remove-image-btn" onclick="removeImage('${imageKey}')">&times;</button></div>`;
-        input.value = '';
-        uploadedImages[imageKey] = null;
-      }
-    }
-    
-    async function compressImage(file) {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = (e) => {
-          const img = new Image();
-          img.src = e.target.result;
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            let width = img.width, height = img.height;
-            const maxSize = 1024;
-            if (width > maxSize || height > maxSize) {
-              if (width > height) { 
-                height = (height * maxSize) / width; 
-                width = maxSize; 
-              } else { 
-                width = (width * maxSize) / height; 
-                height = maxSize; 
-              }
-            }
-            canvas.width = width; 
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-            resolve(canvas.toDataURL('image/jpeg', 0.7));
-          };
-        };
-      });
-    }
-    
-    async function removeImage(imageKey) {
-      uploadedImages[imageKey] = null;
-      const inputMap = { 
-        'main': 'file-main', 
-        'img2': 'file-img2', 
-        'img3': 'file-img3', 
-        'img4': 'file-img4', 
-        'img5': 'file-img5' 
-      };
-      const input = document.getElementById(inputMap[imageKey]);
-      if (input) input.value = '';
-      
-      const previewDiv = document.getElementById(`preview-${imageKey}`);
-      if (previewDiv) previewDiv.innerHTML = '';
-      
-      if (imageKey === 'main') {
-        const mainError = document.getElementById('mainImageError');
-        if (mainError) mainError.style.display = 'block';
-      }
-    }
-    
-    function formatPhoneNumber(phone) {
-      let cleaned = phone.replace(/\D/g, '');
-      if (cleaned.startsWith('0')) cleaned = '62' + cleaned.substring(1);
-      return cleaned;
-    }
-    
-    function validateForm() {
-      let isValid = true;
-      
-      // Validasi kategori
-      const categorySelect = document.getElementById('categorySelect');
-      const categoryError = document.getElementById('categoryError');
-      if (!categorySelect || !categorySelect.value) {
-        if (categoryError) categoryError.style.display = 'block';
-        isValid = false;
-      } else {
-        if (categoryError) categoryError.style.display = 'none';
-      }
-      
-      // Validasi field teks
-      const fields = ['salesName', 'propertyName', 'price', 'contact', 'kt', 'km', 'lt', 'location', 'specification'];
-      fields.forEach(field => {
-        const input = document.getElementById(field);
-        const errorEl = document.getElementById(`${field}Error`);
-        
-        if (!input || !errorEl) return;
-        
-        const value = input.value.trim();
-        if (!value) {
-          errorEl.style.display = 'block';
-          isValid = false;
-        } else if (field === 'contact') {
-          if (value.replace(/\D/g, '').length < 10) {
-            errorEl.style.display = 'block';
-            isValid = false;
-          } else {
-            errorEl.style.display = 'none';
-          }
-        } else {
-          errorEl.style.display = 'none';
-        }
-      });
-      
-      // Validasi gambar utama
-      const mainError = document.getElementById('mainImageError');
-      if (!uploadedImages.main) {
-        if (mainError) mainError.style.display = 'block';
-        isValid = false;
-      } else {
-        if (mainError) mainError.style.display = 'none';
-      }
-      
-      return isValid;
-    }
-    
-    // SUBMIT SEMUA DATA SEKALIGUS (GAMBAR + TEKS) - TANPA CORS
-    async function submitPropertyData() {
-      if (!validateForm()) return;
-      
-      const loadingOverlay = document.getElementById('loadingOverlay');
-      const submitBtn = document.getElementById('submitBtn');
-      const loadingMessage = document.getElementById('loadingMessage');
-      
-      if (loadingOverlay) loadingOverlay.style.visibility = 'visible';
-      if (submitBtn) submitBtn.disabled = true;
-      if (loadingMessage) loadingMessage.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Mengirim data ke server...';
-      
-      const payload = {
-        action: 'savePropertyWithImages',
-        category: document.getElementById('categorySelect').value,
-        timestamp: new Date().toLocaleString('id-ID'),
-        sales: document.getElementById('salesName').value.trim(),
-        'nama property': document.getElementById('propertyName').value.trim(),
-        harga: document.getElementById('price').value.trim(),
-        kontak: formatPhoneNumber(document.getElementById('contact').value.trim()),
-        kt: document.getElementById('kt').value,
-        km: document.getElementById('km').value,
-        lt: document.getElementById('lt').value,
-        lokasi: document.getElementById('location').value.trim(),
-        spesifikasi: document.getElementById('specification').value.trim(),
-        'gambar utama': uploadedImages.main || '',
-        gambar2: uploadedImages.img2 || '',
-        gambar3: uploadedImages.img3 || '',
-        gambar4: uploadedImages.img4 || '',
-        gambar5: uploadedImages.img5 || ''
-      };
-      
-      try {
-        // 🔥 PAKAI mode: 'no-cors' untuk bypass CORS
-        await fetch(SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',  // ← Kunci utama bypass CORS
-          headers: {
-            'Content-Type': 'application/json',
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: { 
+            'Content-Type': 'application/json'
           },
-          body: JSON.stringify(payload)
+          signal: controller.signal
         });
         
-        // 🔥 Karena mode 'no-cors', response tidak bisa dibaca
-        // Tapi request tetap terkirim ke server
-        alert('✅ Data properti berhasil dikirim!\n\nData akan diproses oleh server.');
-        resetForm();
+        clearTimeout(timeoutId);
+        
+        // 📥 Baca response dari GAS
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          // ✅ LOGIN BERHASIL
+          loginAttempts = 0;
+          
+          // Simpan session
+          const sessionData = {
+            username: result.data.username,
+            role: result.data.role,
+            token: result.data.token,
+            loginTime: new Date().toISOString(),
+            expiresAt: result.data.expiresAt || new Date(Date.now() + 8 * 3600000).toISOString()
+          };
+          
+          sessionStorage.setItem('bmpro_user', JSON.stringify(sessionData));
+          sessionStorage.setItem('bmpro_auth_token', result.data.token);
+          
+          // Redirect ke halaman admin
+          window.location.href = 'admin_form.html';
+          
+        } else {
+          // ❌ LOGIN GAGAL
+          loginAttempts++;
+          
+          errorMsg.style.display = 'block';
+          errorMsg.innerHTML = `❌ ${result.message || 'Username atau password salah!'} (Percobaan ${loginAttempts}/${MAX_ATTEMPTS})`;
+          
+          if (loginAttempts >= MAX_ATTEMPTS) {
+            blockUntil = new Date().getTime() + BLOCK_DURATION;
+            attemptAlert.style.display = 'block';
+            attemptAlert.innerHTML = `⚠️ Anda telah mencapai batas maksimal percobaan (${MAX_ATTEMPTS}x). Mohon tunggu 5 menit.`;
+            loginBtn.disabled = true;
+            
+            setTimeout(() => {
+              if (blockUntil && new Date().getTime() >= blockUntil) {
+                loginBtn.disabled = false;
+                attemptAlert.style.display = 'none';
+                errorMsg.style.display = 'none';
+                loginAttempts = 0;
+                blockUntil = null;
+              }
+            }, BLOCK_DURATION);
+          } else {
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+          }
+        }
         
       } catch (error) {
-        console.error('Submit error:', error);
-        alert('❌ Gagal mengirim data: ' + error.message + '\n\nPeriksa koneksi internet Anda.');
-      } finally {
-        if (loadingOverlay) loadingOverlay.style.visibility = 'hidden';
-        if (submitBtn) submitBtn.disabled = false;
+        console.error('Login error:', error);
+        
+        let errorMessage = 'Gagal terhubung ke server. ';
+        if (error.name === 'AbortError') {
+          errorMessage += 'Koneksi timeout. Periksa koneksi internet Anda.';
+        } else {
+          errorMessage += 'Silakan coba lagi. Periksa URL Apps Script.';
+        }
+        
+        errorMsg.style.display = 'block';
+        errorMsg.innerHTML = `⚠️ ${errorMessage}`;
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
       }
     }
     
-    function resetForm() {
-      const fields = ['salesName', 'propertyName', 'price', 'contact', 'kt', 'km', 'lt', 'location', 'specification'];
-      fields.forEach(field => {
-        const input = document.getElementById(field);
-        if (input) input.value = '';
-      });
+    // Cek apakah sudah login
+    function checkExistingSession() {
+      const sessionData = sessionStorage.getItem('bmpro_user');
       
-      const images = ['main', 'img2', 'img3', 'img4', 'img5'];
-      images.forEach(img => {
-        const input = document.getElementById(`file-${img}`);
-        if (input) input.value = '';
-        const preview = document.getElementById(`preview-${img}`);
-        if (preview) preview.innerHTML = '';
-        uploadedImages[img] = null;
-      });
+      if (!sessionData) {
+        return false;
+      }
       
-      const categorySelect = document.getElementById('categorySelect');
-      if (categorySelect) categorySelect.value = '';
-      
-      const formFields = document.getElementById('formFields');
-      if (formFields) formFields.style.display = 'none';
-    }
-    
-    // Event listener untuk kategori
-    const categorySelect = document.getElementById('categorySelect');
-    if (categorySelect) {
-      categorySelect.addEventListener('change', function() {
-        const formFields = document.getElementById('formFields');
-        const categoryError = document.getElementById('categoryError');
-        if (this.value) {
-          if (formFields) formFields.style.display = 'block';
-          if (categoryError) categoryError.style.display = 'none';
-        } else {
-          if (formFields) formFields.style.display = 'none';
+      try {
+        const userData = JSON.parse(sessionData);
+        
+        if (userData.expiresAt && new Date(userData.expiresAt) < new Date()) {
+          sessionStorage.removeItem('bmpro_user');
+          sessionStorage.removeItem('bmpro_auth_token');
+          return false;
         }
-      });
+        
+        if (userData.role === 'admin' || userData.role === 'sales') {
+          window.location.href = 'admin_form.html';
+          return true;
+        }
+        
+        return false;
+        
+      } catch (e) {
+        console.error('Session check error:', e);
+        sessionStorage.removeItem('bmpro_user');
+        sessionStorage.removeItem('bmpro_auth_token');
+        return false;
+      }
     }
     
-    // Submit button
-    const submitBtn = document.getElementById('submitBtn');
-    if (submitBtn) submitBtn.onclick = submitPropertyData;
+    // Event listener untuk tombol Enter
+    document.getElementById('password').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        doLogin();
+      }
+    });
     
-    // Initialize
-    initImageUploaders();
-    checkAuth();
+    // Cek apakah sudah login saat halaman dimuat
+    checkExistingSession();
   </script>
 </body>
 </html>
