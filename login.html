@@ -53,7 +53,6 @@
       border-radius: 12px;
       font-size: 0.85rem;
       font-family: 'Poppins', sans-serif;
-      transition: all 0.2s;
     }
     .input-group input:focus {
       outline: none;
@@ -70,16 +69,10 @@
       font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
     }
     button:active { transform: scale(0.98); }
     button:disabled { opacity: 0.6; cursor: not-allowed; }
-    .error-msg {
-      color: #e74c3c;
-      font-size: 0.75rem;
-      margin-top: 12px;
-      display: none;
-    }
+    .error-msg { color: #e74c3c; font-size: 0.75rem; margin-top: 12px; display: none; }
     .demo-info {
       margin-top: 20px;
       padding-top: 20px;
@@ -92,9 +85,7 @@
 <body>
   <div class="login-container">
     <div class="login-card">
-      <div class="logo">
-        <i class="fas fa-building"></i>
-      </div>
+      <div class="logo"><i class="fas fa-building"></i></div>
       <h2>BMpro Admin</h2>
       <p>Login untuk mengelola properti</p>
       
@@ -115,7 +106,7 @@
       <div class="error-msg" id="errorMsg"></div>
       
       <div class="demo-info">
-        <strong>Demo Akun:</strong><br>
+        <strong>Info Akun:</strong><br>
         Admin: bobo / bobo111<br>
         Sales: sales1 / sales123
       </div>
@@ -123,7 +114,7 @@
   </div>
   
   <script>
-    const LOGIN_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby1HBxMXLwFRlU-kVOGMZq3KQ7XzwXj5lHumzuxKAwlLZYhyLmUx4jbNZy5jFJahwq5/exec';
+    const LOGIN_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwcNxvfd4JP9dJQFGzHztqAZSBOymJ12znGMmE0E52F74uVuIQBf7g9dkK6s9ihmiTs/exec';
     
     async function doLogin() {
       const username = document.getElementById('username').value.trim();
@@ -142,12 +133,15 @@
       loginBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Memproses...';
       
       try {
-        const payload = { action: 'login', username: username, password: password };
+        const formData = new URLSearchParams();
+        formData.append('action', 'login');
+        formData.append('username', username);
+        formData.append('password', password);
         
         const response = await fetch(LOGIN_SCRIPT_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: formData,
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         });
         
         const result = await response.json();
@@ -185,7 +179,7 @@
       }
     }
     
-    document.getElementById('password').addEventListener('keypress', function(e) {
+    document.getElementById('password').addEventListener('keypress', (e) => {
       if (e.key === 'Enter') doLogin();
     });
     
