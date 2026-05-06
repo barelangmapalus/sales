@@ -355,7 +355,7 @@
   
   <script>
     // 🔥 UPDATE URL INI SETELAH DEPLOY GAS
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzNXxpkVjVnY5RyvJAkaaCBCLnZKZ3HUVrUbqxVssIQGJ69GVNTgyp4GfLrTQbNJzM5/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxw6dhGxCYr03RivuaiwX3LIkyoafPbAEK55L1X8iVXll1gVZ1oswNA37d-mpDeTzi2/exec';
     
     // State untuk menyimpan base64 gambar
     let uploadedImages = {
@@ -505,11 +505,11 @@
     async function removeImage(imageKey) {
       uploadedImages[imageKey] = null;
       const inputMap = { 
-        'main': 'file-main', 
-        'img2': 'file-img2', 
-        'img3': 'file-img3', 
-        'img4': 'file-img4', 
-        'img5': 'file-img5' 
+        'main': 'mainImageInput', 
+        'img2': 'image2Input', 
+        'img3': 'image3Input', 
+        'img4': 'image4Input', 
+        'img5': 'image5Input' 
       };
       const input = document.getElementById(inputMap[imageKey]);
       if (input) input.value = '';
@@ -579,55 +579,64 @@
     // SUBMIT DATA (KIRIM KE GAS)
     // =====================================================
     async function submitPropertyData() {
-      if (!validateForm()) return;
-      
-      const loadingOverlay = document.getElementById('loadingOverlay');
-      const submitBtn = document.getElementById('submitBtn');
-      
-      if (loadingOverlay) loadingOverlay.style.visibility = 'visible';
-      if (submitBtn) submitBtn.disabled = true;
-      
-      const payload = {
-        action: 'savePropertyWithImages',
-        category: document.getElementById('categorySelect').value,
-        timestamp: new Date().toLocaleString('id-ID'),
-        sales: document.getElementById('salesName').value.trim(),
-        'nama property': document.getElementById('propertyName').value.trim(),
-        harga: document.getElementById('price').value.trim(),
-        kontak: formatPhoneNumber(document.getElementById('contact').value.trim()),
-        kt: document.getElementById('kt').value,
-        km: document.getElementById('km').value,
-        lt: document.getElementById('lt').value,
-        lokasi: document.getElementById('location').value.trim(),
-        spesifikasi: document.getElementById('specification').value.trim(),
-        'gambar utama': uploadedImages.main || '',
-        gambar2: uploadedImages.img2 || '',
-        gambar3: uploadedImages.img3 || '',
-        gambar4: uploadedImages.img4 || '',
-        gambar5: uploadedImages.img5 || ''
-      };
-      
-      try {
-        await fetch(SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload)
-        });
-        
-        alert('✅ Data properti berhasil dikirim!');
-        resetForm();
-        
-      } catch (error) {
-        console.error('Submit error:', error);
-        alert('❌ Gagal mengirim data: ' + error.message);
-      } finally {
-        if (loadingOverlay) loadingOverlay.style.visibility = 'hidden';
-        if (submitBtn) submitBtn.disabled = false;
-      }
+  if (!validateForm()) return;
+
+  const loadingOverlay = document.getElementById('loadingOverlay');
+  const submitBtn = document.getElementById('submitBtn');
+
+  loadingOverlay.style.visibility = 'visible';
+  submitBtn.disabled = true;
+
+  try {
+    // 🔥 SAMAKAN SEMUA KEY DENGAN GAS
+    const payload = {
+      action: 'savePropertyWithImages',
+      category: document.getElementById('categorySelect').value,
+      timestamp: new Date().toISOString(),
+      sales: document.getElementById('salesName').value.trim(),
+      nama_property: document.getElementById('propertyName').value.trim(),
+      harga: document.getElementById('price').value.trim(),
+      kontak: formatPhoneNumber(document.getElementById('contact').value.trim()),
+      kt: document.getElementById('kt').value,
+      km: document.getElementById('km').value,
+      lt: document.getElementById('lt').value,
+      lokasi: document.getElementById('location').value.trim(),
+      spesifikasi: document.getElementById('specification').value.trim(),
+      gambar_utama: uploadedImages.main || '',
+      gambar2: uploadedImages.img2 || '',
+      gambar3: uploadedImages.img3 || '',
+      gambar4: uploadedImages.img4 || '',
+      gambar5: uploadedImages.img5 || ''
+    };
+
+    // 🔥 PAKAI FORM-URLENCODED (WAJIB UNTUK GAS)
+    const formData = new URLSearchParams();
+    Object.keys(payload).forEach(key => {
+      formData.append(key, payload[key]);
+    });
+
+    const response = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: formData
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      alert('✅ Data berhasil disimpan!');
+      resetForm();
+    } else {
+      throw new Error(result.message);
     }
+
+  } catch (error) {
+    console.error(error);
+    alert('❌ ERROR: ' + error.message);
+  } finally {
+    loadingOverlay.style.visibility = 'hidden';
+    submitBtn.disabled = false;
+  }
+}
     
     function resetForm() {
       const fields = ['salesName', 'propertyName', 'price', 'contact', 'kt', 'km', 'lt', 'location', 'specification'];
@@ -701,6 +710,5 @@
       `).join('');
     }
     
-    initImageUploaders();
     checkAuth();
   </script>
