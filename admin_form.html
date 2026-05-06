@@ -3,110 +3,188 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>Admin Form - BMpro</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>BMpro - Tambah Properti</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    
     body {
-      font-family: 'Poppins', sans-serif;
-      background: #f5f7fb;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
       padding: 20px;
       padding-bottom: 80px;
     }
+    
     .form-container { max-width: 600px; margin: 0 auto; }
-    .form-card {
-      background: white;
-      border-radius: 20px;
-      padding: 20px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    
+    /* Header Premium */
+    .header {
+      text-align: center;
+      margin-bottom: 25px;
     }
-    .form-title {
-      font-size: 1.4rem;
-      font-weight: 600;
-      color: #2c3e50;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    
+    .header h1 {
+      color: white;
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
     }
-    .user-info {
-      display: flex;
+    
+    .header p {
+      color: rgba(255,255,255,0.9);
+      font-size: 0.85rem;
+    }
+    
+    /* User Badge Premium */
+    .user-badge {
+      display: inline-flex;
       align-items: center;
       gap: 10px;
-      background: #f0f0f0;
-      padding: 8px 15px;
-      border-radius: 30px;
-      font-size: 0.75rem;
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px);
+      padding: 8px 20px;
+      border-radius: 50px;
+      margin-top: 15px;
     }
-    .user-info i { color: #3498db; }
-    .logout-btn {
-      background: none;
+    
+    .user-badge i { color: white; font-size: 0.9rem; }
+    .user-badge span { color: white; font-weight: 500; font-size: 0.85rem; }
+    
+    .logout-btn-header {
+      background: rgba(255,255,255,0.2);
       border: none;
-      color: #e74c3c;
+      color: white;
+      padding: 5px 12px;
+      border-radius: 20px;
       cursor: pointer;
-      margin-left: 10px;
+      font-size: 0.75rem;
+      transition: all 0.3s ease;
     }
+    
+    .logout-btn-header:hover { background: rgba(255,255,255,0.3); }
+    
+    /* Form Card Premium */
+    .form-card {
+      background: white;
+      border-radius: 28px;
+      padding: 25px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      animation: slideUp 0.4s ease;
+    }
+    
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Section Title */
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #667eea;
+      display: inline-block;
+    }
+    
+    .section-title i {
+      margin-right: 10px;
+      color: #667eea;
+    }
+    
     .form-group { margin-bottom: 18px; }
+    
     .form-group label {
       display: block;
-      font-size: 0.8rem;
-      font-weight: 500;
+      margin-bottom: 8px;
+      font-weight: 600;
       color: #555;
-      margin-bottom: 6px;
+      font-size: 0.85rem;
     }
-    .form-group label .required { color: #e74c3c; margin-left: 4px; }
-    .form-group input, .form-group select, .form-group textarea {
+    
+    .form-group label i {
+      margin-right: 8px;
+      color: #667eea;
+    }
+    
+    .form-group label .required {
+      color: #e74c3c;
+      margin-left: 3px;
+    }
+    
+    input, select, textarea {
       width: 100%;
       padding: 12px 14px;
-      border: 1px solid #ddd;
+      border: 1.5px solid #e0e0e0;
       border-radius: 12px;
-      font-size: 0.85rem;
-      font-family: 'Poppins', sans-serif;
+      font-size: 0.9rem;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.3s ease;
+      background: #f8f9fa;
     }
+    
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+    }
+    
+    textarea { resize: vertical; min-height: 90px; }
+    
+    /* Specs Grid */
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    
+    /* Image Upload Premium */
     .image-upload-area {
-      border: 2px dashed #ddd;
+      border: 2px dashed #ccc;
       border-radius: 12px;
       padding: 20px;
       text-align: center;
       cursor: pointer;
+      transition: all 0.3s ease;
       background: #fafafa;
     }
-    .image-upload-area i { font-size: 2rem; color: #aaa; }
-    .image-upload-area p { font-size: 0.75rem; color: #888; }
+    
+    .image-upload-area:hover {
+      border-color: #667eea;
+      background: #f0f3ff;
+    }
+    
+    .image-upload-area:active { transform: scale(0.98); }
+    .image-upload-area i { font-size: 2rem; color: #667eea; margin-bottom: 8px; }
+    .image-upload-area p { font-size: 0.75rem; color: #666; }
+    
     .image-preview {
       margin-top: 12px;
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
     }
+    
     .image-preview-item {
       position: relative;
       width: 70px;
       height: 70px;
-      border-radius: 10px;
+      border-radius: 12px;
       overflow: hidden;
       background: #f0f0f0;
     }
+    
     .image-preview-item img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
-    .image-preview-item .remove-btn {
-      position: absolute;
-      top: 2px;
-      right: 2px;
-      background: rgba(0,0,0,0.6);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 18px;
-      height: 18px;
-      font-size: 10px;
-      cursor: pointer;
-    }
-    /* Tambahan CSS untuk upload status */
+    
     .upload-status {
       position: absolute;
       bottom: 2px;
@@ -119,9 +197,11 @@
       padding: 2px;
       border-radius: 4px;
     }
+    
     .upload-status.success { background: #27ae60; }
     .upload-status.error { background: #e74c3c; }
     .upload-status.uploading { background: #f39c12; }
+    
     .remove-image-btn {
       position: absolute;
       top: 2px;
@@ -134,55 +214,93 @@
       height: 18px;
       font-size: 10px;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
+    
+    /* Submit Button Premium */
     .btn-submit {
       width: 100%;
-      background: linear-gradient(135deg, #2c3e50, #3498db);
+      padding: 15px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
       border: none;
-      padding: 14px;
-      border-radius: 12px;
+      border-radius: 14px;
       font-size: 1rem;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      margin-top: 10px;
+      transition: all 0.3s ease;
+      margin-top: 20px;
     }
+    
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102,126,234,0.3);
+    }
+    
     .btn-submit:disabled {
       opacity: 0.6;
       cursor: not-allowed;
+      transform: none;
     }
-    .error-text { color: #e74c3c; font-size: 0.7rem; margin-top: 4px; display: none; }
+    
+    .error-text {
+      color: #e74c3c;
+      font-size: 0.7rem;
+      margin-top: 4px;
+      display: none;
+    }
+    
+    /* Loading Overlay Premium */
     .loading-overlay {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0,0,0,0.7);
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(5px);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 1000;
       visibility: hidden;
     }
+    
     .loading-content {
       background: white;
       padding: 30px;
-      border-radius: 20px;
+      border-radius: 24px;
       text-align: center;
+      animation: pulse 1s infinite;
     }
-    .loading-content i { font-size: 2rem; color: #3498db; }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+    
+    .loading-content i { font-size: 2.5rem; color: #667eea; margin-bottom: 15px; }
+    .loading-content p { color: #333; font-weight: 500; }
+    
+    /* Bottom Navigation Premium */
     .bottom-nav {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      background: white;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
       display: flex;
       justify-content: space-around;
-      padding: 10px 16px 20px;
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+      padding: 10px 16px 22px;
+      box-shadow: 0 -3px 15px rgba(0,0,0,0.1);
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
     }
+    
     .nav-item {
       display: flex;
       flex-direction: column;
@@ -190,32 +308,47 @@
       gap: 4px;
       text-decoration: none;
       color: #888;
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       cursor: pointer;
+      transition: all 0.2s ease;
     }
-    .nav-item.active { color: #3498db; }
+    
+    .nav-item:active { transform: scale(0.95); }
+    .nav-item.active { color: #667eea; }
     .nav-item i { font-size: 1.2rem; }
+    
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
     .fa-spinner { animation: spin 1s linear infinite; }
+    
+    @media (max-width: 480px) {
+      body { padding: 15px; }
+      .form-card { padding: 18px; }
+      .specs-grid { gap: 10px; }
+    }
   </style>
 </head>
 <body>
   <div class="form-container">
-    <div class="form-card">
-      <div class="form-title">
-        <span><i class="fas fa-building"></i> Tambah Properti</span>
-        <div class="user-info" id="userInfo">
-          <i class="fas fa-user"></i>
-          <span id="usernameDisplay"></span>
-          <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
-        </div>
+    <!-- Header Premium -->
+    <div class="header">
+      <h1><i class="fas fa-building"></i> BMpro</h1>
+      <p>Tambah properti dengan upload instan</p>
+      <div class="user-badge">
+        <i class="fas fa-user-circle"></i>
+        <span id="usernameDisplay"></span>
+        <button class="logout-btn-header" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
       </div>
-      
+    </div>
+    
+    <!-- Form Card Premium -->
+    <div class="form-card">
+      <div class="section-title">
+        <i class="fas fa-tag"></i> Kategori Properti
+      </div>
       <div class="form-group">
-        <label>Kategori Properti <span class="required">*</span></label>
         <select id="categorySelect">
           <option value="">-- Pilih Kategori --</option>
           <option value="primary">🏠 Primary</option>
@@ -226,77 +359,89 @@
       </div>
       
       <div id="formFields" style="display: none;">
+        <div class="section-title">
+          <i class="fas fa-user-circle"></i> Informasi Penjual
+        </div>
         <div class="form-group">
-          <label>Nama Sales <span class="required">*</span></label>
+          <label><i class="fas fa-user"></i> Nama Sales <span class="required">*</span></label>
           <input type="text" id="salesName" placeholder="Nama sales">
           <div class="error-text" id="salesError">Wajib diisi</div>
         </div>
         
         <div class="form-group">
-          <label>Nama Properti <span class="required">*</span></label>
+          <label><i class="fas fa-phone"></i> Kontak (WhatsApp) <span class="required">*</span></label>
+          <input type="tel" id="contact" placeholder="081234567890">
+          <div class="error-text" id="contactError">Minimal 10 digit</div>
+        </div>
+        
+        <div class="section-title">
+          <i class="fas fa-home"></i> Detail Properti
+        </div>
+        
+        <div class="form-group">
+          <label><i class="fas fa-building"></i> Nama Properti <span class="required">*</span></label>
           <input type="text" id="propertyName" placeholder="Nama properti">
           <div class="error-text" id="propertyError">Wajib diisi</div>
         </div>
         
         <div class="form-group">
-          <label>Harga <span class="required">*</span></label>
-          <input type="text" id="price" placeholder="Rp 850.000.000">
-          <div class="error-text" id="priceError">Wajib diisi</div>
-        </div>
-        
-        <div class="form-group">
-          <label>Kontak (WhatsApp) <span class="required">*</span></label>
-          <input type="tel" id="contact" placeholder="081234567890">
-          <div class="error-text" id="contactError">Minimal 10 digit</div>
-        </div>
-        
-        <div class="form-group">
-          <label>KT <span class="required">*</span></label>
-          <input type="number" id="kt" placeholder="Jumlah kamar tidur">
-          <div class="error-text" id="ktError">Wajib diisi</div>
-        </div>
-        
-        <div class="form-group">
-          <label>KM <span class="required">*</span></label>
-          <input type="number" id="km" placeholder="Jumlah kamar mandi">
-          <div class="error-text" id="kmError">Wajib diisi</div>
-        </div>
-        
-        <div class="form-group">
-          <label>LT (m²) <span class="required">*</span></label>
-          <input type="number" id="lt" placeholder="Luas tanah">
-          <div class="error-text" id="ltError">Wajib diisi</div>
-        </div>
-        
-        <div class="form-group">
-          <label>Lokasi <span class="required">*</span></label>
+          <label><i class="fas fa-map-marker-alt"></i> Lokasi <span class="required">*</span></label>
           <input type="text" id="location" placeholder="Lokasi properti">
           <div class="error-text" id="locationError">Wajib diisi</div>
         </div>
         
         <div class="form-group">
-          <label>Spesifikasi <span class="required">*</span></label>
-          <textarea id="specification" rows="3" placeholder="Detail spesifikasi"></textarea>
+          <label><i class="fas fa-money-bill-wave"></i> Harga <span class="required">*</span></label>
+          <input type="text" id="price" placeholder="Rp 850.000.000">
+          <div class="error-text" id="priceError">Wajib diisi</div>
+        </div>
+        
+        <div class="specs-grid">
+          <div class="form-group">
+            <label><i class="fas fa-bed"></i> KT <span class="required">*</span></label>
+            <input type="number" id="kt" placeholder="Kamar tidur">
+            <div class="error-text" id="ktError">Wajib diisi</div>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-bath"></i> KM <span class="required">*</span></label>
+            <input type="number" id="km" placeholder="Kamar mandi">
+            <div class="error-text" id="kmError">Wajib diisi</div>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-vector-square"></i> LT (m²) <span class="required">*</span></label>
+            <input type="number" id="lt" placeholder="Luas tanah">
+            <div class="error-text" id="ltError">Wajib diisi</div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label><i class="fas fa-clipboard-list"></i> Spesifikasi <span class="required">*</span></label>
+          <textarea id="specification" rows="3" placeholder="Detail spesifikasi properti"></textarea>
           <div class="error-text" id="specError">Wajib diisi</div>
         </div>
         
-        <!-- Gambar 1 (Wajib) - Perbaiki onchange -->
+        <div class="section-title">
+          <i class="fas fa-images"></i> Galeri Properti
+        </div>
+        
+        <!-- Gambar Utama -->
         <div class="form-group">
-          <label>Gambar Utama <span class="required">*</span></label>
+          <label><i class="fas fa-star"></i> Gambar Utama <span class="required">*</span></label>
           <div class="image-upload-area" onclick="document.getElementById('mainImageInput').click()">
-            <i class="fas fa-camera"></i>
+            <i class="fas fa-cloud-upload-alt"></i>
             <p>Tap untuk pilih gambar</p>
+            <p style="font-size: 0.65rem; color: #999;">Max 10MB | Akan dikompres</p>
           </div>
           <input type="file" id="mainImageInput" accept="image/*" style="display: none;" onchange="previewAndCompress(this, 'main')">
           <div id="preview-main" class="image-preview"></div>
           <div class="error-text" id="mainImageError">Gambar utama wajib diupload</div>
         </div>
         
-        <!-- Gambar 2-5 dengan ID preview yang sesuai -->
+        <!-- Gambar 2-5 -->
         <div class="form-group">
-          <label>Gambar 2 (Opsional)</label>
+          <label><i class="fas fa-image"></i> Gambar 2 (Opsional)</label>
           <div class="image-upload-area" onclick="document.getElementById('image2Input').click()">
-            <i class="fas fa-camera"></i>
+            <i class="fas fa-cloud-upload-alt"></i>
             <p>Tap untuk pilih gambar</p>
           </div>
           <input type="file" id="image2Input" accept="image/*" style="display: none;" onchange="previewAndCompress(this, 'img2')">
@@ -304,9 +449,9 @@
         </div>
         
         <div class="form-group">
-          <label>Gambar 3 (Opsional)</label>
+          <label><i class="fas fa-image"></i> Gambar 3 (Opsional)</label>
           <div class="image-upload-area" onclick="document.getElementById('image3Input').click()">
-            <i class="fas fa-camera"></i>
+            <i class="fas fa-cloud-upload-alt"></i>
             <p>Tap untuk pilih gambar</p>
           </div>
           <input type="file" id="image3Input" accept="image/*" style="display: none;" onchange="previewAndCompress(this, 'img3')">
@@ -314,9 +459,9 @@
         </div>
         
         <div class="form-group">
-          <label>Gambar 4 (Opsional)</label>
+          <label><i class="fas fa-image"></i> Gambar 4 (Opsional)</label>
           <div class="image-upload-area" onclick="document.getElementById('image4Input').click()">
-            <i class="fas fa-camera"></i>
+            <i class="fas fa-cloud-upload-alt"></i>
             <p>Tap untuk pilih gambar</p>
           </div>
           <input type="file" id="image4Input" accept="image/*" style="display: none;" onchange="previewAndCompress(this, 'img4')">
@@ -324,9 +469,9 @@
         </div>
         
         <div class="form-group">
-          <label>Gambar 5 (Opsional)</label>
+          <label><i class="fas fa-image"></i> Gambar 5 (Opsional)</label>
           <div class="image-upload-area" onclick="document.getElementById('image5Input').click()">
-            <i class="fas fa-camera"></i>
+            <i class="fas fa-cloud-upload-alt"></i>
             <p>Tap untuk pilih gambar</p>
           </div>
           <input type="file" id="image5Input" accept="image/*" style="display: none;" onchange="previewAndCompress(this, 'img5')">
@@ -341,9 +486,18 @@
   </div>
   
   <nav class="bottom-nav">
-    <div class="nav-item active" onclick="window.location.reload()"><i class="fas fa-plus-circle"></i><span>Tambah</span></div>
-    <div class="nav-item" onclick="window.location.href='index.html'"><i class="fas fa-home"></i><span>Beranda</span></div>
-    <div class="nav-item" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Logout</span></div>
+    <div class="nav-item active" onclick="window.location.reload()">
+      <i class="fas fa-plus-circle"></i>
+      <span>Tambah</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='index.html'">
+      <i class="fas fa-home"></i>
+      <span>Beranda</span>
+    </div>
+    <div class="nav-item" onclick="logout()">
+      <i class="fas fa-sign-out-alt"></i>
+      <span>Logout</span>
+    </div>
   </nav>
   
   <div class="loading-overlay" id="loadingOverlay">
@@ -389,9 +543,6 @@
       window.location.href = 'login.html'; 
     }
     
-    // =====================================================
-    // KOMPRES GAMBAR YANG LEBIH BAIK UNTUK KAMERA PONSEL
-    // =====================================================
     async function compressImage(file) {
       return new Promise((resolve, reject) => {
         console.log('Original file size:', (file.size / 1024 / 1024).toFixed(2), 'MB');
@@ -406,7 +557,6 @@
             let width = img.width;
             let height = img.height;
             
-            // 🔥 RESIZE LEBIH KECIL UNTUK KAMERA PONSEL (max 800px)
             const maxSize = 800;
             
             if (width > maxSize || height > maxSize) {
@@ -425,11 +575,9 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
             
-            // 🔥 KOMPRESI LEBIH KUAT (quality 0.6)
             let quality = 0.6;
             let dataUrl = canvas.toDataURL('image/jpeg', quality);
             
-            // Jika masih terlalu besar (> 300KB), turunkan quality lagi
             let dataUrlSize = Math.round((dataUrl.length * 0.75) / 1024);
             console.log('Compressed size:', dataUrlSize, 'KB (quality:', quality, ')');
             
@@ -449,14 +597,10 @@
       });
     }
     
-    // =====================================================
-    // PREVIEW DAN KOMPRES GAMBAR (DENGAN FEEDBACK)
-    // =====================================================
     async function previewAndCompress(input, imageKey) {
       const file = input.files[0];
       if (!file) return;
       
-      // 🔥 BATASI UKURAN FILE (10MB untuk kamera ponsel)
       if (file.size > 10 * 1024 * 1024) {
         alert('Ukuran gambar terlalu besar (maksimal 10MB).\nSilakan pilih gambar dengan resolusi lebih rendah.');
         input.value = '';
@@ -466,7 +610,6 @@
       const previewDiv = document.getElementById(`preview-${imageKey}`);
       if (!previewDiv) return;
       
-      // Tampilkan loading dengan spinner
       previewDiv.innerHTML = `
         <div class="image-preview-item">
           <div style="width: 70px; height: 70px; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
@@ -575,68 +718,63 @@
       return isValid;
     }
     
-    // =====================================================
-    // SUBMIT DATA (KIRIM KE GAS)
-    // =====================================================
     async function submitPropertyData() {
-  if (!validateForm()) return;
+      if (!validateForm()) return;
 
-  const loadingOverlay = document.getElementById('loadingOverlay');
-  const submitBtn = document.getElementById('submitBtn');
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      const submitBtn = document.getElementById('submitBtn');
 
-  loadingOverlay.style.visibility = 'visible';
-  submitBtn.disabled = true;
+      loadingOverlay.style.visibility = 'visible';
+      submitBtn.disabled = true;
 
-  try {
-    // 🔥 SAMAKAN SEMUA KEY DENGAN GAS
-    const payload = {
-      action: 'savePropertyWithImages',
-      category: document.getElementById('categorySelect').value,
-      timestamp: new Date().toISOString(),
-      sales: document.getElementById('salesName').value.trim(),
-      nama_property: document.getElementById('propertyName').value.trim(),
-      harga: document.getElementById('price').value.trim(),
-      kontak: formatPhoneNumber(document.getElementById('contact').value.trim()),
-      kt: document.getElementById('kt').value,
-      km: document.getElementById('km').value,
-      lt: document.getElementById('lt').value,
-      lokasi: document.getElementById('location').value.trim(),
-      spesifikasi: document.getElementById('specification').value.trim(),
-      gambar_utama: uploadedImages.main || '',
-      gambar2: uploadedImages.img2 || '',
-      gambar3: uploadedImages.img3 || '',
-      gambar4: uploadedImages.img4 || '',
-      gambar5: uploadedImages.img5 || ''
-    };
+      try {
+        const payload = {
+          action: 'savePropertyWithImages',
+          category: document.getElementById('categorySelect').value,
+          timestamp: new Date().toISOString(),
+          sales: document.getElementById('salesName').value.trim(),
+          nama_property: document.getElementById('propertyName').value.trim(),
+          harga: document.getElementById('price').value.trim(),
+          kontak: formatPhoneNumber(document.getElementById('contact').value.trim()),
+          kt: document.getElementById('kt').value,
+          km: document.getElementById('km').value,
+          lt: document.getElementById('lt').value,
+          lokasi: document.getElementById('location').value.trim(),
+          spesifikasi: document.getElementById('specification').value.trim(),
+          gambar_utama: uploadedImages.main || '',
+          gambar2: uploadedImages.img2 || '',
+          gambar3: uploadedImages.img3 || '',
+          gambar4: uploadedImages.img4 || '',
+          gambar5: uploadedImages.img5 || ''
+        };
 
-    // 🔥 PAKAI FORM-URLENCODED (WAJIB UNTUK GAS)
-    const formData = new URLSearchParams();
-    Object.keys(payload).forEach(key => {
-      formData.append(key, payload[key]);
-    });
+        const formData = new URLSearchParams();
+        Object.keys(payload).forEach(key => {
+          formData.append(key, payload[key]);
+        });
 
-    const response = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      body: formData
-    });
+        const response = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: formData
+        });
 
-    const result = await response.json();
+        const result = await response.json();
 
-    if (result.success) {
-      alert('✅ Data berhasil disimpan!');
-      resetForm();
-    } else {
-      throw new Error(result.message);
+        if (result.success) {
+          alert('✅ Data berhasil disimpan!');
+          resetForm();
+        } else {
+          throw new Error(result.message);
+        }
+
+      } catch (error) {
+        console.error(error);
+        alert('❌ ERROR: ' + error.message);
+      } finally {
+        loadingOverlay.style.visibility = 'hidden';
+        submitBtn.disabled = false;
+      }
     }
-
-  } catch (error) {
-    console.error(error);
-    alert('❌ ERROR: ' + error.message);
-  } finally {
-    loadingOverlay.style.visibility = 'hidden';
-    submitBtn.disabled = false;
-  }
-}
     
     function resetForm() {
       const fields = ['salesName', 'propertyName', 'price', 'contact', 'kt', 'km', 'lt', 'location', 'specification'];
@@ -661,7 +799,6 @@
       if (formFields) formFields.style.display = 'none';
     }
     
-    // Event listener untuk kategori
     const categorySelect = document.getElementById('categorySelect');
     if (categorySelect) {
       categorySelect.addEventListener('change', function() {
@@ -676,39 +813,10 @@
       });
     }
     
-    // Submit button
     const submitBtn = document.getElementById('submitBtn');
     if (submitBtn) submitBtn.onclick = submitPropertyData;
     
-    // Initialize image uploaders
-    function initImageUploaders() {
-      const imageGrid = document.getElementById('imageGrid');
-      if (!imageGrid) return;
-      
-      const images = [
-        { id: 'main', label: 'Gambar Utama', icon: 'fa-star', required: true, badge: 'WAJIB' },
-        { id: 'img2', label: 'Gambar 2', icon: 'fa-image', required: false },
-        { id: 'img3', label: 'Gambar 3', icon: 'fa-image', required: false },
-        { id: 'img4', label: 'Gambar 4', icon: 'fa-image', required: false },
-        { id: 'img5', label: 'Gambar 5', icon: 'fa-image', required: false }
-      ];
-      
-      imageGrid.innerHTML = images.map(img => `
-        <div class="image-card ${img.required ? 'primary' : ''}">
-          <div class="image-label">
-            <i class="fas ${img.icon}"></i> ${img.label}
-            ${img.badge ? `<span class="badge">${img.badge}</span>` : ''}
-          </div>
-          <div class="upload-area" onclick="document.getElementById('file-${img.id}').click()">
-            <i class="fas fa-cloud-upload-alt"></i>
-            <p>Tap pilih gambar</p>
-            <div class="file-size-info">Max 10MB | Akan dikompres ke ±250KB</div>
-          </div>
-          <input type="file" id="file-${img.id}" accept="image/*" style="display: none;" onchange="previewAndCompress(this, '${img.id}')">
-          <div id="preview-${img.id}" class="image-preview"></div>
-        </div>
-      `).join('');
-    }
-    
     checkAuth();
   </script>
+</body>
+</html>
