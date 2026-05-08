@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>BMpro - Daftar Properti</title>
+  <title>BMpro - Listing Properti</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -17,7 +17,7 @@
     }
     .container { max-width: 600px; margin: 0 auto; }
     .header { text-align: center; margin-bottom: 25px; }
-    .header h1 { color: #2c3e50; font-size: 1.8rem; font-weight: 700; margin-bottom: 8px; }
+    .header h1 { color: #2c3e50; font-size: 1.8rem; font-weight: 700; }
     .header p { color: #666; font-size: 0.85rem; }
     .user-badge {
       display: inline-flex;
@@ -28,8 +28,6 @@
       border-radius: 50px;
       margin-top: 15px;
     }
-    .user-badge i { color: #2c3e50; font-size: 0.9rem; }
-    .user-badge span { color: #2c3e50; font-weight: 500; font-size: 0.85rem; }
     .logout-btn-header {
       background: #e74c3c;
       border: none;
@@ -56,7 +54,6 @@
       border-radius: 40px;
       font-weight: 600;
       cursor: pointer;
-      font-family: 'Inter', sans-serif;
       transition: all 0.3s ease;
     }
     .tab-btn.active {
@@ -77,10 +74,10 @@
       background: #f0f0f0;
     }
     .property-info { padding: 15px; }
-    .property-title { font-size: 1.1rem; font-weight: 700; color: #2c3e50; margin-bottom: 5px; }
-    .property-location { font-size: 0.75rem; color: #888; margin-bottom: 8px; display: flex; align-items: center; gap: 4px; }
-    .property-price { font-size: 1.1rem; font-weight: 700; color: #3498db; margin-bottom: 8px; }
-    .property-specs { display: flex; gap: 15px; font-size: 0.7rem; color: #666; margin-bottom: 10px; }
+    .property-title { font-size: 1.1rem; font-weight: 700; color: #2c3e50; }
+    .property-location { font-size: 0.75rem; color: #888; margin: 5px 0; }
+    .property-price { font-size: 1.1rem; font-weight: 700; color: #3498db; margin: 5px 0; }
+    .property-specs { display: flex; gap: 15px; font-size: 0.7rem; color: #666; margin: 8px 0; }
     .property-specs span i { margin-right: 4px; color: #3498db; }
     .property-sales { font-size: 0.7rem; color: #888; border-top: 1px solid #eee; padding-top: 10px; margin-top: 5px; }
     .action-buttons { display: flex; gap: 10px; margin-top: 12px; }
@@ -109,6 +106,8 @@
     .empty-state { text-align: center; padding: 50px 20px; background: white; border-radius: 20px; }
     .empty-state i { font-size: 3rem; color: #ccc; margin-bottom: 15px; }
     .loading-state { text-align: center; padding: 50px; }
+    
+    /* Modal Styles */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -140,7 +139,6 @@
       padding-bottom: 10px;
       border-bottom: 2px solid #3498db;
     }
-    .modal-header h3 { color: #2c3e50; }
     .close-modal {
       background: none;
       border: none;
@@ -156,15 +154,12 @@
       color: #555;
       margin-bottom: 5px;
     }
-    .modal-form-group input,
-    .modal-form-group textarea,
-    .modal-form-group select {
+    .modal-form-group input, .modal-form-group textarea {
       width: 100%;
       padding: 10px;
       border: 1px solid #ddd;
       border-radius: 10px;
       font-family: 'Inter', sans-serif;
-      font-size: 0.85rem;
     }
     .image-upload-area {
       border: 2px dashed #ccc;
@@ -172,10 +167,8 @@
       padding: 12px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.3s ease;
       background: #fafafa;
     }
-    .image-upload-area:hover { border-color: #3498db; background: #f0f3ff; }
     .image-preview-container { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
     .preview-item {
       position: relative;
@@ -208,8 +201,16 @@
       font-weight: 600;
       cursor: pointer;
       margin-top: 20px;
-      font-size: 1rem;
     }
+    .section-divider {
+      font-weight: 700;
+      margin: 15px 0 10px 0;
+      padding-bottom: 5px;
+      border-bottom: 1px solid #ddd;
+      color: #2c3e50;
+    }
+    
+    /* Bottom Navigation */
     .bottom-nav {
       position: fixed;
       bottom: 0;
@@ -230,13 +231,10 @@
       flex-direction: column;
       align-items: center;
       gap: 4px;
-      text-decoration: none;
       color: #888;
       font-size: 0.65rem;
       cursor: pointer;
-      transition: all 0.2s ease;
     }
-    .nav-item:active { transform: scale(0.95); }
     .nav-item.active { color: #3498db; }
     .nav-item i { font-size: 1.2rem; }
     .toast {
@@ -251,30 +249,22 @@
       font-size: 0.8rem;
       z-index: 200;
       display: none;
-      white-space: nowrap;
-    }
-    .section-divider {
-      font-weight: 700;
-      margin: 15px 0 10px 0;
-      padding-bottom: 5px;
-      border-bottom: 1px solid #ddd;
-      color: #2c3e50;
-      font-size: 0.9rem;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1><i class="fas fa-list-alt"></i> Daftar Properti</h1>
+      <h1><i class="fas fa-list-alt"></i> Listing Properti</h1>
       <p>Kelola properti & update gambar</p>
       <div class="user-badge">
         <i class="fas fa-user-circle"></i>
         <span id="usernameDisplay"></span>
-        <button class="logout-btn-header" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        <button class="logout-btn-header" onclick="logout()">Logout</button>
       </div>
     </div>
 
+    <!-- Tabs: Primary aktif pertama -->
     <div class="tabs">
       <button class="tab-btn active" data-category="primary">🏠 Primary</button>
       <button class="tab-btn" data-category="secondary">🏡 Secondary</button>
@@ -282,15 +272,16 @@
     </div>
 
     <div id="propertyList">
-      <div class="loading-state"><i class="fas fa-spinner fa-pulse fa-2x"></i><p>Memuat data...</p></div>
+      <div class="loading-state"><i class="fas fa-spinner fa-pulse"></i> Memuat data Primary...</div>
     </div>
   </div>
 
+  <!-- Bottom Navigation -->
   <nav class="bottom-nav">
     <div class="nav-item" onclick="window.location.href='admin_form.html'">
       <i class="fas fa-plus-circle"></i><span>Tambah</span>
     </div>
-    <div class="nav-item active" onclick="window.location.href='properti_list.html'">
+    <div class="nav-item active" onclick="window.location.href='listing.html'">
       <i class="fas fa-list"></i><span>Listing</span>
     </div>
     <div class="nav-item" onclick="window.location.href='index.html'">
@@ -301,95 +292,94 @@
     </div>
   </nav>
 
+  <!-- Modal Edit -->
   <div id="editModal" class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
         <h3><i class="fas fa-edit"></i> Edit Properti</h3>
         <button class="close-modal" onclick="closeModal()">&times;</button>
       </div>
-      <div id="editForm">
-        <input type="hidden" id="editRowIndex">
-        <input type="hidden" id="editCategory">
-        <div class="modal-form-group">
-          <label>Nama Properti</label>
-          <input type="text" id="editPropertyName" placeholder="Nama properti">
-        </div>
-        <div class="modal-form-group">
-          <label>Harga</label>
-          <input type="text" id="editPrice" placeholder="Rp 850.000.000">
-        </div>
-        <div class="modal-form-group">
-          <label>Lokasi</label>
-          <input type="text" id="editLocation" placeholder="Lokasi properti">
-        </div>
-        <div class="modal-form-group">
-          <label>Kontak (WhatsApp)</label>
-          <input type="tel" id="editContact" placeholder="081234567890">
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-          <div class="modal-form-group"><label>KT</label><input type="number" id="editKt" placeholder="Kamar tidur"></div>
-          <div class="modal-form-group"><label>KM</label><input type="number" id="editKm" placeholder="Kamar mandi"></div>
-          <div class="modal-form-group"><label>LT (m²)</label><input type="number" id="editLt" placeholder="Luas tanah"></div>
-        </div>
-        <div class="modal-form-group">
-          <label>Spesifikasi</label>
-          <textarea id="editSpecification" rows="3" placeholder="Detail spesifikasi properti"></textarea>
-        </div>
-
-        <div class="section-divider"><i class="fas fa-star" style="color: #f39c12;"></i> Gambar Utama</div>
-        <div class="modal-form-group">
-          <div class="image-upload-area" onclick="document.getElementById('editMainImage').click()">
-            <i class="fas fa-cloud-upload-alt"></i>
-            <p>Tap untuk ganti gambar utama</p>
-            <p style="font-size: 0.6rem; color: #999;">Gambar lama akan terhapus otomatis</p>
-          </div>
-          <input type="file" id="editMainImage" accept="image/*" style="display: none;" onchange="previewEditImage(this, 'main')">
-          <div id="editPreviewMain" class="image-preview-container"></div>
-          <input type="hidden" id="editOldMainImage">
-        </div>
-
-        <div class="section-divider"><i class="fas fa-image"></i> Gambar 2 (Opsional)</div>
-        <div class="modal-form-group">
-          <div class="image-upload-area" onclick="document.getElementById('editImage2').click()">
-            <i class="fas fa-cloud-upload-alt"></i><p>Tap untuk ganti gambar 2</p>
-          </div>
-          <input type="file" id="editImage2" accept="image/*" style="display: none;" onchange="previewEditImage(this, 'img2')">
-          <div id="editPreviewImg2" class="image-preview-container"></div>
-          <input type="hidden" id="editOldImage2">
-        </div>
-
-        <div class="section-divider"><i class="fas fa-image"></i> Gambar 3 (Opsional)</div>
-        <div class="modal-form-group">
-          <div class="image-upload-area" onclick="document.getElementById('editImage3').click()">
-            <i class="fas fa-cloud-upload-alt"></i><p>Tap untuk ganti gambar 3</p>
-          </div>
-          <input type="file" id="editImage3" accept="image/*" style="display: none;" onchange="previewEditImage(this, 'img3')">
-          <div id="editPreviewImg3" class="image-preview-container"></div>
-          <input type="hidden" id="editOldImage3">
-        </div>
-
-        <div class="section-divider"><i class="fas fa-image"></i> Gambar 4 (Opsional)</div>
-        <div class="modal-form-group">
-          <div class="image-upload-area" onclick="document.getElementById('editImage4').click()">
-            <i class="fas fa-cloud-upload-alt"></i><p>Tap untuk ganti gambar 4</p>
-          </div>
-          <input type="file" id="editImage4" accept="image/*" style="display: none;" onchange="previewEditImage(this, 'img4')">
-          <div id="editPreviewImg4" class="image-preview-container"></div>
-          <input type="hidden" id="editOldImage4">
-        </div>
-
-        <div class="section-divider"><i class="fas fa-image"></i> Gambar 5 (Opsional)</div>
-        <div class="modal-form-group">
-          <div class="image-upload-area" onclick="document.getElementById('editImage5').click()">
-            <i class="fas fa-cloud-upload-alt"></i><p>Tap untuk ganti gambar 5</p>
-          </div>
-          <input type="file" id="editImage5" accept="image/*" style="display: none;" onchange="previewEditImage(this, 'img5')">
-          <div id="editPreviewImg5" class="image-preview-container"></div>
-          <input type="hidden" id="editOldImage5">
-        </div>
-
-        <button class="btn-save" onclick="saveEditWithImages()"><i class="fas fa-save"></i> Simpan Perubahan</button>
+      <input type="hidden" id="editRowIndex">
+      <input type="hidden" id="editCategory">
+      
+      <div class="modal-form-group">
+        <label>Nama Properti</label>
+        <input type="text" id="editPropertyName">
       </div>
+      <div class="modal-form-group">
+        <label>Harga</label>
+        <input type="text" id="editPrice">
+      </div>
+      <div class="modal-form-group">
+        <label>Lokasi</label>
+        <input type="text" id="editLocation">
+      </div>
+      <div class="modal-form-group">
+        <label>Kontak (WhatsApp)</label>
+        <input type="tel" id="editContact">
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+        <div class="modal-form-group"><label>KT</label><input type="number" id="editKt"></div>
+        <div class="modal-form-group"><label>KM</label><input type="number" id="editKm"></div>
+        <div class="modal-form-group"><label>LT (m²)</label><input type="number" id="editLt"></div>
+      </div>
+      <div class="modal-form-group">
+        <label>Spesifikasi</label>
+        <textarea id="editSpecification" rows="3"></textarea>
+      </div>
+
+      <div class="section-divider"><i class="fas fa-star"></i> Gambar Utama</div>
+      <div class="modal-form-group">
+        <div class="image-upload-area" onclick="document.getElementById('editMainImage').click()">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <p>Tap untuk ganti gambar (lama akan terhapus)</p>
+        </div>
+        <input type="file" id="editMainImage" accept="image/*" style="display: none;" onchange="previewEditImage(this, 'main')">
+        <div id="editPreviewMain" class="image-preview-container"></div>
+        <input type="hidden" id="editOldMainImage">
+      </div>
+
+      <div class="section-divider"><i class="fas fa-image"></i> Gambar 2</div>
+      <div class="modal-form-group">
+        <div class="image-upload-area" onclick="document.getElementById('editImage2').click()">
+          <i class="fas fa-cloud-upload-alt"></i><p>Tap untuk ganti</p>
+        </div>
+        <input type="file" id="editImage2" accept="image/*" style="display: none;" onchange="previewEditImage(this, 'img2')">
+        <div id="editPreviewImg2" class="image-preview-container"></div>
+        <input type="hidden" id="editOldImage2">
+      </div>
+
+      <div class="section-divider"><i class="fas fa-image"></i> Gambar 3</div>
+      <div class="modal-form-group">
+        <div class="image-upload-area" onclick="document.getElementById('editImage3').click()">
+          <i class="fas fa-cloud-upload-alt"></i><p>Tap untuk ganti</p>
+        </div>
+        <input type="file" id="editImage3" accept="image/*" style="display: none;" onchange="previewEditImage(this, 'img3')">
+        <div id="editPreviewImg3" class="image-preview-container"></div>
+        <input type="hidden" id="editOldImage3">
+      </div>
+
+      <div class="section-divider"><i class="fas fa-image"></i> Gambar 4</div>
+      <div class="modal-form-group">
+        <div class="image-upload-area" onclick="document.getElementById('editImage4').click()">
+          <i class="fas fa-cloud-upload-alt"></i><p>Tap untuk ganti</p>
+        </div>
+        <input type="file" id="editImage4" accept="image/*" style="display: none;" onchange="previewEditImage(this, 'img4')">
+        <div id="editPreviewImg4" class="image-preview-container"></div>
+        <input type="hidden" id="editOldImage4">
+      </div>
+
+      <div class="section-divider"><i class="fas fa-image"></i> Gambar 5</div>
+      <div class="modal-form-group">
+        <div class="image-upload-area" onclick="document.getElementById('editImage5').click()">
+          <i class="fas fa-cloud-upload-alt"></i><p>Tap untuk ganti</p>
+        </div>
+        <input type="file" id="editImage5" accept="image/*" style="display: none;" onchange="previewEditImage(this, 'img5')">
+        <div id="editPreviewImg5" class="image-preview-container"></div>
+        <input type="hidden" id="editOldImage5">
+      </div>
+
+      <button class="btn-save" onclick="saveEdit()"><i class="fas fa-save"></i> Simpan Perubahan</button>
     </div>
   </div>
 
@@ -399,40 +389,44 @@
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxw6dhGxCYr03RivuaiwX3LIkyoafPbAEK55L1X8iVXll1gVZ1oswNA37d-mpDeTzi2/exec';
     let currentCategory = 'primary';
     let currentUser = null;
-    let currentPropertiesData = [];
+    let currentData = [];
     let editNewImages = { main: null, img2: null, img3: null, img4: null, img5: null };
 
     async function checkAuth() {
       const userStr = localStorage.getItem('bmpro_user');
       if (!userStr) { window.location.href = 'login.html'; return false; }
       currentUser = JSON.parse(userStr);
-      if (currentUser.role !== 'admin' && currentUser.role !== 'sales') { window.location.href = 'index.html'; return false; }
       document.getElementById('usernameDisplay').innerText = currentUser.username;
       return true;
     }
 
     function logout() { localStorage.removeItem('bmpro_user'); window.location.href = 'login.html'; }
 
+    // Tab click handler
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentCategory = btn.dataset.category;
-        loadProperties();
+        loadData();
       });
     });
 
-    async function loadProperties() {
+    async function loadData() {
       const container = document.getElementById('propertyList');
-      container.innerHTML = '<div class="loading-state"><i class="fas fa-spinner fa-pulse fa-2x"></i><p>Memuat data...</p></div>';
+      container.innerHTML = `<div class="loading-state"><i class="fas fa-spinner fa-pulse"></i> Memuat data ${currentCategory}...</div>`;
       try {
         const formData = new URLSearchParams();
         formData.append('action', 'getProperties');
         formData.append('category', currentCategory);
-        const response = await fetch(SCRIPT_URL, { method: 'POST', body: formData, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+        const response = await fetch(SCRIPT_URL, { method: 'POST', body: formData });
         const result = await response.json();
-        if (result.success && result.data && result.data.length > 0) { displayProperties(result.data); }
-        else { container.innerHTML = `<div class="empty-state"><i class="fas fa-building"></i><p>Belum ada properti di kategori ini</p></div>`; }
+        if (result.success && result.data?.length) {
+          currentData = result.data;
+          displayData(result.data);
+        } else {
+          container.innerHTML = `<div class="empty-state"><i class="fas fa-building"></i><p>Belum ada properti di ${currentCategory}</p></div>`;
+        }
       } catch (error) {
         container.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Gagal memuat data</p></div>`;
       }
@@ -444,25 +438,36 @@
       return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
     }
 
-    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, function(m) { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+    }
 
-    function displayProperties(properties) {
+    function displayData(data) {
       const container = document.getElementById('propertyList');
-      currentPropertiesData = properties;
-      const html = properties.map((prop, idx) => `
+      container.innerHTML = data.map((item, idx) => `
         <div class="property-card">
-          ${prop.gambar_utama ? `<img class="property-image" src="${prop.gambar_utama}" alt="${prop.nama_property}" onerror="this.src='https://via.placeholder.com/400x200?text=No+Image'">` : `<div class="property-image" style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea20, #764ba220);"><i class="fas fa-building" style="font-size: 3rem; color: #ccc;"></i></div>`}
+          <img class="property-image" src="${item.gambar_utama || 'https://via.placeholder.com/400x200?text=No+Image'}" onerror="this.src='https://via.placeholder.com/400x200?text=No+Image'">
           <div class="property-info">
-            <div class="property-title">${escapeHtml(prop.nama_property || 'No name')}</div>
-            <div class="property-location"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(prop.lokasi || '-')}</div>
-            <div class="property-price">${formatPrice(prop.harga)}</div>
-            <div class="property-specs"><span><i class="fas fa-bed"></i> ${prop.kt || 0} KT</span><span><i class="fas fa-bath"></i> ${prop.km || 0} KM</span><span><i class="fas fa-vector-square"></i> ${prop.lt || 0} m²</span></div>
-            <div class="property-sales"><i class="fas fa-user"></i> Sales: ${escapeHtml(prop.sales || '-')} &nbsp;|&nbsp;<i class="fab fa-whatsapp"></i> ${escapeHtml(prop.kontak || '-')}</div>
-            <div class="action-buttons"><button class="btn-edit" onclick="openEditModal(${idx})"><i class="fas fa-edit"></i> Update</button><button class="btn-delete" onclick="deleteProperty(${idx})"><i class="fas fa-trash"></i> Delete</button></div>
+            <div class="property-title">${escapeHtml(item.nama_property || '-')}</div>
+            <div class="property-location"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(item.lokasi || '-')}</div>
+            <div class="property-price">${formatPrice(item.harga)}</div>
+            <div class="property-specs">
+              <span><i class="fas fa-bed"></i> ${item.kt || 0} KT</span>
+              <span><i class="fas fa-bath"></i> ${item.km || 0} KM</span>
+              <span><i class="fas fa-vector-square"></i> ${item.lt || 0} m²</span>
+            </div>
+            <div class="property-sales">
+              <i class="fas fa-user"></i> ${escapeHtml(item.sales || '-')} &nbsp;|&nbsp;
+              <i class="fab fa-whatsapp"></i> ${escapeHtml(item.kontak || '-')}
+            </div>
+            <div class="action-buttons">
+              <button class="btn-edit" onclick="openEditModal(${idx})"><i class="fas fa-edit"></i> Update</button>
+              <button class="btn-delete" onclick="deleteItem(${idx})"><i class="fas fa-trash"></i> Delete</button>
+            </div>
           </div>
         </div>
       `).join('');
-      container.innerHTML = html;
     }
 
     async function compressImage(file) {
@@ -483,8 +488,7 @@
             canvas.width = width; canvas.height = height;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
-            let dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-            resolve(dataUrl);
+            resolve(canvas.toDataURL('image/jpeg', 0.7));
           };
           img.onerror = reject;
         };
@@ -495,62 +499,69 @@
     async function previewEditImage(input, imageKey) {
       const file = input.files[0];
       if (!file) return;
-      if (file.size > 10 * 1024 * 1024) { alert('Ukuran gambar maksimal 10MB'); input.value = ''; return; }
-      const previewMap = { 'main': 'editPreviewMain', 'img2': 'editPreviewImg2', 'img3': 'editPreviewImg3', 'img4': 'editPreviewImg4', 'img5': 'editPreviewImg5' };
+      if (file.size > 10 * 1024 * 1024) { alert('Maksimal 10MB'); input.value = ''; return; }
+      
+      const previewMap = { main:'editPreviewMain', img2:'editPreviewImg2', img3:'editPreviewImg3', img4:'editPreviewImg4', img5:'editPreviewImg5' };
       const previewDiv = document.getElementById(previewMap[imageKey]);
-      previewDiv.innerHTML = `<div class="preview-item" style="display: flex; align-items: center; justify-content: center;"><i class="fas fa-spinner fa-pulse fa-2x"></i></div>`;
+      previewDiv.innerHTML = `<div class="preview-item"><i class="fas fa-spinner fa-pulse"></i></div>`;
+      
       try {
-        const compressedBase64 = await compressImage(file);
-        previewDiv.innerHTML = `<div class="preview-item"><img src="${compressedBase64}" alt="Preview"><div class="preview-label new">Baru</div></div>`;
-        editNewImages[imageKey] = compressedBase64;
-      } catch (error) { previewDiv.innerHTML = `<div class="preview-item" style="display: flex; align-items: center; justify-content: center; color: red;">Gagal</div>`; input.value = ''; editNewImages[imageKey] = null; }
+        const compressed = await compressImage(file);
+        previewDiv.innerHTML = `<div class="preview-item"><img src="${compressed}"><div class="preview-label new">Baru</div></div>`;
+        editNewImages[imageKey] = compressed;
+      } catch(e) { previewDiv.innerHTML = '<div class="preview-item" style="color:red;">Gagal</div>'; input.value = ''; }
     }
 
     function openEditModal(index) {
-      const prop = currentPropertiesData[index];
-      if (!prop) return;
+      const item = currentData[index];
+      if (!item) return;
       editNewImages = { main: null, img2: null, img3: null, img4: null, img5: null };
-      document.getElementById('editMainImage').value = '';
-      document.getElementById('editImage2').value = '';
-      document.getElementById('editImage3').value = '';
-      document.getElementById('editImage4').value = '';
-      document.getElementById('editImage5').value = '';
+      
       document.getElementById('editRowIndex').value = index;
       document.getElementById('editCategory').value = currentCategory;
-      document.getElementById('editPropertyName').value = prop.nama_property || '';
-      document.getElementById('editPrice').value = prop.harga || '';
-      document.getElementById('editLocation').value = prop.lokasi || '';
-      document.getElementById('editContact').value = prop.kontak || '';
-      document.getElementById('editKt').value = prop.kt || '';
-      document.getElementById('editKm').value = prop.km || '';
-      document.getElementById('editLt').value = prop.lt || '';
-      document.getElementById('editSpecification').value = prop.spesifikasi || '';
-      document.getElementById('editOldMainImage').value = prop.gambar_utama || '';
-      document.getElementById('editOldImage2').value = prop.gambar2 || '';
-      document.getElementById('editOldImage3').value = prop.gambar3 || '';
-      document.getElementById('editOldImage4').value = prop.gambar4 || '';
-      document.getElementById('editOldImage5').value = prop.gambar5 || '';
-      displayOldPreview('editPreviewMain', prop.gambar_utama, 'Lama');
-      displayOldPreview('editPreviewImg2', prop.gambar2, 'Lama');
-      displayOldPreview('editPreviewImg3', prop.gambar3, 'Lama');
-      displayOldPreview('editPreviewImg4', prop.gambar4, 'Lama');
-      displayOldPreview('editPreviewImg5', prop.gambar5, 'Lama');
+      document.getElementById('editPropertyName').value = item.nama_property || '';
+      document.getElementById('editPrice').value = item.harga || '';
+      document.getElementById('editLocation').value = item.lokasi || '';
+      document.getElementById('editContact').value = item.kontak || '';
+      document.getElementById('editKt').value = item.kt || '';
+      document.getElementById('editKm').value = item.km || '';
+      document.getElementById('editLt').value = item.lt || '';
+      document.getElementById('editSpecification').value = item.spesifikasi || '';
+      
+      document.getElementById('editOldMainImage').value = item.gambar_utama || '';
+      document.getElementById('editOldImage2').value = item.gambar2 || '';
+      document.getElementById('editOldImage3').value = item.gambar3 || '';
+      document.getElementById('editOldImage4').value = item.gambar4 || '';
+      document.getElementById('editOldImage5').value = item.gambar5 || '';
+      
+      displayOldPreview('editPreviewMain', item.gambar_utama);
+      displayOldPreview('editPreviewImg2', item.gambar2);
+      displayOldPreview('editPreviewImg3', item.gambar3);
+      displayOldPreview('editPreviewImg4', item.gambar4);
+      displayOldPreview('editPreviewImg5', item.gambar5);
+      
       document.getElementById('editModal').style.visibility = 'visible';
     }
 
-    function displayOldPreview(containerId, imageUrl, label) {
+    function displayOldPreview(containerId, url) {
       const container = document.getElementById(containerId);
-      if (imageUrl && imageUrl !== '') { container.innerHTML = `<div class="preview-item"><img src="${imageUrl}" alt="Preview" onerror="this.src='https://via.placeholder.com/80?text=Error'"><div class="preview-label old">${label}</div></div>`; }
-      else { container.innerHTML = `<div class="preview-item" style="display: flex; align-items: center; justify-content: center; background: #f0f0f0;"><i class="fas fa-image" style="color: #ccc;"></i></div>`; }
+      if (url && url !== '') {
+        container.innerHTML = `<div class="preview-item"><img src="${url}" onerror="this.src='https://via.placeholder.com/80'"><div class="preview-label old">Lama</div></div>`;
+      } else {
+        container.innerHTML = `<div class="preview-item" style="display:flex;align-items:center;justify-content:center;"><i class="fas fa-image"></i></div>`;
+      }
     }
 
     function closeModal() { document.getElementById('editModal').style.visibility = 'hidden'; }
 
-    async function saveEditWithImages() {
+    async function saveEdit() {
       const index = parseInt(document.getElementById('editRowIndex').value);
       const category = document.getElementById('editCategory').value;
+      
       const payload = {
-        action: 'updatePropertyWithImages', category: category, rowIndex: index + 2,
+        action: 'updatePropertyWithImages',
+        category: category,
+        rowIndex: index + 2,
         nama_property: document.getElementById('editPropertyName').value.trim(),
         harga: document.getElementById('editPrice').value.trim(),
         lokasi: document.getElementById('editLocation').value.trim(),
@@ -570,43 +581,45 @@
         new_gambar4: editNewImages.img4 || '',
         new_gambar5: editNewImages.img5 || ''
       };
+      
       if (!payload.nama_property) { showToast('Nama properti wajib diisi'); return; }
       closeModal();
-      showToast('Menyimpan perubahan...');
+      showToast('Menyimpan...');
+      
       try {
         const formData = new URLSearchParams();
-        Object.keys(payload).forEach(key => { if (payload[key] !== undefined && payload[key] !== '') { formData.append(key, payload[key]); } });
-        const response = await fetch(SCRIPT_URL, { method: 'POST', body: formData, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+        Object.keys(payload).forEach(k => { if (payload[k]) formData.append(k, payload[k]); });
+        const response = await fetch(SCRIPT_URL, { method: 'POST', body: formData });
         const result = await response.json();
-        if (result.success) { showToast('✅ Data berhasil diupdate'); loadProperties(); }
-        else { showToast('❌ Gagal update: ' + (result.message || 'Unknown error')); }
-      } catch (error) { showToast('❌ Error: ' + error.message); }
+        if (result.success) { showToast('✅ Berhasil diupdate'); loadData(); }
+        else { showToast('❌ Gagal: ' + result.message); }
+      } catch(e) { showToast('❌ Error: ' + e.message); }
     }
 
-    async function deleteProperty(index) {
-      const prop = currentPropertiesData[index];
-      if (!confirm(`Hapus properti "${prop.nama_property}"?\n\nSEMUA GAMBAR akan dihapus dari Drive!`)) return;
-      showToast('Menghapus data dan gambar...');
+    async function deleteItem(index) {
+      const item = currentData[index];
+      if (!confirm(`Hapus "${item.nama_property}"?\nSEMUA GAMBAR akan dihapus dari Drive!`)) return;
+      showToast('Menghapus...');
       try {
         const formData = new URLSearchParams();
         formData.append('action', 'deleteProperty');
         formData.append('category', currentCategory);
         formData.append('rowIndex', index + 2);
-        const response = await fetch(SCRIPT_URL, { method: 'POST', body: formData, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+        const response = await fetch(SCRIPT_URL, { method: 'POST', body: formData });
         const result = await response.json();
-        if (result.success) { showToast('✅ Data dan gambar berhasil dihapus'); loadProperties(); }
-        else { showToast('❌ Gagal hapus: ' + (result.message || 'Unknown error')); }
-      } catch (error) { showToast('❌ Error: ' + error.message); }
+        if (result.success) { showToast('✅ Terhapus'); loadData(); }
+        else { showToast('❌ Gagal'); }
+      } catch(e) { showToast('❌ Error'); }
     }
 
-    function showToast(message) {
+    function showToast(msg) {
       const toast = document.getElementById('toast');
-      toast.innerText = message;
+      toast.innerText = msg;
       toast.style.display = 'block';
-      setTimeout(() => { toast.style.display = 'none'; }, 2500);
+      setTimeout(() => toast.style.display = 'none', 2000);
     }
 
-    checkAuth().then(() => { loadProperties(); });
+    checkAuth().then(() => loadData());
   </script>
 </body>
 </html>
