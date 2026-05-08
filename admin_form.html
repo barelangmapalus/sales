@@ -239,6 +239,19 @@ body {
       transition: all 0.3s ease;
       margin: 20px 0 10px 0;  /* margin bottom untuk ruang */
     }
+
+
+
+
+
+
+
+
+
+
+
+
+    
     .btn-submit:hover {
       transform: translateY(-2px);
       box-shadow: 0 10px 20px rgba(102,126,234,0.3);
@@ -492,9 +505,13 @@ body {
   </div>
   
   <nav class="bottom-nav">
-    <div class="nav-item active" onclick="window.location.reload()">
+    <div class="nav-item" onclick="window.location.reload()">
       <i class="fas fa-plus-circle"></i>
       <span>Tambah</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='properti_list.html'">
+      <i class="fas fa-list"></i>
+      <span>Listing</span>
     </div>
     <div class="nav-item" onclick="window.location.href='index.html'">
       <i class="fas fa-home"></i>
@@ -515,7 +532,15 @@ body {
   
   <script>
     // 🔥 UPDATE URL INI SETELAH DEPLOY GAS
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby2aBjczB7iEzoQoEMGMlqb7shL1Gf01CTjEqQLifwXYxtOwRlnU3FRntIYxTOdr48e/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbykwTEHwSbagLhsAsi9lqqOo9CE1pbfkK9dxdDU6diUqAvfVfq5I9_YnguMo_i8VzPu/exec';
+
+    // Variabel Global untuk menyimpan status edit
+    let IS_EDIT_MODE = false;
+    let EDIT_ROW_NUMBER = null;
+
+    window.onload = function() {
+        checkEditMode();
+    };
     
     // State untuk menyimpan base64 gambar
     let uploadedImages = {
@@ -547,6 +572,88 @@ body {
     function logout() { 
       localStorage.removeItem('bmpro_user'); 
       window.location.href = 'login.html'; 
+    }
+
+    function checkEditMode() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get('mode');
+    const row = urlParams.get('row');
+
+    if (mode === 'edit' && row) {
+        IS_EDIT_MODE = true;
+        EDIT_ROW_NUMBER = row;
+        
+        // Ambil data dari localStorage yang kita set di properti_list.html
+        const rawData = localStorage.getItem('edit_data');
+        if (rawData) {
+            const data = JSON.parse(rawData);
+            fillFormForEdit(data);
+            
+            // Ubah tampilan UI
+            document.getElementById('form-title').innerText = "Edit Listing Properti";
+            document.getElementById('btn-submit').innerText = "Update Properti";
+        }
+    }
+}
+
+    function fillFormForEdit(data) {
+        // Isi field teks (Pastikan ID input sesuai dengan nama field di JSON)
+        // Kita gunakan mapping manual sesuai urutan kolom di sheet Anda
+        document.getElementById('category').value = localStorage.getItem('edit_category') || 'primary';
+        document.getElementById('sales').value = data.sales || '';
+        document.getElementById('nama_property').value = data.nama_property || '';
+        document.getElementById('harga').value = data.harga || '';
+        document.getElementById('kontak').value = data.kontak || '';
+        document.getElementById('kt').value = data.kt || '';
+        document.getElementById('km').value = data.km || '';
+        document.getElementById('lt').value = data.lt || '';
+        document.getElementById('lokasi').value = data.lokasi || '';
+        document.getElementById('spesifikasi').value = data.spesifikasi || '';
+
+        // Untuk gambar, kita tampilkan preview saja karena input file tidak bisa diisi secara programatik
+        if (data.gambar_utama) {
+            const preview = document.getElementById('preview-utama'); // Pastikan ada elemen preview
+            if(preview) preview.src = data.gambar_utama;
+        }
+    }
+
+
+    // Modifikasi fungsi Submit Anda
+    async function handleSubmit(event) {
+        event.preventDefault();
+        const btn = document.getElementById('btn-submit');
+        btn.disabled = true;
+        btn.innerText = "Processing...";
+
+        const formData = new FormData(document.getElementById('property-form'));
+        
+        // Tentukan aksi: addProperty atau updateProperty
+        if (IS_EDIT_MODE) {
+            formData.append('action', 'updateProperty');
+            formData.append('row', EDIT_ROW_NUMBER);
+        } else {
+            formData.append('action', 'addProperty');
+        }
+
+        try {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: new URLSearchParams(formData)
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                alert(result.message);
+                window.location.href = 'properti_list.html'; // Kembali ke list
+            } else {
+                alert("Error: " + result.message);
+            }
+        } catch (e) {
+            alert("Gagal mengirim data");
+        } finally {
+            btn.disabled = false;
+            btn.innerText = IS_EDIT_MODE ? "Update Properti" : "Simpan Properti";
+        }
     }
     
     async function compressImage(file) {
