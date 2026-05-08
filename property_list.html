@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Listing Properti - BMpro</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  font-family:'Poppins',sans-serif;
+  background:#f5f7fb;
+  padding:20px;
+  padding-bottom:100px;
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.header h2{
+  font-size:1.3rem;
+  color:#2c3e50;
+}
+
+.category-select{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:16px;
+  background:white;
+  box-shadow:0 4px 15px rgba(0,0,0,0.06);
+  font-size:0.9rem;
+  margin-bottom:20px;
+}
+
+.property-list{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+.property-card{
+  background:white;
+  border-radius:20px;
+  overflow:hidden;
+  display:flex;
+  gap:14px;
+  padding:12px;
+  box-shadow:0 5px 18px rgba(0,0,0,0.06);
+}
+
+.property-image{
+  width:120px;
+  height:120px;
+  border-radius:16px;
+  object-fit:cover;
+  background:#eee;
+}
+
+.property-info{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+
+.property-name{
+  font-size:0.95rem;
+  font-weight:600;
+  color:#2c3e50;
+}
+
+.property-price{
+  font-size:1rem;
+  font-weight:700;
+  color:#27ae60;
+  margin-top:6px;
+}
+
+.property-location{
+  font-size:0.75rem;
+  color:#777;
+  margin-top:4px;
+}
+
+.property-buttons{
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
+
+.btn{
+  flex:1;
+  border:none;
+  padding:10px;
+  border-radius:12px;
+  color:white;
+  font-size:0.8rem;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.btn-edit{
+  background:linear-gradient(135deg,#3498db,#2980b9);
+}
+
+.btn-delete{
+  background:linear-gradient(135deg,#e74c3c,#c0392b);
+}
+
+.loading{
+  text-align:center;
+  padding:40px;
+  color:#666;
+}
+
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:white;
+  display:flex;
+  justify-content:space-around;
+  padding:12px 16px 20px;
+  box-shadow:0 -2px 10px rgba(0,0,0,0.05);
+}
+
+.nav-item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  text-decoration:none;
+  color:#888;
+  font-size:0.7rem;
+  cursor:pointer;
+}
+
+.nav-item.active{
+  color:#3498db;
+}
+
+.nav-item i{
+  font-size:1.2rem;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <h2><i class="fas fa-layer-group"></i> Listing Properti</h2>
+</div>
+
+<select class="category-select" id="categorySelect">
+  <option value="">-- Pilih Kategori --</option>
+  <option value="primary">🏠 Primary</option>
+  <option value="secondary">🏡 Secondary</option>
+  <option value="rent">🔑 Rent</option>
+</select>
+
+<div class="property-list" id="propertyList">
+
+  <div class="loading">
+    <i class="fas fa-spinner fa-spin"></i>
+    Pilih kategori...
+  </div>
+
+</div>
+
+<nav class="bottom-nav">
+
+  <div class="nav-item"
+    onclick="window.location.href='admin_form.html'">
+    <i class="fas fa-plus-circle"></i>
+    <span>Tambah</span>
+  </div>
+
+  <div class="nav-item active">
+    <i class="fas fa-layer-group"></i>
+    <span>Listing</span>
+  </div>
+
+  <div class="nav-item"
+    onclick="window.location.href='index.html'">
+    <i class="fas fa-home"></i>
+    <span>Beranda</span>
+  </div>
+
+  <div class="nav-item"
+    onclick="logout()">
+    <i class="fas fa-sign-out-alt"></i>
+    <span>Logout</span>
+  </div>
+
+</nav>
+
+<script>
+
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzMXaU2JXNKsiXTcFe-iD6xVcvXQJWD7pRPipiCvmii9zii3_teLydXmD5Zv9f9KFP2/exec';
+
+    async function checkAuth(){
+
+    const userStr =
+    localStorage.getItem('bmpro_user');
+
+    if(!userStr){
+
+      window.location.href =
+      'login.html';
+
+      return;
+
+    }
+
+    const user =
+    JSON.parse(userStr);
+
+    if(
+      user.role !== 'admin' &&
+      user.role !== 'sales'
+    ){
+
+      window.location.href =
+      'index.html';
+
+    }
+
+  }
+
+function logout(){
+  localStorage.removeItem('bmpro_user');
+  window.location.href='login.html';
+}
+
+document.getElementById('categorySelect')
+.addEventListener('change',loadProperties);
+
+async function loadProperties(){
+
+  const category =
+  document.getElementById('categorySelect').value;
+
+  if(!category)return;
+
+  const list =
+  document.getElementById('propertyList');
+
+  list.innerHTML=`
+    <div class="loading">
+      <i class="fas fa-spinner fa-spin"></i>
+      Memuat data...
+    </div>
+  `;
+
+  try{
+
+    const response = await fetch(
+      `${SCRIPT_URL}?action=getProperties&category=${category}`
+    );
+
+    const result = await response.json();
+
+    if(!result.success){
+      throw new Error(result.message);
+    }
+
+    if(result.data.length===0){
+      list.innerHTML=`
+        <div class="loading">
+          Belum ada listing
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML='';
+
+    result.data.forEach(item=>{
+
+      list.innerHTML += `
+
+      <div class="property-card">
+
+        <img
+          src="${
+          item.gambar ||
+          'https://via.placeholder.com/120x120?text=No+Image'
+        }"
+          class="property-image">
+
+        <div class="property-info">
+
+          <div>
+
+            <div class="property-name">
+              ${item.nama}
+            </div>
+
+            <div class="property-price">
+              ${item.harga}
+            </div>
+
+            <div class="property-location">
+              <i class="fas fa-map-marker-alt"></i>
+              ${item.lokasi}
+            </div>
+
+          </div>
+
+          <div class="property-buttons">
+
+            <button
+              class="btn btn-edit"
+              onclick='editProperty("${category}",${item.row})'>
+
+              <i class="fas fa-pen"></i>
+              Update
+
+            </button>
+
+            <button
+              class="btn btn-delete"
+              onclick='deleteProperty("${category}",${item.row})'>
+
+              <i class="fas fa-trash"></i>
+              Delete
+
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      `;
+
+    });
+
+  }catch(error){
+
+    list.innerHTML=`
+      <div class="loading">
+        ERROR: ${error.message}
+      </div>
+    `;
+
+  }
+
+}
+
+function editProperty(category,row){
+
+localStorage.setItem(
+  'edit_category',
+  category
+);
+
+localStorage.setItem(
+  'edit_row',
+  row
+);
+
+window.location.href =
+'admin_form.html?mode=edit';
+
+}
+
+async function deleteProperty(category,row){
+
+  const yes = confirm(
+    'Yakin ingin menghapus properti ini?'
+  );
+
+  if(!yes)return;
+
+  try{
+
+    const formData = new URLSearchParams();
+
+    formData.append('action','deleteProperty');
+    formData.append('category',category);
+    formData.append('row',row);
+
+    const response = await fetch(SCRIPT_URL,{
+      method:'POST',
+      body:formData
+    });
+
+    const result = await response.json();
+    console.log("LIST RESULT:", result);
+
+    if(result.success){
+
+      alert('Properti berhasil dihapus');
+
+      loadProperties();
+      window.scrollTo({
+        top:0,
+        behavior:'smooth'
+      });
+
+    }else{
+
+      throw new Error(result.message);
+
+    }
+
+  }catch(error){
+
+    alert(error.message);
+
+  }
+
+}
+checkAuth();
+</script>
+
+</body>
+</html>
