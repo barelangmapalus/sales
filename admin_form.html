@@ -625,6 +625,9 @@ body {
     async function previewAndCompress(input, imageKey) {
       const file = input.files[0];
       if (!file) return;
+
+      // 🔥 reset gambar lama dulu
+      uploadedImages[imageKey] = null;
       
       if (file.size > 10 * 1024 * 1024) {
         alert('Ukuran gambar terlalu besar (maksimal 10MB).\nSilakan pilih gambar dengan resolusi lebih rendah.');
