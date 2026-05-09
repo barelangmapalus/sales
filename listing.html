@@ -472,6 +472,31 @@
       }
     }
 
+    // ========== KONVERSI URL GOOGLE DRIVE KE THUMBNAIL ==========
+    function convertDriveUrl(url) {
+      if (!url) return '';
+      if (url.includes('lh3.googleusercontent.com')) return url;
+      
+      // Pattern: /d/FILE_ID/
+      const fileIdMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (fileIdMatch) {
+        return `https://lh3.googleusercontent.com/d/${fileIdMatch[1]}=w400`;
+      }
+      
+      // Pattern: ?id=FILE_ID
+      const ucIdMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+      if (ucIdMatch) {
+        return `https://lh3.googleusercontent.com/d/${ucIdMatch[1]}=w400`;
+      }
+      
+      // Pattern: langsung FILE_ID
+      if (url.match(/^[a-zA-Z0-9_-]{25,}$/)) {
+        return `https://lh3.googleusercontent.com/d/${url}=w400`;
+      }
+      
+      return url;
+    }
+
     // =====================================================
     // FORMATTER & HELPER
     // =====================================================
@@ -489,14 +514,14 @@
     // =====================================================
     // DISPLAY DATA (dengan referrerpolicy agar gambar muncul)
     // =====================================================
-    function displayData(data) {
-      const container = document.getElementById('propertyList');
-      container.innerHTML = data.map((item, idx) => `
-        <div class="property-card" data-idx="${idx}">
-          <img class="property-image" src="${item['gambar utama'] || 'https://via.placeholder.com/400x200?text=No+Image'}" 
-               referrerpolicy="no-referrer"
-               onerror="this.src='https://via.placeholder.com/400x200?text=No+Image'">
-          <div class="property-info">
+          function displayData(data) {
+        const container = document.getElementById('propertyList');
+        container.innerHTML = data.map((item, idx) => `
+          <div class="property-card" data-idx="${idx}">
+            <img class="property-image" src="${convertDriveUrl(item['gambar utama']) || 'https://via.placeholder.com/400x200?text=No+Image'}" 
+                onerror="this.src='https://via.placeholder.com/400x200?text=No+Image'">
+            <div class="property-info">
+
             <div class="property-title">${escapeHtml(item['nama property'] || '-')}</div>
             <div class="property-location"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(item.lokasi || '-')}</div>
             <div class="property-price">${formatPrice(item.harga)}</div>
@@ -557,13 +582,18 @@
       
       const previewMap = { main:'editPreviewMain', img2:'editPreviewImg2', img3:'editPreviewImg3', img4:'editPreviewImg4', img5:'editPreviewImg5' };
       const previewDiv = document.getElementById(previewMap[imageKey]);
+      
       previewDiv.innerHTML = `<div class="preview-item"><i class="fas fa-spinner fa-pulse"></i></div>`;
       
       try {
         const compressed = await compressImage(file);
-        previewDiv.innerHTML = `<div class="preview-item"><img src="${compressed}"><div class="preview-label new">Baru</div></div>`;
+        // 🔥 PERUBAHAN: tambahkan referrerpolicy dan crossorigin
+        previewDiv.innerHTML = `<div class="preview-item"><img src="${compressed}" referrerpolicy="no-referrer" crossorigin="anonymous"><div class="preview-label new">Baru</div></div>`;
         editNewImages[imageKey] = compressed;
-      } catch(e) { previewDiv.innerHTML = '<div class="preview-item" style="color:red;">Gagal</div>'; input.value = ''; }
+      } catch(e) { 
+        previewDiv.innerHTML = '<div class="preview-item" style="color:red;">Gagal</div>'; 
+        input.value = ''; 
+      }
     }
 
     // =====================================================
@@ -630,10 +660,10 @@
       document.getElementById('editModal').style.visibility = 'visible';
     }
 
-    function displayOldPreview(containerId, url) {
+        function displayOldPreview(containerId, url) {
       const container = document.getElementById(containerId);
       if (url && url !== '') {
-        container.innerHTML = `<div class="preview-item"><img src="${url}" referrerpolicy="no-referrer" onerror="this.src='https://via.placeholder.com/80'"><div class="preview-label old">Lama</div></div>`;
+        container.innerHTML = `<div class="preview-item"><img src="${convertDriveUrl(url)}" onerror="this.src='https://via.placeholder.com/80'"><div class="preview-label old">Lama</div></div>`;
       } else {
         container.innerHTML = `<div class="preview-item" style="display:flex;align-items:center;justify-content:center;"><i class="fas fa-image"></i></div>`;
       }
