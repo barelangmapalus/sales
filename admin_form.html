@@ -14,15 +14,14 @@ body {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
   padding: 20px;
-  padding-bottom: 90px;  /* cukupkan ruang untuk bottom nav */
+  padding-bottom: 90px;
 }
 
 .form-container { 
   max-width: 600px; 
   margin: 0 auto;
-  padding-bottom: 20px; /* ruang ekstra sebelum footer */
+  padding-bottom: 20px;
 }
-
 
     /* Header Premium */
     .header {
@@ -88,32 +87,32 @@ body {
 
     /* Section Title */
     .section-title {
-      font-size: 1.15rem;
+      font-size: 0.7rem;
       font-weight: 700;
       color: #333;
-      margin-bottom: 20px;
-      padding-bottom: 8px;
+      margin-bottom: 15px;
+      padding-bottom: 6px;
       border-bottom: 2px solid #667eea;
       display: inline-block;
     }
 
     .section-title i {
-      margin-right: 10px;
+      margin-right: 8px;
       color: #667eea;
     }
 
-    .form-group { margin-bottom: 18px; }
+    .form-group { margin-bottom: 14px; }
 
     .form-group label {
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 5px;
       font-weight: 600;
       color: #555;
-      font-size: 0.85rem;
+      font-size: 0.75rem;
     }
 
     .form-group label i {
-      margin-right: 8px;
+      margin-right: 6px;
       color: #667eea;
     }
 
@@ -124,10 +123,10 @@ body {
 
     input, select, textarea {
       width: 100%;
-      padding: 12px 14px;
+      padding: 8px 12px;
       border: 1.5px solid #e0e0e0;
-      border-radius: 12px;
-      font-size: 0.9rem;
+      border-radius: 10px;
+      font-size: 0.7rem;
       font-family: 'Inter', sans-serif;
       transition: all 0.3s ease;
       background: #f8f9fa;
@@ -140,20 +139,30 @@ body {
       box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
     }
 
-    textarea { resize: vertical; min-height: 90px; }
+    textarea { resize: vertical; min-height: 70px; }
 
-    /* Specs Grid */
+    /* Specs Grid - diperkecil */
     .specs-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
+      gap: 10px;
+    }
+    
+    .specs-grid .form-group {
+      margin-bottom: 0;
+    }
+    
+    .specs-grid input {
+      padding: 5px 5px;
+      text-align: center;
+      font-size: 0.70rem;
     }
 
     /* Image Upload Premium */
     .image-upload-area {
       border: 2px dashed #ccc;
       border-radius: 12px;
-      padding: 20px;
+      padding: 15px;
       text-align: center;
       cursor: pointer;
       transition: all 0.3s ease;
@@ -166,21 +175,21 @@ body {
     }
 
     .image-upload-area:active { transform: scale(0.98); }
-    .image-upload-area i { font-size: 2rem; color: #667eea; margin-bottom: 8px; }
-    .image-upload-area p { font-size: 0.75rem; color: #666; }
+    .image-upload-area i { font-size: 1.5rem; color: #667eea; margin-bottom: 5px; }
+    .image-upload-area p { font-size: 0.7rem; color: #666; }
 
     .image-preview {
-      margin-top: 12px;
+      margin-top: 10px;
       display: flex;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
     }
 
     .image-preview-item {
       position: relative;
-      width: 70px;
-      height: 70px;
-      border-radius: 12px;
+      width: 60px;
+      height: 60px;
+      border-radius: 10px;
       overflow: hidden;
       background: #f0f0f0;
     }
@@ -198,7 +207,7 @@ body {
       right: 2px;
       background: rgba(0,0,0,0.7);
       color: white;
-      font-size: 8px;
+      font-size: 7px;
       text-align: center;
       padding: 2px;
       border-radius: 4px;
@@ -216,9 +225,9 @@ body {
       color: white;
       border: none;
       border-radius: 50%;
-      width: 18px;
-      height: 18px;
-      font-size: 10px;
+      width: 16px;
+      height: 16px;
+      font-size: 8px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -228,16 +237,16 @@ body {
     /* Submit Button Premium */
     .btn-submit {
       width: 100%;
-      padding: 15px;
+      padding: 12px;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
       border: none;
       border-radius: 14px;
-      font-size: 1rem;
+      font-size: 0.9rem;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.3s ease;
-      margin: 20px 0 10px 0;  /* margin bottom untuk ruang */
+      margin: 15px 0 5px 0;
     }
     
     .btn-submit:hover {
@@ -253,8 +262,8 @@ body {
 
     .error-text {
       color: #e74c3c;
-      font-size: 0.7rem;
-      margin-top: 4px;
+      font-size: 0.65rem;
+      margin-top: 3px;
       display: none;
     }
 
@@ -276,7 +285,7 @@ body {
 
     .loading-content {
       background: white;
-      padding: 30px;
+      padding: 25px;
       border-radius: 24px;
       text-align: center;
       animation: pulse 1s infinite;
@@ -288,25 +297,25 @@ body {
       100% { transform: scale(1); }
     }
 
-    .loading-content i { font-size: 2.5rem; color: #667eea; margin-bottom: 15px; }
-    .loading-content p { color: #333; font-weight: 500; }
+    .loading-content i { font-size: 2rem; color: #667eea; margin-bottom: 10px; }
+    .loading-content p { color: #333; font-weight: 500; font-size: 0.85rem; }
 
     /* Bottom Navigation Premium */
     .bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(255,255,255,0.95);
-  backdrop-filter: blur(10px);
-  display: flex;
-  justify-content: space-around;
-  padding: 8px 16px 18px;
-  box-shadow: 0 -3px 15px rgba(0,0,0,0.1);
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-  z-index: 100;
-}
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 16px 18px;
+      box-shadow: 0 -3px 15px rgba(0,0,0,0.1);
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      z-index: 100;
+    }
 
     .nav-item {
       display: flex;
@@ -332,8 +341,9 @@ body {
 
     @media (max-width: 480px) {
       body { padding: 15px; }
-      .form-card { padding: 18px; }
-      .specs-grid { gap: 10px; }
+      .form-card { padding: 15px; }
+      .specs-grid { gap: 8px; }
+      .specs-grid input { padding: 6px 6px; }
     }
   </style>
 </head>
@@ -423,7 +433,7 @@ body {
 
         <div class="form-group">
           <label><i class="fas fa-clipboard-list"></i> Spesifikasi <span class="required">*</span></label>
-          <textarea id="specification" rows="3" placeholder="Detail spesifikasi properti"></textarea>
+          <textarea id="specification" rows="2" placeholder="Detail spesifikasi properti"></textarea>
           <div class="error-text" id="specError">Wajib diisi</div>
         </div>
 
@@ -437,7 +447,7 @@ body {
           <div class="image-upload-area" onclick="document.getElementById('mainImageInput').click()">
             <i class="fas fa-cloud-upload-alt"></i>
             <p>Tap untuk pilih gambar</p>
-            <p style="font-size: 0.65rem; color: #999;">Max 10MB | Akan dikompres</p>
+            <p style="font-size: 0.6rem; color: #999;">Max 10MB | Akan dikompres</p>
           </div>
           <input type="file" id="mainImageInput" accept="image/*" style="display: none;" onchange="previewAndCompress(this, 'main')">
           <div id="preview-main" class="image-preview"></div>
@@ -522,14 +532,6 @@ body {
     // 🔥 UPDATE URL INI SETELAH DEPLOY GAS
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwC1MFh4um_ckJJUs-jl6FHMi9MEOV6hZrE2c-V3I0tCBUWn81OCJlsCNYSBb8e-qqq/exec';
 
-    // Variabel Global untuk menyimpan status edit
-    let IS_EDIT_MODE = false;
-    let EDIT_ROW_NUMBER = null;
-
-    window.onload = function() {
-        checkEditMode();
-    };
-
     // State untuk menyimpan base64 gambar
     let uploadedImages = {
       main: null,
@@ -560,88 +562,6 @@ body {
     function logout() { 
       localStorage.removeItem('bmpro_user'); 
       window.location.href = 'login.html'; 
-    }
-
-    function checkEditMode() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const mode = urlParams.get('mode');
-    const row = urlParams.get('row');
-
-    if (mode === 'edit' && row) {
-        IS_EDIT_MODE = true;
-        EDIT_ROW_NUMBER = row;
-
-        // Ambil data dari localStorage yang kita set di properti_list.html
-        const rawData = localStorage.getItem('edit_data');
-        if (rawData) {
-            const data = JSON.parse(rawData);
-            fillFormForEdit(data);
-
-            // Ubah tampilan UI
-            document.getElementById('form-title').innerText = "Edit Listing Properti";
-            document.getElementById('btn-submit').innerText = "Update Properti";
-        }
-    }
-}
-
-    function fillFormForEdit(data) {
-        // Isi field teks (Pastikan ID input sesuai dengan nama field di JSON)
-        // Kita gunakan mapping manual sesuai urutan kolom di sheet Anda
-        document.getElementById('category').value = localStorage.getItem('edit_category') || 'primary';
-        document.getElementById('sales').value = data.sales || '';
-        document.getElementById('nama_property').value = data.nama_property || '';
-        document.getElementById('harga').value = data.harga || '';
-        document.getElementById('kontak').value = data.kontak || '';
-        document.getElementById('kt').value = data.kt || '';
-        document.getElementById('km').value = data.km || '';
-        document.getElementById('lt').value = data.lt || '';
-        document.getElementById('lokasi').value = data.lokasi || '';
-        document.getElementById('spesifikasi').value = data.spesifikasi || '';
-
-        // Untuk gambar, kita tampilkan preview saja karena input file tidak bisa diisi secara programatik
-        if (data.gambar_utama) {
-            const preview = document.getElementById('preview-utama'); // Pastikan ada elemen preview
-            if(preview) preview.src = data.gambar_utama;
-        }
-    }
-
-
-    // Modifikasi fungsi Submit Anda
-    async function handleSubmit(event) {
-        event.preventDefault();
-        const btn = document.getElementById('btn-submit');
-        btn.disabled = true;
-        btn.innerText = "Processing...";
-
-        const formData = new FormData(document.getElementById('property-form'));
-
-        // Tentukan aksi: addProperty atau updateProperty
-        if (IS_EDIT_MODE) {
-            formData.append('action', 'updateProperty');
-            formData.append('row', EDIT_ROW_NUMBER);
-        } else {
-            formData.append('action', 'addProperty');
-        }
-
-        try {
-            const response = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: new URLSearchParams(formData)
-            });
-            const result = await response.json();
-
-            if (result.success) {
-                alert(result.message);
-                window.location.href = 'properti_list.html'; // Kembali ke list
-            } else {
-                alert("Error: " + result.message);
-            }
-        } catch (e) {
-            alert("Gagal mengirim data");
-        } finally {
-            btn.disabled = false;
-            btn.innerText = IS_EDIT_MODE ? "Update Properti" : "Simpan Properti";
-        }
     }
 
     async function compressImage(file) {
@@ -713,8 +633,8 @@ body {
 
       previewDiv.innerHTML = `
         <div class="image-preview-item">
-          <div style="width: 70px; height: 70px; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
-            <i class="fas fa-spinner fa-pulse" style="font-size: 20px; color: #667eea;"></i>
+          <div style="width: 60px; height: 60px; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-spinner fa-pulse" style="font-size: 16px; color: #667eea;"></i>
           </div>
           <div class="upload-status uploading">⏫ Memproses...</div>
           <button class="remove-image-btn" onclick="removeImage('${imageKey}')">&times;</button>
@@ -726,7 +646,7 @@ body {
 
         previewDiv.innerHTML = `
           <div class="image-preview-item">
-            <img src="${compressedBase64}" alt="Preview" style="width: 70px; height: 70px; object-fit: cover;">
+            <img src="${compressedBase64}" alt="Preview" style="width: 60px; height: 60px; object-fit: cover;">
             <div class="upload-status success">✓ Siap (${Math.round((compressedBase64.length * 0.75) / 1024)} KB)</div>
             <button class="remove-image-btn" onclick="removeImage('${imageKey}')">&times;</button>
           </div>
