@@ -19,40 +19,25 @@
     .header { text-align: center; margin-bottom: 25px; }
     .header h1 { color: #2c3e50; font-size: 1.8rem; font-weight: 700; }
     .header p { color: #666; font-size: 0.85rem; }
-    .user-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: rgba(44,62,80,0.1);
-      padding: 8px 20px;
-      border-radius: 50px;
-      margin-top: 15px;
-    }
-    .logout-btn-header {
-      background: #e74c3c;
-      border: none;
-      color: white;
-      padding: 5px 12px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 0.75rem;
-    }
+    
+    /* Tabs lebih kecil 2x */
     .tabs {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       margin-bottom: 20px;
       background: white;
-      padding: 8px;
-      border-radius: 50px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      padding: 6px;
+      border-radius: 40px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
     .tab-btn {
       flex: 1;
-      padding: 12px;
+      padding: 6px 10px;
       border: none;
       background: transparent;
-      border-radius: 40px;
-      font-weight: 600;
+      border-radius: 30px;
+      font-weight: 500;
+      font-size: 0.7rem;
       cursor: pointer;
       transition: all 0.3s ease;
     }
@@ -69,26 +54,26 @@
     }
     .property-image {
       width: 100%;
-      height: 200px;
+      height: 180px;
       object-fit: cover;
       background: #f0f0f0;
     }
-    .property-info { padding: 15px; }
-    .property-title { font-size: 1.1rem; font-weight: 700; color: #2c3e50; }
-    .property-location { font-size: 0.75rem; color: #888; margin: 5px 0; }
-    .property-price { font-size: 1.1rem; font-weight: 700; color: #3498db; margin: 5px 0; }
-    .property-specs { display: flex; gap: 15px; font-size: 0.7rem; color: #666; margin: 8px 0; }
+    .property-info { padding: 12px; }
+    .property-title { font-size: 1rem; font-weight: 700; color: #2c3e50; }
+    .property-location { font-size: 0.7rem; color: #888; margin: 4px 0; }
+    .property-price { font-size: 1rem; font-weight: 700; color: #3498db; margin: 4px 0; }
+    .property-specs { display: flex; gap: 12px; font-size: 0.65rem; color: #666; margin: 6px 0; }
     .property-specs span i { margin-right: 4px; color: #3498db; }
-    .property-sales { font-size: 0.7rem; color: #888; border-top: 1px solid #eee; padding-top: 10px; margin-top: 5px; }
-    .action-buttons { display: flex; gap: 10px; margin-top: 12px; }
+    .property-sales { font-size: 0.65rem; color: #888; border-top: 1px solid #eee; padding-top: 8px; margin-top: 5px; }
+    .action-buttons { display: flex; gap: 10px; margin-top: 10px; }
     .btn-edit {
       flex: 1;
       background: linear-gradient(135deg, #f39c12, #e67e22);
       color: white;
       border: none;
-      padding: 10px;
+      padding: 8px;
       border-radius: 10px;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       font-weight: 600;
       cursor: pointer;
     }
@@ -97,9 +82,9 @@
       background: linear-gradient(135deg, #e74c3c, #c0392b);
       color: white;
       border: none;
-      padding: 10px;
+      padding: 8px;
       border-radius: 10px;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       font-weight: 600;
       cursor: pointer;
     }
@@ -257,14 +242,9 @@
     <div class="header">
       <h1><i class="fas fa-list-alt"></i> Listing Properti</h1>
       <p>Kelola properti & update gambar</p>
-      <div class="user-badge">
-        <i class="fas fa-user-circle"></i>
-        <span id="usernameDisplay"></span>
-        <button class="logout-btn-header" onclick="logout()">Logout</button>
-      </div>
     </div>
 
-    <!-- Tabs: Primary aktif pertama -->
+    <!-- Tabs: Primary aktif pertama - ukuran lebih kecil -->
     <div class="tabs">
       <button class="tab-btn active" data-category="primary">🏠 Primary</button>
       <button class="tab-btn" data-category="secondary">🏡 Secondary</button>
@@ -276,7 +256,7 @@
     </div>
   </div>
 
-  <!-- Bottom Navigation -->
+  <!-- Bottom Navigation (sudah ada tombol logout di sini) -->
   <nav class="bottom-nav">
     <div class="nav-item" onclick="window.location.href='admin_form.html'">
       <i class="fas fa-plus-circle"></i><span>Tambah</span>
@@ -386,7 +366,7 @@
   <div id="toast" class="toast"></div>
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbykwTEHwSbagLhsAsi9lqqOo9CE1pbfkK9dxdDU6diUqAvfVfq5I9_YnguMo_i8VzPu/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxw6dhGxCYr03RivuaiwX3LIkyoafPbAEK55L1X8iVXll1gVZ1oswNA37d-mpDeTzi2/exec';
     let currentCategory = 'primary';
     let currentUser = null;
     let currentData = [];
@@ -394,13 +374,18 @@
 
     async function checkAuth() {
       const userStr = localStorage.getItem('bmpro_user');
-      if (!userStr) { window.location.href = 'login.html'; return false; }
+      if (!userStr) { 
+        window.location.href = 'login.html'; 
+        return false; 
+      }
       currentUser = JSON.parse(userStr);
-      document.getElementById('usernameDisplay').innerText = currentUser.username;
       return true;
     }
 
-    function logout() { localStorage.removeItem('bmpro_user'); window.location.href = 'login.html'; }
+    function logout() { 
+      localStorage.removeItem('bmpro_user'); 
+      window.location.href = 'login.html'; 
+    }
 
     // Tab click handler
     document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -517,6 +502,12 @@
       if (!item) return;
       editNewImages = { main: null, img2: null, img3: null, img4: null, img5: null };
       
+      document.getElementById('editMainImage').value = '';
+      document.getElementById('editImage2').value = '';
+      document.getElementById('editImage3').value = '';
+      document.getElementById('editImage4').value = '';
+      document.getElementById('editImage5').value = '';
+      
       document.getElementById('editRowIndex').value = index;
       document.getElementById('editCategory').value = currentCategory;
       document.getElementById('editPropertyName').value = item.nama_property || '';
@@ -552,7 +543,9 @@
       }
     }
 
-    function closeModal() { document.getElementById('editModal').style.visibility = 'hidden'; }
+    function closeModal() { 
+      document.getElementById('editModal').style.visibility = 'hidden'; 
+    }
 
     async function saveEdit() {
       const index = parseInt(document.getElementById('editRowIndex').value);
@@ -582,44 +575,83 @@
         new_gambar5: editNewImages.img5 || ''
       };
       
-      if (!payload.nama_property) { showToast('Nama properti wajib diisi'); return; }
+      if (!payload.nama_property) { 
+        showToast('Nama properti wajib diisi'); 
+        return; 
+      }
+      
       closeModal();
-      showToast('Menyimpan...');
+      showToast('Menyimpan perubahan...');
       
       try {
         const formData = new URLSearchParams();
-        Object.keys(payload).forEach(k => { if (payload[k]) formData.append(k, payload[k]); });
-        const response = await fetch(SCRIPT_URL, { method: 'POST', body: formData });
+        Object.keys(payload).forEach(key => {
+          if (payload[key] !== undefined && payload[key] !== '') {
+            formData.append(key, payload[key]);
+          }
+        });
+        
+        const response = await fetch(SCRIPT_URL, { 
+          method: 'POST', 
+          body: formData 
+        });
         const result = await response.json();
-        if (result.success) { showToast('✅ Berhasil diupdate'); loadData(); }
-        else { showToast('❌ Gagal: ' + result.message); }
-      } catch(e) { showToast('❌ Error: ' + e.message); }
+        
+        if (result.success) {
+          showToast('✅ Data berhasil diupdate');
+          loadData();
+        } else {
+          showToast('❌ Gagal: ' + (result.message || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Save error:', error);
+        showToast('❌ Error: ' + error.message);
+      }
     }
 
     async function deleteItem(index) {
       const item = currentData[index];
-      if (!confirm(`Hapus "${item.nama_property}"?\nSEMUA GAMBAR akan dihapus dari Drive!`)) return;
-      showToast('Menghapus...');
+      if (!confirm(`Hapus properti "${item.nama_property}"?\n\nSEMUA GAMBAR akan dihapus dari Drive!`)) return;
+      
+      showToast('Menghapus data dan gambar...');
+      
       try {
         const formData = new URLSearchParams();
         formData.append('action', 'deleteProperty');
         formData.append('category', currentCategory);
         formData.append('rowIndex', index + 2);
-        const response = await fetch(SCRIPT_URL, { method: 'POST', body: formData });
+        
+        const response = await fetch(SCRIPT_URL, { 
+          method: 'POST', 
+          body: formData 
+        });
         const result = await response.json();
-        if (result.success) { showToast('✅ Terhapus'); loadData(); }
-        else { showToast('❌ Gagal'); }
-      } catch(e) { showToast('❌ Error'); }
+        
+        if (result.success) {
+          showToast('✅ Data dan gambar berhasil dihapus');
+          loadData();
+        } else {
+          showToast('❌ Gagal hapus: ' + (result.message || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Delete error:', error);
+        showToast('❌ Error: ' + error.message);
+      }
     }
 
-    function showToast(msg) {
+    function showToast(message) {
       const toast = document.getElementById('toast');
-      toast.innerText = msg;
+      toast.innerText = message;
       toast.style.display = 'block';
-      setTimeout(() => toast.style.display = 'none', 2000);
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 2000);
     }
 
-    checkAuth().then(() => loadData());
+    // Initialize
+    checkAuth().then(() => {
+      loadData();
+    });
   </script>
 </body>
 </html>
