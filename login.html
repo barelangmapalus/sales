@@ -96,7 +96,7 @@
       
       <div class="input-group">
         <label>Nomor HP Host</label>
-        <input type="text" id="phone" placeholder="Contoh: 08123456789">
+        <input type="text" id="kontak" placeholder="Contoh: 08123456789">
       </div>
       
       <button id="loginBtn" onclick="doLogin()">
@@ -120,10 +120,12 @@
     const LOGIN_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzoCaMzIvADwXrDeBmB0Ds4XFjQ3b9oez_hVzHlmzw-sLGC-fyf1OzxE5W41asW_MVO/exec';
     
     async function doLogin() {
+
       const username = document.getElementById('username').value.trim();
       const kontak = document.getElementById('kontak').value.trim();
+      const errorMsg = document.getElementById('errorMsg');
       const loginBtn = document.getElementById('loginBtn');
-      
+
       if (!username || !kontak) {
         errorMsg.style.display = 'block';
         errorMsg.innerHTML = 'Username dan kontak wajib diisi!';
