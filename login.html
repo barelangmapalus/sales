@@ -95,8 +95,8 @@
       </div>
       
       <div class="input-group">
-        <label>Password</label>
-        <input type="password" id="password" placeholder="Masukkan password">
+        <label>Nomor HP Host</label>
+        <input type="text" id="phone" placeholder="Contoh: 08123456789">
       </div>
       
       <button id="loginBtn" onclick="doLogin()">
@@ -117,17 +117,16 @@
       </div>
   
   <script>
-    const LOGIN_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwC1MFh4um_ckJJUs-jl6FHMi9MEOV6hZrE2c-V3I0tCBUWn81OCJlsCNYSBb8e-qqq/exec';
+    const LOGIN_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzoCaMzIvADwXrDeBmB0Ds4XFjQ3b9oez_hVzHlmzw-sLGC-fyf1OzxE5W41asW_MVO/exec';
     
     async function doLogin() {
       const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const errorMsg = document.getElementById('errorMsg');
+      const kontak = document.getElementById('kontak').value.trim();
       const loginBtn = document.getElementById('loginBtn');
       
-      if (!username || !password) {
+      if (!username || !kontak) {
         errorMsg.style.display = 'block';
-        errorMsg.innerHTML = 'Username dan password wajib diisi!';
+        errorMsg.innerHTML = 'Username dan kontak wajib diisi!';
         return;
       }
       
@@ -139,7 +138,7 @@
         const formData = new URLSearchParams();
         formData.append('action', 'login');
         formData.append('username', username);
-        formData.append('password', password);
+        formData.append('kontak', kontak);
         
         const response = await fetch(LOGIN_SCRIPT_URL, {
           method: 'POST',
@@ -152,6 +151,7 @@
         if (result.success) {
           localStorage.setItem('bmpro_user', JSON.stringify({
             username: result.data.username,
+            kontak: result.data.kontak,
             role: result.data.role,
             token: result.data.token,
             loginTime: new Date().toISOString()
@@ -159,7 +159,7 @@
           window.location.href = 'admin_form.html';
         } else {
           errorMsg.style.display = 'block';
-          errorMsg.innerHTML = result.message || 'Username atau password salah!';
+          errorMsg.innerHTML = result.message || 'Username atau kontak salah!';
           loginBtn.disabled = false;
           loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
         }
@@ -182,7 +182,7 @@
       }
     }
     
-    document.getElementById('password').addEventListener('keypress', (e) => {
+    document.getElementById('kontak').addEventListener('keypress', (e) => {
       if (e.key === 'Enter') doLogin();
     });
     
