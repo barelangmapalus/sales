@@ -95,9 +95,14 @@
       </div>
       
       <div class="input-group">
-        <label>Nomor HP Host</label>
-        <input type="text" id="kontak" placeholder="Contoh: 08123456789">
-      </div>
+  <label>Nomor HP Host</label>
+  <input type="tel" 
+         id="kontak" 
+         placeholder="Contoh: 08123456789"
+         inputmode="numeric"
+         pattern="[0-9]*"
+         onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+</div>
       
       <button id="loginBtn" onclick="doLogin()">
         <i class="fas fa-sign-in-alt"></i> Login
