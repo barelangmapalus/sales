@@ -402,7 +402,7 @@
     // =====================================================
     const SHEET_ID = '1mosLZD23_3YDcuzi2diUY2TRNBSigJ2HNiiiFGPWtzo';
     const OPENSHEET_URL = `https://opensheet.elk.sh/${SHEET_ID}`;
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzr8P2yPawp1_jG_fVLU5hqhy9QTuHqBCAw-HGiTqNzV5TMQaevjkikneCgIe2_LEWt/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyfYY02t4g9kOOdGyLgmGN4ItP7rymICOEtMDFnieasVQSkN-f1ybqyywuum1XnYiSU/exec';
     
     let currentCategory = 'primary';
     let currentUser = null;
@@ -689,6 +689,8 @@
       
       const payload = {
         action: 'updatePropertyWithImages',
+        role: currentUser.role,
+        kontak_user: currentUser.kontak,
         category: category,
         rowIndex: index + 2, // +2 karena OpenSheet index mulai 0, sheet row mulai 2
         nama_property: document.getElementById('editPropertyName').value.trim(),
@@ -773,6 +775,9 @@
         formData.append('action', 'deleteProperty');
         formData.append('category', currentCategory);
         formData.append('rowIndex', index + 2); // +2 karena OpenSheet index mulai 0, sheet row mulai 2
+
+        formData.append('role', currentUser.role);
+        formData.append('kontak', currentUser.kontak);
         
         // 🔥 PAKAI APPS SCRIPT UNTUK DELETE
         const response = await fetch(APPS_SCRIPT_URL, { 
