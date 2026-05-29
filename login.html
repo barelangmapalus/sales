@@ -95,14 +95,9 @@
       </div>
       
       <div class="input-group">
-  <label>Nomor HP Host</label>
-  <input type="tel" 
-         id="kontak" 
-         placeholder="Contoh: 08123456789"
-         inputmode="numeric"
-         pattern="[0-9]*"
-         onkeypress="return event.charCode >= 48 && event.charCode <= 57">
-</div>
+        <label>Nomor HP Host</label>
+        <input type="text" id="kontak" placeholder="Contoh: 08123456789">
+      </div>
       
       <button id="loginBtn" onclick="doLogin()">
         <i class="fas fa-sign-in-alt"></i> Login
@@ -122,7 +117,7 @@
       </div>
   
   <script>
-    const LOGIN_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyfYY02t4g9kOOdGyLgmGN4ItP7rymICOEtMDFnieasVQSkN-f1ybqyywuum1XnYiSU/exec';
+    const LOGIN_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzoCaMzIvADwXrDeBmB0Ds4XFjQ3b9oez_hVzHlmzw-sLGC-fyf1OzxE5W41asW_MVO/exec';
     
     async function doLogin() {
 
@@ -154,6 +149,10 @@
         });
         
         const result = await response.json();
+
+        if (!result.data || !result.data.role) {
+          throw new Error('Data login tidak valid');
+        }
         
         if (result.success) {
           localStorage.setItem('bmpro_user', JSON.stringify({
@@ -183,7 +182,7 @@
       const user = localStorage.getItem('bmpro_user');
       if (user) {
         const userData = JSON.parse(user);
-        if (userData.role === 'admin' || userData.role === 'sales') {
+        if (userData.role === 'admin' || userData.role === 'host') {
           window.location.href = 'admin_form.html';
         }
       }
