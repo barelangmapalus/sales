@@ -414,8 +414,12 @@
     // AUTHENTICATION
     // =====================================================
     async function checkAuth() {
+
       try {
+
         const userStr = localStorage.getItem('bmpro_user');
+
+        console.log('LOCAL USER:', userStr);
 
         if (!userStr) {
           window.location.href = 'login.html';
@@ -424,24 +428,28 @@
 
         currentUser = JSON.parse(userStr);
 
+        console.log('PARSED USER:', currentUser);
+
+        if (!currentUser) {
+          logout();
+          return false;
+        }
+
         if (
-          !currentUser ||
-          !currentUser.username ||
-          !currentUser.role ||
-          !['admin', 'sales'].includes(currentUser.role)
+          currentUser.role !== 'admin' &&
+          currentUser.role !== 'sales'
         ) {
-          localStorage.removeItem('bmpro_user');
-          window.location.href = 'login.html';
+          logout();
           return false;
         }
 
         return true;
 
-      } catch (error) {
-        console.error('Auth error:', error);
+      } catch (err) {
 
-        localStorage.removeItem('bmpro_user');
-        window.location.href = 'login.html';
+        console.error('CHECK AUTH ERROR:', err);
+
+        logout();
 
         return false;
       }
