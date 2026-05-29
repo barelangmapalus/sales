@@ -530,7 +530,7 @@ body {
 
   <script>
     // 🔥 UPDATE URL INI SETELAH DEPLOY GAS
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxetcRBDCKHrdwMGenCg6GKM3VKRCT15NP9gOVrvtcqS0N48ZY3aRXfqxCrFa-4dCpC/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyfYY02t4g9kOOdGyLgmGN4ItP7rymICOEtMDFnieasVQSkN-f1ybqyywuum1XnYiSU/exec';
 
     // State untuk menyimpan base64 gambar
     let uploadedImages = {
@@ -804,7 +804,7 @@ body {
           sales: document.getElementById('salesName').value.trim(),
           nama_property: document.getElementById('propertyName').value.trim(),
           harga: document.getElementById('price').value.trim(),
-          kontak: formatPhoneNumber(document.getElementById('contact').value.trim()),
+          kontak: document.getElementById('contact').value.trim(),
           kt: document.getElementById('kt').value,
           km: document.getElementById('km').value,
           lt: document.getElementById('lt').value,
