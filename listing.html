@@ -415,49 +415,49 @@
     // =====================================================
     async function checkAuth() {
 
-      try {
+    try {
 
-        const userStr = localStorage.getItem('bmpro_user');
+      const userStr = localStorage.getItem('bmpro_user');
 
-        console.log('LOCAL USER:', userStr);
+      console.log('LOCAL USER:', userStr);
 
-        if (!userStr) {
-          window.location.href = 'login.html';
-          return false;
-        }
-
-        currentUser = JSON.parse(userStr);
-
-        console.log('PARSED USER:', currentUser);
-
-        if (!currentUser) {
-          logout();
-          return false;
-        }
-
-        if (
-          currentUser.role !== 'admin' &&
-          currentUser.role !== 'sales'
-        ) {
-          logout();
-          return false;
-        }
-
-        return true;
-
-      } catch (err) {
-
-        console.error('CHECK AUTH ERROR:', err);
-
-        logout();
-
+      if (!userStr) {
+        window.location.href = 'login.html';
         return false;
       }
+
+      currentUser = JSON.parse(userStr);
+
+      console.log('PARSED USER:', currentUser);
+
+      if (!currentUser) {
+        logout();
+        return false;
+      }
+
+      if (
+        currentUser.role !== 'admin' &&
+        currentUser.role !== 'host'
+      ) {
+        logout();
+        return false;
+      }
+
+      return true;
+
+    } catch (err) {
+
+      console.error('CHECK AUTH ERROR:', err);
+
+      logout();
+
+      return false;
+    }
     }
 
     function logout() { 
-      localStorage.removeItem('bmpro_user'); 
-      window.location.href = 'login.html'; 
+    localStorage.removeItem('bmpro_user'); 
+    window.location.href = 'login.html'; 
     }
 
     // =====================================================
