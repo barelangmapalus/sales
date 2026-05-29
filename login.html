@@ -116,83 +116,133 @@
         </a>
       </div>
   
-  <script>
-    const LOGIN_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzoCaMzIvADwXrDeBmB0Ds4XFjQ3b9oez_hVzHlmzw-sLGC-fyf1OzxE5W41asW_MVO/exec';
-    
-    async function doLogin() {
-
-      const username = document.getElementById('username').value.trim();
-      const kontak = document.getElementById('kontak').value.trim();
-      const errorMsg = document.getElementById('errorMsg');
-      const loginBtn = document.getElementById('loginBtn');
-
-      if (!username || !kontak) {
-        errorMsg.style.display = 'block';
-        errorMsg.innerHTML = 'Username dan kontak wajib diisi!';
-        return;
-      }
+      <script>
+        const LOGIN_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzoCaMzIvADwXrDeBmB0Ds4XFjQ3b9oez_hVzHlmzw-sLGC-fyf1OzxE5W41asW_MVO/exec';
       
-      errorMsg.style.display = 'none';
-      loginBtn.disabled = true;
-      loginBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Memproses...';
+        async function doLogin() {
       
-      try {
-        const formData = new URLSearchParams();
-        formData.append('action', 'login');
-        formData.append('username', username);
-        formData.append('kontak', kontak);
-        
-        const response = await fetch(LOGIN_SCRIPT_URL, {
-          method: 'POST',
-          body: formData,
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-        });
-        
-        const result = await response.json();
-
-        if (!result.data || !result.data.role) {
-          throw new Error('Data login tidak valid');
+          const username = document.getElementById('username').value.trim();
+          const kontak = document.getElementById('kontak').value.trim();
+          const errorMsg = document.getElementById('errorMsg');
+          const loginBtn = document.getElementById('loginBtn');
+      
+          if (!username || !kontak) {
+            errorMsg.style.display = 'block';
+            errorMsg.innerHTML = 'Username dan kontak wajib diisi!';
+            return;
+          }
+      
+          errorMsg.style.display = 'none';
+      
+          loginBtn.disabled = true;
+          loginBtn.innerHTML =
+            '<i class="fas fa-spinner fa-pulse"></i> Memproses...';
+      
+          try {
+      
+            const formData = new URLSearchParams();
+            formData.append('action', 'login');
+            formData.append('username', username);
+            formData.append('kontak', kontak);
+      
+            const response = await fetch(LOGIN_SCRIPT_URL, {
+              method: 'POST',
+              body: formData,
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+              }
+            });
+      
+            const result = await response.json();
+      
+            // LOGIN BERHASIL
+            if (
+              result.success &&
+              result.data &&
+              result.data.role
+            ) {
+      
+              localStorage.setItem('bmpro_user', JSON.stringify({
+                username: result.data.username,
+                kontak: result.data.kontak,
+                role: result.data.role,
+                token: result.data.token,
+                loginTime: new Date().toISOString()
+              }));
+      
+              window.location.href = 'admin_form.html';
+      
+            } else {
+      
+              // HAPUS SESSION LAMA
+              localStorage.removeItem('bmpro_user');
+      
+              alert(result.message || 'Login gagal');
+      
+              errorMsg.style.display = 'block';
+              errorMsg.innerHTML =
+                result.message || 'Username atau kontak salah!';
+      
+              loginBtn.disabled = false;
+              loginBtn.innerHTML =
+                '<i class="fas fa-sign-in-alt"></i> Login';
+            }
+      
+          } catch (error) {
+      
+            console.error('Login error:', error);
+      
+            // HAPUS SESSION JIKA ERROR
+            localStorage.removeItem('bmpro_user');
+      
+            alert('Gagal login atau data tidak ditemukan');
+      
+            errorMsg.style.display = 'block';
+            errorMsg.innerHTML =
+              'Gagal terhubung ke server';
+      
+            loginBtn.disabled = false;
+            loginBtn.innerHTML =
+              '<i class="fas fa-sign-in-alt"></i> Login';
+          }
         }
-        
-        if (result.success) {
-          localStorage.setItem('bmpro_user', JSON.stringify({
-            username: result.data.username,
-            kontak: result.data.kontak,
-            role: result.data.role,
-            token: result.data.token,
-            loginTime: new Date().toISOString()
-          }));
-          window.location.href = 'admin_form.html';
-        } else {
-          errorMsg.style.display = 'block';
-          errorMsg.innerHTML = result.message || 'Username atau kontak salah!';
-          loginBtn.disabled = false;
-          loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+      
+        // CEK SESSION LOGIN
+        function checkLogin() {
+      
+          const user = localStorage.getItem('bmpro_user');
+      
+          if (user) {
+      
+            const userData = JSON.parse(user);
+      
+            if (
+              userData &&
+              userData.username &&
+              userData.kontak &&
+              (userData.role === 'admin' ||
+               userData.role === 'host')
+            ) {
+      
+              window.location.href = 'admin_form.html';
+      
+            } else {
+      
+              // SESSION INVALID
+              localStorage.removeItem('bmpro_user');
+            }
+          }
         }
-      } catch (error) {
-        console.error('Login error:', error);
-        errorMsg.style.display = 'block';
-        errorMsg.innerHTML = 'Gagal terhubung ke server. Periksa URL Apps Script.';
-        loginBtn.disabled = false;
-        loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
-      }
-    }
-    
-    function checkLogin() {
-      const user = localStorage.getItem('bmpro_user');
-      if (user) {
-        const userData = JSON.parse(user);
-        if (userData.role === 'admin' || userData.role === 'host') {
-          window.location.href = 'admin_form.html';
-        }
-      }
-    }
-    
-    document.getElementById('kontak').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') doLogin();
-    });
-    
-    checkLogin();
-  </script>
+      
+        document.getElementById('kontak')
+          .addEventListener('keypress', (e) => {
+      
+            if (e.key === 'Enter') {
+              doLogin();
+            }
+          });
+      
+        checkLogin();
+      </script>
 </body>
 </html>
