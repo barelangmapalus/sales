@@ -489,11 +489,32 @@
         const data = await response.json();
         
         if (data && data.length > 0) {
-          // Filter data yang kosong (nama property tidak ada)
-          const filteredData = data.filter(row => row['nama property'] && row['nama property'].trim() !== '');
-          currentData = filteredData;
-          displayData(filteredData);
-        } else {
+
+// FILTER DATA KOSONG
+let filteredData = data.filter(row =>
+  row['nama property'] &&
+  row['nama property'].trim() !== ''
+);
+
+// FILTER KHUSUS HOST
+if (currentUser.role === 'host') {
+
+  filteredData = filteredData.filter(row => {
+
+    return (
+      String(row.kontak).trim() ===
+      String(currentUser.kontak).trim()
+    );
+
+  });
+
+}
+
+currentData = filteredData;
+
+displayData(filteredData);
+
+} else {
           container.innerHTML = `<div class="empty-state"><i class="fas fa-building"></i><p>Belum ada properti di ${currentCategory}</p></div>`;
         }
       } catch (error) {
