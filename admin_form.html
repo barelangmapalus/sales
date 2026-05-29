@@ -386,7 +386,8 @@ body {
         </div>
 
         <div class="form-group">
-          <label><i class="fas fa-phone"></i> Kontak (WhatsApp) <span class="required">*</span></label>
+          <label style="font-size: 0.55rem;"><i class="fas fa-phone"></i> Nomor Ponsel harus sama dengan nomor Host!<span class="required">*</span>
+          </label>
           <input type="tel" id="contact" placeholder="081234567890">
           <div class="error-text" id="contactError">Minimal 10 digit</div>
         </div>
@@ -409,7 +410,12 @@ body {
 
         <div class="form-group">
           <label><i class="fas fa-money-bill-wave"></i> Harga <span class="required">*</span></label>
-          <input type="text" id="price" placeholder="Rp 850.000.000">
+          <input 
+                type="text"
+                id="price"
+                inputmode="numeric"
+                pattern="[0-9.]*"
+                placeholder="Rp 850.000.000">
           <div class="error-text" id="priceError">Wajib diisi</div>
         </div>
 
