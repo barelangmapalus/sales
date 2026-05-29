@@ -414,13 +414,37 @@
     // AUTHENTICATION
     // =====================================================
     async function checkAuth() {
-      const userStr = localStorage.getItem('bmpro_user');
-      if (!userStr) { 
-        window.location.href = 'login.html'; 
-        return false; 
+      try {
+        const userStr = localStorage.getItem('bmpro_user');
+
+        if (!userStr) {
+          window.location.href = 'login.html';
+          return false;
+        }
+
+        currentUser = JSON.parse(userStr);
+
+        if (
+          !currentUser ||
+          !currentUser.username ||
+          !currentUser.role ||
+          !['admin', 'sales'].includes(currentUser.role)
+        ) {
+          localStorage.removeItem('bmpro_user');
+          window.location.href = 'login.html';
+          return false;
+        }
+
+        return true;
+
+      } catch (error) {
+        console.error('Auth error:', error);
+
+        localStorage.removeItem('bmpro_user');
+        window.location.href = 'login.html';
+
+        return false;
       }
-      currentUser = JSON.parse(userStr);
-      return true;
     }
 
     function logout() { 
@@ -777,7 +801,7 @@
         formData.append('rowIndex', index + 2); // +2 karena OpenSheet index mulai 0, sheet row mulai 2
 
         formData.append('role', currentUser.role);
-        formData.append('kontak', currentUser.kontak);
+        formData.append('kontak_user', currentUser.kontak);
         
         // 🔥 PAKAI APPS SCRIPT UNTUK DELETE
         const response = await fetch(APPS_SCRIPT_URL, { 
@@ -814,8 +838,10 @@
     // =====================================================
     // INITIALIZE
     // =====================================================
-    checkAuth().then(() => {
-      loadData();
+    checkAuth().then(auth => {
+      if (auth) {
+        loadData();
+      }
     });
   </script>
 </body>
