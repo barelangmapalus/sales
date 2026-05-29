@@ -844,13 +844,36 @@
     }
 
     // =====================================================
-    // INITIALIZE
-    // =====================================================
-    checkAuth().then(auth => {
-      if (auth) {
-        loadData();
-      }
-    });
+// INITIALIZE
+// =====================================================
+window.addEventListener('DOMContentLoaded', async () => {
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+
+  btn.addEventListener('click', () => {
+
+    if (isLoading) return;
+
+    document.querySelectorAll('.tab-btn')
+      .forEach(b => b.classList.remove('active'));
+
+    btn.classList.add('active');
+
+    currentCategory = btn.dataset.category;
+
+    loadData();
+
+  });
+
+});
+
+  const isAuth = await checkAuth();
+
+  if (!isAuth) return;
+
+  loadData();
+
+  });
   </script>
 </body>
 </html>
