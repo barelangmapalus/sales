@@ -157,21 +157,24 @@
       
             // LOGIN BERHASIL
             if (
-              result.success &&
-              result.data &&
-              result.data.role
-            ) {
-      
-              localStorage.setItem('bmpro_user', JSON.stringify({
-                username: result.data.username,
-                kontak: result.data.kontak,
-                role: result.data.role,
-                token: result.data.token,
-                loginTime: new Date().toISOString()
-              }));
-      
-              window.location.href = 'admin_form.html';
-      
+                result.success &&
+                result.data &&
+                result.data.role
+              ) {
+
+                // Hapus session lama
+                localStorage.removeItem('bmpro_user');
+
+                localStorage.setItem('bmpro_user', JSON.stringify({
+                  username: result.data.username,
+                  kontak: result.data.kontak,
+                  role: result.data.role,
+                  token: result.data.token,
+                  loginTime: new Date().toISOString()
+                }));
+
+                window.location.href = 'admin_form.html';
+  
             } else {
       
               // HAPUS SESSION LAMA
