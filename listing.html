@@ -460,6 +460,28 @@
     window.location.href = 'login.html'; 
     }
 
+
+    function normalizePhone(phone) {
+
+    if (!phone) return '';
+
+    let cleaned =
+      phone.toString().replace(/\D/g, '');
+
+    // 08123 -> 628123
+    if (cleaned.startsWith('0')) {
+      cleaned = '62' + cleaned.substring(1);
+    }
+
+    // 8123 -> 628123
+    if (!cleaned.startsWith('62')) {
+      cleaned = '62' + cleaned;
+    }
+
+    return cleaned;
+
+    }
+
     // =====================================================
     // TAB NAVIGATION
     // =====================================================
@@ -499,14 +521,14 @@ let filteredData = data.filter(row =>
 // FILTER KHUSUS HOST
 if (currentUser.role === 'host') {
 
-  filteredData = filteredData.filter(row => {
+filteredData = filteredData.filter(row => {
 
-    return (
-      String(row.kontak).trim() ===
-      String(currentUser.kontak).trim()
-    );
+  return (
+    normalizePhone(row.kontak) ===
+    normalizePhone(currentUser.kontak)
+  );
 
-  });
+});
 
 }
 
