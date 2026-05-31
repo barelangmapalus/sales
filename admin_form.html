@@ -388,7 +388,7 @@ body {
         <div class="form-group">
           <label style="font-size: 0.55rem;"><i class="fas fa-phone"></i> Nomor Ponsel harus sama dengan nomor Host!<span class="required">*</span>
           </label>
-          <input type="tel" id="contact" placeholder="081234567890">
+          <input type="text" id="contact" inputmode="numeric" autocomplete="off" placeholder="081234567890">
           <div class="error-text" id="contactError">Minimal 10 digit</div>
         </div>
 
@@ -536,7 +536,7 @@ body {
 
   <script>
     // 🔥 UPDATE URL INI SETELAH DEPLOY GAS
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx52uYDwkGE6o0QNqbeoiWITF44iFdb_Dk8TKNgsozyUIPn75D31ivY065GJEIwXMk/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyic8qIfZKHjSFG0A0WihlQ8ZUnwO8j9r9b9rvnpy08Nuej3ji4Ne0nf0fWufQacLy1/exec';
 
     // State untuk menyimpan base64 gambar
     let uploadedImages = {
@@ -810,7 +810,7 @@ body {
           sales: document.getElementById('salesName').value.trim(),
           nama_property: document.getElementById('propertyName').value.trim(),
           harga: document.getElementById('price').value.trim(),
-          kontak: document.getElementById('contact').value.trim(),
+          kontak: safePhoneInput(document.getElementById('contact').value),
           kt: document.getElementById('kt').value,
           km: document.getElementById('km').value,
           lt: document.getElementById('lt').value,
@@ -850,6 +850,10 @@ body {
         submitBtn.disabled = false;
       }
     }
+
+    function safePhoneInput(v) {
+      return String(v || '').replace(/\s+/g,'').trim();
+      }
 
     function resetForm() {
       const fields = ['salesName', 'propertyName', 'price', 'contact', 'kt', 'km', 'lt', 'location', 'specification'];
