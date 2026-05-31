@@ -120,7 +120,17 @@
       align-items: center;
       justify-content: center;
       z-index: 1000;
+
+      opacity: 0;
       visibility: hidden;
+      pointer-events: none;
+      transition: 0.3s;
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
     }
     .modal-content {
       background: white;
@@ -268,6 +278,21 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+    .property-viewers{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+    color:#666;
+    margin-top:4px;
+    margin-bottom:6px;
+  }
+  
+  .property-viewers i{
+    color:#3498db;
+    font-size:11px;
+  }
   </style>
 </head>
 <body>
@@ -402,7 +427,7 @@
     // =====================================================
     const SHEET_ID = '1mosLZD23_3YDcuzi2diUY2TRNBSigJ2HNiiiFGPWtzo';
     const OPENSHEET_URL = `https://opensheet.elk.sh/${SHEET_ID}`;
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx52uYDwkGE6o0QNqbeoiWITF44iFdb_Dk8TKNgsozyUIPn75D31ivY065GJEIwXMk/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxixVx090ahp3wava6yfTT5u3BqCN6vFRzWbpbcDvcTKX79P0FlOZwFRhMnPzBzHqT3/exec';
     
     let currentCategory = 'primary';
     let currentUser = null;
@@ -483,19 +508,6 @@
     }
 
     // =====================================================
-    // TAB NAVIGATION
-    // =====================================================
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (isLoading) return;
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentCategory = btn.dataset.category;
-        loadData();
-      });
-    });
-
-    // =====================================================
     // LOAD DATA PAKAI OPENSHEET (GAMBAR LANGSUNG MUNCUL)
     // =====================================================
     async function loadData() {
@@ -507,7 +519,9 @@
       
       try {
         // 🔥 PAKAI OPENSHEET UNTUK AMBIL DATA
-        const response = await fetch(`${OPENSHEET_URL}/${currentCategory}`);
+        const response = await fetch(
+          `${OPENSHEET_URL}/${currentCategory}?t=${Date.now()}`
+        );
         const data = await response.json();
         
         if (data && data.length > 0) {
@@ -532,9 +546,14 @@ filteredData = filteredData.filter(row => {
 
 }
 
-currentData = filteredData;
+  filteredData = filteredData.map((row, idx) => ({
+    ...row,
+    __rowIndex: idx + 2
+  }));
 
-displayData(filteredData);
+  currentData = filteredData;
+
+  displayData(filteredData);
 
 } else {
           container.innerHTML = `<div class="empty-state"><i class="fas fa-building"></i><p>Belum ada properti di ${currentCategory}</p></div>`;
@@ -598,6 +617,7 @@ displayData(filteredData);
             <div class="property-info">
 
             <div class="property-title">${escapeHtml(item['nama property'] || '-')}</div>
+            <div class="property-viewers"><i class="fas fa-eye"></i>${p['viewer'] || 0} Dilihat</div>
             <div class="property-location"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(item.lokasi || '-')}</div>
             <div class="property-price">${formatPrice(item.harga)}</div>
             <div class="property-specs">
@@ -732,7 +752,7 @@ displayData(filteredData);
       displayOldPreview('editPreviewImg4', item.gambar4);
       displayOldPreview('editPreviewImg5', item.gambar5);
       
-      document.getElementById('editModal').style.visibility = 'visible';
+      document.getElementById('editModal').classList.add('show');
     }
 
         function displayOldPreview(containerId, url) {
@@ -744,9 +764,25 @@ displayData(filteredData);
       }
     }
 
-    function closeModal() { 
-      document.getElementById('editModal').style.visibility = 'hidden'; 
+    function closeModal() {
+
+    document
+      .getElementById('editModal')
+      .classList.remove('show');
+
     }
+
+    // Klik area hitam untuk tutup modal
+    document.getElementById('editModal')
+    .addEventListener('click', function(e) {
+
+      if (e.target === this) {
+
+        closeModal();
+
+      }
+
+    });
 
     // =====================================================
     // SAVE EDIT PAKAI APPS SCRIPT (untuk update data & gambar)
@@ -767,7 +803,7 @@ displayData(filteredData);
         role: currentUser.role,
         kontak_user: currentUser.kontak,
         category: category,
-        rowIndex: index + 2, // +2 karena OpenSheet index mulai 0, sheet row mulai 2
+        rowIndex: currentData[index].__rowIndex,
         nama_property: document.getElementById('editPropertyName').value.trim(),
         harga: document.getElementById('editPrice').value.trim(),
         lokasi: document.getElementById('editLocation').value.trim(),
@@ -811,14 +847,37 @@ displayData(filteredData);
           method: 'POST', 
           body: formData 
         });
-        const result = await response.json();
-        
-        if (result.success) {
-          showToast('✅ Data berhasil diupdate');
-          await loadData(); // Refresh data dari OpenSheet
-        } else {
-          showToast('❌ Gagal: ' + (result.message || 'Unknown error'));
-        }
+
+        const text = await response.text();
+
+      let result;
+
+      try {
+
+        result = JSON.parse(text);
+
+      } catch {
+
+        console.error('RESPON BUKAN JSON:', text);
+
+        throw new Error('Response bukan JSON');
+
+      }
+
+      if (result.success) {
+
+        showToast('✅ Data berhasil diupdate');
+
+        await loadData();
+
+      } else {
+
+        showToast(
+          '❌ Gagal: ' +
+          (result.message || 'Unknown error')
+        );
+
+      }
       } catch (error) {
         console.error('Save error:', error);
         showToast('❌ Error: ' + error.message);
@@ -832,58 +891,139 @@ displayData(filteredData);
     // DELETE ITEM PAKAI APPS SCRIPT (hapus data & gambar)
     // =====================================================
     async function deleteItem(index) {
+
       const item = currentData[index];
-      if (!confirm(`Hapus properti "${item['nama property']}"?\n\nSEMUA GAMBAR akan dihapus dari Drive!`)) return;
-      
-      setCardLoading(index, true);
-      
-      const card = document.querySelector(`.property-card[data-idx="${index}"]`);
-      const deleteBtn = card?.querySelector('.btn-delete');
-      if (deleteBtn) {
-        setButtonLoading(deleteBtn, true, 'Menghapus...');
+
+      if (!item) {
+        showToast('Data tidak ditemukan');
+        return;
       }
-      
+
+      if (!confirm(
+        `Hapus properti "${item['nama property']}"?\n\nSEMUA GAMBAR akan dihapus dari Drive!`
+      )) return;
+
+      setCardLoading(index, true);
+
+      const card =
+        document.querySelector(`.property-card[data-idx="${index}"]`);
+
+      const deleteBtn = card?.querySelector('.btn-delete');
+
+      if (deleteBtn) {
+        setButtonLoading(
+          deleteBtn,
+          true,
+          'Menghapus...'
+        );
+      }
+
       showToast('🔄 Menghapus data dan gambar...');
-      
+
       try {
+
         const formData = new URLSearchParams();
+
         formData.append('action', 'deleteProperty');
         formData.append('category', currentCategory);
-        formData.append('rowIndex', index + 2); // +2 karena OpenSheet index mulai 0, sheet row mulai 2
+
+        // 🔥 PAKAI ROW INDEX
+        formData.append('rowIndex', index + 2);
 
         formData.append('role', currentUser.role);
         formData.append('kontak_user', currentUser.kontak);
-        
-        // 🔥 PAKAI APPS SCRIPT UNTUK DELETE
-        const response = await fetch(APPS_SCRIPT_URL, { 
-          method: 'POST', 
-          body: formData 
+
+        const response = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: formData
         });
-        const result = await response.json();
-        
-        if (result.success) {
-          showToast('✅ Data dan gambar berhasil dihapus');
-          await loadData(); // Refresh data dari OpenSheet
-        } else {
-          showToast('❌ Gagal hapus: ' + (result.message || 'Unknown error'));
-          setCardLoading(index, false);
-          if (deleteBtn) setButtonLoading(deleteBtn, false, '<i class="fas fa-trash"></i> Delete');
+
+        const text = await response.text();
+
+        let result;
+
+        try {
+
+          result = JSON.parse(text);
+
+        } catch {
+
+          console.error(
+            'RESPON DELETE BUKAN JSON:',
+            text
+          );
+
+          throw new Error('Response bukan JSON');
+
         }
+
+        if (result.success) {
+
+          showToast('✅ Data berhasil dihapus');
+
+          await loadData();
+
+        } else {
+
+          showToast(
+            '❌ Gagal hapus: ' +
+            (result.message || 'Unknown error')
+          );
+
+          setCardLoading(index, false);
+
+          if (deleteBtn) {
+
+            setButtonLoading(
+              deleteBtn,
+              false,
+              '<i class="fas fa-trash"></i> Delete'
+            );
+
+          }
+
+        }
+
       } catch (error) {
-        console.error('Delete error:', error);
+
+        console.error(error);
+
         showToast('❌ Error: ' + error.message);
+
         setCardLoading(index, false);
-        if (deleteBtn) setButtonLoading(deleteBtn, false, '<i class="fas fa-trash"></i> Delete');
+
+        if (deleteBtn) {
+
+          setButtonLoading(
+            deleteBtn,
+            false,
+            '<i class="fas fa-trash"></i> Delete'
+          );
+
+        }
+
       }
+
     }
 
+    let toastTimer;
+
     function showToast(message) {
+
       const toast = document.getElementById('toast');
+
       toast.innerText = message;
+
       toast.style.display = 'block';
-      setTimeout(() => {
+
+      clearTimeout(toastTimer);
+
+      toastTimer = setTimeout(() => {
+
         toast.style.display = 'none';
+
       }, 2500);
+
     }
 
     // =====================================================
