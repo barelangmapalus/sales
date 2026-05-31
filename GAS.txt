@@ -1,0 +1,1238 @@
+UPDATE 31 MEI 2026 BERHASIL TIDAKADA BUG:
+
+// =====================================================
+// GOOGLE APPS SCRIPT - BMpro (LENGKAP dengan DELETE FILE)
+// =====================================================
+
+const SPREADSHEET_ID = '1mosLZD23_3YDcuzi2diUY2TRNBSigJ2HNiiiFGPWtzo';
+const DRIVE_FOLDER_ID = '13fH1C-nzXZxJDw3bU0uLhL40JhZ-5tUx';
+
+// =====================================================
+// RESPONSE HELPER
+// =====================================================
+function respond(success, message, data) {
+  const response = { success: success, message: message };
+  if (data) response.data = data;
+  return ContentService
+    .createTextOutput(JSON.stringify(response))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// =====================================================
+// DELETE FILE FROM DRIVE BY URL
+// =====================================================
+function deleteFileFromDrive(fileUrl) {
+  if (!fileUrl || fileUrl === '') return true;
+  
+  try {
+    let fileId = null;
+    
+    // Pattern 1: uc?export=view&id=xxx
+    let match = fileUrl.match(/[?&]id=([^&]+)/);
+    if (match && match[1]) {
+      fileId = match[1];
+    }
+    
+    // Pattern 2: file/d/xxx/view
+    if (!fileId) {
+      match = fileUrl.match(/\/d\/([^\/]+)/);
+      if (match && match[1]) {
+        fileId = match[1];
+      }
+    }
+    
+    if (fileId) {
+      const file = DriveApp.getFileById(fileId);
+      file.setTrashed(true);
+      console.log('File deleted:', fileId);
+      return true;
+    }
+    return false;
+  } catch(e) {
+    console.log('Delete failed:', e.toString());
+    return false;
+  }
+}
+
+// =====================================================
+// UPLOAD GAMBAR KE DRIVE
+// =====================================================
+function uploadImageToDrive(imageBase64, fileName) {
+  try {
+    let cleanBase64 = imageBase64;
+    if (cleanBase64 && cleanBase64.includes(',')) {
+      cleanBase64 = cleanBase64.split(',')[1];
+    }
+
+    const bytes = Utilities.base64Decode(cleanBase64);
+    const blob = Utilities.newBlob(bytes, 'image/jpeg', fileName + '.jpg');
+    const file = DriveApp.createFile(blob);
+    const fileId = file.getId();
+    
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    
+    const folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+    file.moveTo(folder);
+    
+    const url = "https://drive.google.com/uc?export=view&id=" + fileId;
+    return { success: true, url: url };
+  } catch (error) {
+    return { success: false, error: error.toString() };
+  }
+}
+
+// =====================================================
+// GET PROPERTIES FROM SHEET
+// =====================================================
+function getPropertiesFromSheet(category, user) {
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sheet = ss.getSheetByName(category);
+
+    if (!sheet) {
+      return { success: true, data: [] };
+    }
+
+    const data = sheet.getDataRange().getDisplayValues();
+
+    if (data.length <= 1) {
+      return { success: true, data: [] };
+    }
+
+    const headers = data[0];
+
+    let viewerCol = headers.indexOf('viewer');
+
+    if (viewerCol === -1) {
+
+      viewerCol = headers.length;
+
+      sheet
+        .getRange(1, viewerCol + 1)
+        .setValue('viewer');
+
+      sheet
+        .getRange(1, viewerCol + 1)
+        .setFontWeight('bold');
+
+    }
+
+    const properties = [];
+
+    const role = user?.role || '';
+    const kontak = user?.kontak || '';
+
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+
+      if (!row[2] || row[2].toString().trim() === '') {
+        continue;
+      }
+
+      const property = {};
+      headers.forEach((header, idx) => {
+        property[header] = row[idx] || '';
+      });
+
+      // 🔥 FILTER ROLE DI SINI
+      if (role === 'admin') {
+        properties.push(property);
+      } 
+      else if (role === 'host') {
+        // asumsi: kolom kontak = owner
+        if (property['kontak'] === kontak) {
+          properties.push(property);
+        }
+      }
+    }
+
+    return { success: true, data: properties };
+
+  } catch (error) {
+    return { success: false, error: error.toString() };
+  }
+}
+
+// =====================================================
+// UPDATE PROPERTY WITH IMAGES (DELETE OLD IMAGES)
+// =====================================================
+function updatePropertyWithImages(params) {
+  try {
+    const {
+      category, property_id,
+      nama_property, harga, lokasi, kontak, kt, km, lt, spesifikasi,
+      old_gambar_utama, old_gambar2, old_gambar3, old_gambar4, old_gambar5,
+      new_gambar_utama, new_gambar2, new_gambar3, new_gambar4, new_gambar5
+    } = params;
+    
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    let sheet = ss.getSheetByName(category);
+    
+    if (!sheet) {
+      return { success: false, message: 'Sheet tidak ditemukan' };
+    }
+    
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+
+    const role = params.role || '';
+    const userKontak = params.kontak_user || '';
+
+    const kontakCol = headers.indexOf('kontak') + 1;
+
+
+    const propertyIdCol =
+      headers.indexOf('property_id');
+
+    if (propertyIdCol === -1) {
+      return {
+        success: false,
+        message: 'Kolom property_id tidak ditemukan'
+      };
+    }
+
+    let rowIndex = -1;
+
+    for (let i = 1; i < sheet.getLastRow(); i++) {
+
+      const currentPropertyId =
+        String(
+          sheet
+            .getRange(i + 1, propertyIdCol + 1)
+            .getValue()
+        ).trim();
+
+      if (
+        currentPropertyId ===
+        String(property_id).trim()
+      ) {
+
+        rowIndex = i + 1;
+        break;
+
+      }
+
+    }
+
+    if (rowIndex === -1) {
+      return {
+        success: false,
+        message: 'Property tidak ditemukan'
+      };
+    }
+    
+
+    const ownerKontak = sheet
+      .getRange(rowIndex, kontakCol)
+      .getDisplayValue()
+      .replace(/^'+/, '')
+      .trim();
+
+    const cleanUserKontak = String(userKontak)
+      .replace(/^'+/, '')
+      .trim();
+
+    if (
+      role !== 'admin' &&
+      ownerKontak !== cleanUserKontak
+    ) {
+      return {
+        success: false,
+        message: 'Anda tidak memiliki akses'
+      };
+    }
+
+    const colMap = {};
+    headers.forEach((h, idx) => { colMap[h] = idx + 1; });
+    
+    function processImage(newBase64, oldUrl, label) {
+      let resultUrl = oldUrl;
+      if (newBase64 && newBase64 !== '') {
+        if (oldUrl && oldUrl !== '') {
+          deleteFileFromDrive(oldUrl);
+        }
+        const uploadResult = uploadImageToDrive(newBase64, `${category}_update_${Date.now()}_${label}`);
+        if (uploadResult.success) {
+          resultUrl = uploadResult.url;
+        }
+      }
+      return resultUrl;
+    }
+    
+    const finalGambarUtama = processImage(new_gambar_utama, old_gambar_utama, 'main');
+    const finalGambar2 = processImage(new_gambar2, old_gambar2, 'img2');
+    const finalGambar3 = processImage(new_gambar3, old_gambar3, 'img3');
+    const finalGambar4 = processImage(new_gambar4, old_gambar4, 'img4');
+    const finalGambar5 = processImage(new_gambar5, old_gambar5, 'img5');
+    
+    if (colMap['nama property']) sheet.getRange(rowIndex, colMap['nama property']).setValue(nama_property || '');
+    if (colMap['harga']) sheet.getRange(rowIndex, colMap['harga']).setValue(harga || '');
+    if (colMap['lokasi']) sheet.getRange(rowIndex, colMap['lokasi']).setValue(lokasi || '');
+    // AFTER
+    if (colMap['kontak']) {
+
+      sheet
+        .getRange(rowIndex, colMap['kontak'])
+        .setNumberFormat('@');
+
+      sheet
+        .getRange(rowIndex, colMap['kontak'])
+        .setValue(forceTextPhone(kontak))
+
+    }
+    if (colMap['kt']) sheet.getRange(rowIndex, colMap['kt']).setValue(kt || '');
+    if (colMap['km']) sheet.getRange(rowIndex, colMap['km']).setValue(km || '');
+    if (colMap['lt']) sheet.getRange(rowIndex, colMap['lt']).setValue(lt || '');
+    if (colMap['spesifikasi']) sheet.getRange(rowIndex, colMap['spesifikasi']).setValue(spesifikasi || '');
+    if (colMap['gambar utama']) sheet.getRange(rowIndex, colMap['gambar utama']).setValue(finalGambarUtama);
+    if (colMap['gambar2']) sheet.getRange(rowIndex, colMap['gambar2']).setValue(finalGambar2);
+    if (colMap['gambar3']) sheet.getRange(rowIndex, colMap['gambar3']).setValue(finalGambar3);
+    if (colMap['gambar4']) sheet.getRange(rowIndex, colMap['gambar4']).setValue(finalGambar4);
+    if (colMap['gambar5']) sheet.getRange(rowIndex, colMap['gambar5']).setValue(finalGambar5);
+    
+    return { success: true, message: 'Data dan gambar berhasil diupdate' };
+  } catch (error) {
+    return { success: false, message: error.toString() };
+  }
+}
+
+// =====================================================
+// DELETE PROPERTY WITH IMAGES
+// =====================================================
+function deletePropertyWithImages(params) {
+  try {
+
+    // 🔥 GANTI timestamp -> property_id
+    const { category, property_id } = params;
+
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sheet = ss.getSheetByName(category);
+
+    if (!sheet) {
+      return { success: false, message: 'Sheet tidak ditemukan' };
+    }
+
+    const data = sheet.getDataRange().getValues();
+
+    const headers = data[0];
+
+    const idCol =
+      headers.indexOf('property_id');
+
+    if (idCol === -1) {
+      return {
+        success: false,
+        message: 'Kolom property_id tidak ditemukan'
+      };
+    }
+
+    let rowIndex = -1;
+
+    for (let i = 1; i < data.length; i++) {
+
+      const rowId =
+        String(data[i][idCol]).trim();
+
+      if (
+        rowId ===
+        String(property_id).trim()
+      ) {
+
+        rowIndex = i + 1;
+        break;
+
+      }
+
+    }
+
+  
+    // 🔥 JIKA DATA TIDAK ADA
+    if (rowIndex === -1) {
+      return {
+        success: false,
+        message: 'Data tidak ditemukan'
+      };
+    }
+
+    const rowData = data[rowIndex - 1];
+
+    const kontakCol =
+      headers.indexOf('kontak');
+
+    const role =
+      params.role || '';
+
+    const kontak =
+      params.kontak_user || '';
+
+    // =====================================================
+    // CEK HAK AKSES (ADMIN / HOST ONLY OWNER)
+    // =====================================================
+    const ownerKontak =
+      String(rowData[kontakCol] || '').trim();
+
+    if (
+      role !== 'admin' &&
+      ownerKontak !== String(kontak).trim()
+    ) {
+      return {
+        success: false,
+        message: 'Anda tidak memiliki akses'
+      };
+    }
+
+    // =====================================================
+    // HAPUS FILE GAMBAR DI DRIVE
+    // =====================================================
+    const gambarColumns = [
+      'gambar utama',
+      'gambar2',
+      'gambar3',
+      'gambar4',
+      'gambar5'
+    ];
+
+    gambarColumns.forEach(col => {
+
+      const colIndex = headers.indexOf(col);
+
+      if (
+        colIndex !== -1 &&
+        rowData[colIndex]
+      ) {
+
+        deleteFileFromDrive(
+          rowData[colIndex]
+        );
+
+      }
+
+    });
+
+    // =====================================================
+    // BERSIHKAN ROW
+    // =====================================================
+    sheet
+      .getRange(
+        rowIndex,
+        1,
+        1,
+        sheet.getLastColumn()
+      )
+      .clearContent();
+
+    return {
+      success: true,
+      message: 'Data dan gambar berhasil dihapus'
+    };
+
+  } catch (error) {
+
+    return {
+      success: false,
+      message: error.toString()
+    };
+
+  }
+}
+
+// =====================================================
+// SAVE PROPERTY WITH IMAGES
+// =====================================================
+function savePropertyWithImages(params) {
+  try {
+    const {
+      category, timestamp, sales, nama_property, harga, kontak,
+      kt, km, lt, lokasi, spesifikasi,
+      gambar_utama, gambar2, gambar3, gambar4, gambar5
+    } = params;
+
+    console.log('🚀 savePropertyWithImages dipanggil');
+    console.log('📂 Category:', category);
+    console.log('📝 Nama:', nama_property);
+
+    if (!category || !sales || !nama_property || !harga || !kontak) {
+      console.log('❌ Data tidak lengkap');
+      return respond(false, 'Data tidak lengkap');
+    }
+
+    const safeName = nama_property
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9]/g, '_');
+
+    const upload = (img, label) =>
+      img
+        ? uploadImageToDrive(
+            img,
+            `${category}_${safeName}_${label}_${timestamp}`
+          )
+        : { success: true, url: '' };
+
+    const main = upload(gambar_utama, 'main');
+    if (!main.success) return respond(false, main.error);
+
+    const img2Res = upload(gambar2, '2');
+    const img3Res = upload(gambar3, '3');
+    const img4Res = upload(gambar4, '4');
+    const img5Res = upload(gambar5, '5');
+
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    let sheet = ss.getSheetByName(category);
+    
+    if (!sheet) {
+        sheet = ss.insertSheet(category);
+
+        const headers = [
+          'timestamp',
+          'sales',
+          'nama property',
+          'harga',
+          'kontak',
+          'kt',
+          'km',
+          'lt',
+          'lokasi',
+          'spesifikasi',
+          'gambar utama',
+          'gambar2',
+          'gambar3',
+          'gambar4',
+          'gambar5',
+          'viewer',
+          'property_id'
+        ];
+
+        sheet
+          .getRange(1, 1, 1, headers.length)
+          .setValues([headers]);
+
+        sheet
+          .getRange(1, 1, 1, headers.length)
+          .setFontWeight('bold');
+      }
+    
+    const propertyId =
+      Utilities.getUuid();
+
+    const newRowData = [
+      timestamp,
+      sales,
+      nama_property,
+      harga,
+      forceTextPhone(kontak),
+      kt,
+      km,
+      lt,
+      lokasi,
+      spesifikasi,
+      main.url,
+      img2Res.url,
+      img3Res.url,
+      img4Res.url,
+      img5Res.url,
+      0,
+      propertyId
+    ];
+
+    let targetRow = -1;
+    const lastRow = sheet.getLastRow();
+
+    if (lastRow >= 2) {
+      for (let row = 2; row <= lastRow; row++) {
+        const headers =
+  sheet.getRange(
+    1,
+    1,
+    1,
+    sheet.getLastColumn()
+  ).getValues()[0];
+
+const namaPropertyCol =
+  headers.indexOf('nama property') + 1;
+
+const rowData = sheet.getRange(row, 1, 1, sheet.getLastColumn()).getValues()[0];
+
+        const isEmptyRow = rowData.every(cell =>
+          !cell || cell.toString().trim() === ''
+        );
+
+        if (isEmptyRow) {
+          targetRow = row;
+          break;
+        }
+      }
+    }
+
+    if (targetRow !== -1) {
+
+        // 🔥 TULIS DATA DULU (JANGAN pakai format dulu)
+        sheet
+          .getRange(targetRow, 1, 1, newRowData.length)
+          .setValues([newRowData]);
+
+        // 🔥 KUNCI KOLOM KONTAK JADI TEXT SETELAH DATA MASUK
+        sheet
+          .getRange(targetRow, 5)
+          .setNumberFormat('@');
+
+      } else {
+
+        // 🔥 BARIS BARU (JANGAN appendRow supaya tidak auto-format aneh)
+        const newLastRow = sheet.getLastRow() + 1;
+
+        sheet
+          .getRange(newLastRow, 1, 1, newRowData.length)
+          .setValues([newRowData]);
+
+        // 🔥 KUNCI KOLOM KONTAK
+        sheet
+          .getRange(newLastRow, 5)
+          .setNumberFormat('@');
+
+        console.log('✅ Data ditambahkan di baris baru');
+      }
+
+    // =====================================================
+    // 🔥 KIRIM NOTIFIKASI WHATSAPP (PASTIKAN ADA!) 🔥
+    // =====================================================
+    console.log('📢 Akan mengirim notifikasi WA...');
+    
+    sendWhatsAppNotificationToBuyers({
+      nama_property: nama_property,
+      lokasi: lokasi,
+      harga: harga,
+      kt: kt,
+      km: km,
+      lt: lt,
+      sales: sales,
+      kontak: kontak,
+      gambar_utama: main.url
+    }, category, timestamp);
+    
+    console.log('✅ Notifikasi WA telah dipanggil');
+
+    return respond(true, 'Berhasil disimpan');
+    
+  } catch (error) {
+    console.log('❌ Error:', error.toString());
+    return respond(false, error.toString());
+  }
+}
+
+// =====================================================
+// HANDLE LOGIN
+// =====================================================
+function handleLogin(username, kontak) {
+
+  try {
+
+    const ss =
+    SpreadsheetApp.openById(SPREADSHEET_ID);
+
+    const sheet =
+    ss.getSheetByName('login');
+
+    if (!sheet) {
+      return respond(false, 'Sheet login tidak ditemukan');
+    }
+
+    const data =
+    sheet.getDataRange().getDisplayValues();
+
+    let userFound = null;
+
+    for (let i = 1; i < data.length; i++) {
+
+      const dbUsername =
+      String(data[i][0]).trim();
+
+      const dbKontak =
+      String(data[i][1]).trim();
+
+      const dbRole =
+      String(data[i][2]).trim();
+
+      const dbStatus =
+      String(data[i][4]).trim();
+
+      // skip user nonaktif
+      if (dbStatus.toLowerCase() !== 'active') {
+        continue;
+      }
+
+      // username + kontak harus cocok
+      if (
+        dbUsername === username &&
+        dbKontak === kontak
+      ) {
+
+        userFound = {
+          username: dbUsername,
+          kontak: dbKontak,
+          role: dbRole
+        };
+
+        break;
+      }
+
+    }
+
+    if (!userFound) {
+
+      return respond(
+        false,
+        'Username atau nomor HP salah'
+      );
+
+    }
+
+    const token =
+    Utilities.base64Encode(
+      username + ':' + new Date().getTime()
+    );
+
+    return respond(
+      true,
+      'Login berhasil',
+      {
+        username: userFound.username,
+        kontak: userFound.kontak,
+        role: userFound.role,
+        token: token
+      }
+    );
+
+  } catch (error) {
+
+    return respond(
+      false,
+      error.toString()
+    );
+
+  }
+
+}
+
+// =====================================================
+// FONNTE NOTIFICATION - BMPRO.GS
+// Versi Terupdate - Mengirim WA ke Semua Pembeli di Tab "users"
+// =====================================================
+
+// ========== KONFIGURASI FONNTE ==========
+// Ganti dengan token asli dari dashboard Fonnte Anda
+const FONNTE_TOKEN = 'Fq5q82Wkyoa43W8fN2ga';
+
+// ========== FORMAT NOMOR WHATSAPP ==========
+function formatPhoneNumber(rawNumber) {
+
+  if (!rawNumber) return '';
+
+  let cleaned =
+    rawNumber.toString().replace(/\D/g, '');
+
+  // 6208123 -> 628123
+  if (cleaned.startsWith('620')) {
+    cleaned = '62' + cleaned.substring(3);
+  }
+
+  // 08123 -> 628123
+  if (cleaned.startsWith('0')) {
+    cleaned = '62' + cleaned.substring(1);
+  }
+
+  // 8123 -> 628123
+  if (!cleaned.startsWith('62')) {
+    cleaned = '62' + cleaned;
+  }
+
+  return cleaned;
+}
+
+// =====================================================
+// UPDATE STATUS NOTIF USER
+// =====================================================
+function updateNotifStatus(kontak, notif) {
+
+  try {
+
+    const ss =
+      SpreadsheetApp.openById(SPREADSHEET_ID);
+
+    const sheet =
+      ss.getSheetByName('users');
+
+    if (!sheet) {
+      return respond(false, 'Sheet users tidak ditemukan');
+    }
+
+    const data =
+      sheet.getDataRange().getValues();
+
+    for (let i = 1; i < data.length; i++) {
+
+      const dbKontak =
+        String(data[i][2]).trim();
+
+      if (dbKontak === String(kontak).trim()) {
+
+        // kolom notif = index 4
+        sheet.getRange(i + 1, 4)
+          .setValue(notif);
+
+        return respond(
+          true,
+          'Status notif berhasil diupdate'
+        );
+
+      }
+
+    }
+
+    return respond(false, 'User tidak ditemukan');
+
+  } catch (error) {
+
+    return respond(
+      false,
+      error.toString()
+    );
+
+  }
+
+}
+
+// ========== FORMAT RUPIAH ==========
+function formatRupiah(price) {
+  if (!price) return '0';
+  const num = parseInt(price.toString().replace(/[^0-9]/g, ''));
+  if (isNaN(num)) return '0';
+  return new Intl.NumberFormat('id-ID').format(num);
+}
+
+// ========== KIRIM NOTIFIKASI KE SEMUA PEMBELI ==========
+function sendWhatsAppNotificationToBuyers(propertyData, category, timestamp) {
+  console.log('==========================================');
+  console.log('📢 sendWhatsAppNotificationToBuyers DIPANGGIL');
+  console.log('==========================================');
+  console.log('📋 propertyData:', JSON.stringify(propertyData));
+  console.log('📂 category:', category);
+  console.log('🕒 timestamp:', timestamp);
+  
+  // Cek apakah token terisi
+  if (!FONNTE_TOKEN || FONNTE_TOKEN === 'YOUR_FONNTE_TOKEN_HERE') {
+    console.log('⚠️ Fonnte token tidak dikonfigurasi. Notifikasi tidak terkirim.');
+    console.log('🔑 Nilai token saat ini:', FONNTE_TOKEN);
+    return;
+  }
+  console.log('✅ Token FONNTE valid, panjang:', FONNTE_TOKEN.length);
+
+  // Ambil semua nomor dari tab USERS (pembeli)
+  console.log('📁 Mengakses sheet users...');
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const usersSheet = ss.getSheetByName('users');
+  
+  if (!usersSheet) {
+    console.log('❌ Sheet users tidak ditemukan!');
+    return;
+  }
+  console.log('✅ Sheet users ditemukan');
+  
+  const usersData = usersSheet.getDataRange().getDisplayValues();
+  console.log('📊 Jumlah baris di sheet users:', usersData.length);
+  
+  if (usersData.length <= 1) {
+    console.log('⚠️ Tidak ada pembeli terdaftar di sheet users (hanya header)');
+    return;
+  }
+  
+  // Kumpulkan nomor pembeli (kolom 3 = kontak, index 2)
+  const buyerNumbers = new Set();
+  console.log('📞 Membaca nomor kontak dari baris:');
+  for (let i = 1; i < usersData.length; i++) {
+
+    const nama   = usersData[i][1]; // nama
+    const kontak = usersData[i][2]; // kontak
+    const notif  = usersData[i][3]; // notif ON/OFF
+
+    console.log(
+      `Baris ${i}: Nama=${nama}, Kontak=${kontak}, Notif=${notif}`
+    );
+
+    // 🔥 HANYA KIRIM JIKA NOTIF = ON
+    if (
+      notif &&
+      notif.toString().toLowerCase() === 'on'
+    ) {
+
+      if (kontak && kontak.toString().trim() !== '') {
+
+        const formatted =
+          formatPhoneNumber(
+            kontak.toString().trim()
+          );
+
+        buyerNumbers.add(formatted);
+
+        console.log(
+          `✅ Notif aktif → ${formatted}`
+        );
+
+      }
+
+    } else {
+
+      console.log(
+        `⏸️ Notif OFF untuk ${nama}`
+      );
+
+    }
+
+  }
+  
+  if (buyerNumbers.size === 0) {
+  console.log('⚠️ Tidak ada nomor pembeli valid di sheet users');
+  return;
+      }
+
+    const numberList = [...buyerNumbers];
+
+    console.log(
+      `📞 Total nomor pembeli valid: ${numberList.length}`
+    );
+
+    console.log(
+      `📞 Daftar nomor: ${numberList.join(', ')}`
+    );
+  
+  // Icon berdasarkan kategori
+  const categoryIcon = {
+    'primary': '🏠',
+    'secondary': '🏡',
+    'rent': '🔑'
+  };
+  
+  // Format pesan WhatsApp
+  const message = `${categoryIcon[category] || '🏠'} *Listing Properti Baru!*
+    
+📋 *Nama:* ${propertyData.nama_property || '-'}
+📍 *Lokasi:* ${propertyData.lokasi || '-'}
+💰 *Harga:* Rp ${formatRupiah(propertyData.harga)}
+🛏️ *KT/KM:* ${propertyData.kt || '0'} / ${propertyData.km || '0'}
+📏 *LT:* ${propertyData.lt || '0'} m²
+👤 *Sales:* ${propertyData.sales || '-'}
+
+🔗 *Lihat Detail Properti:*
+https://www.bmproperti.online/notif_detail.html?id=${encodeURIComponent(timestamp)}
+
+📞 *CHAT SALES SEKARANG*
+https://wa.me/${formatPhoneNumber(propertyData.kontak)}
+
+_Notifikasi otomatis dari BMpro_
+Klik link di atas untuk melihat detail properti.`;
+  
+  console.log('📨 Pesan yang akan dikirim:');
+  console.log(message);
+  
+  // Kirim ke semua pembeli
+  let successCount = 0;
+  let failCount = 0;
+
+    for (let idx = 0; idx < numberList.length; idx++) {
+
+      const targetNumber = numberList[idx];
+      console.log(`\n📤 [${idx+1}/${numberList.length}] Mengirim ke: ${targetNumber}`);
+    
+    try {
+      const payload = {
+        target: targetNumber,
+        message: message,
+        url: propertyData.gambar_utama || '',
+        countryCode: '62'
+      };
+      
+      const options = {
+        method: 'post',
+        headers: {
+          Authorization: FONNTE_TOKEN
+        },
+        payload: payload,
+        muteHttpExceptions: true,
+        followRedirects: true,
+        validateHttpsCertificates: true
+      };
+      
+      console.log('🔄 Menghubungi API Fonnte...');
+
+      const response =
+        UrlFetchApp.fetch(
+          'https://api.fonnte.com/send',
+          options
+        );
+
+      const responseCode =
+        response.getResponseCode();
+
+      console.log(
+        '📤 TARGET:',
+        targetNumber
+      );
+
+      console.log(
+        '📶 STATUS:',
+        responseCode
+      );
+
+      console.log(
+        '📨 RESPONSE:',
+        response.getContentText()
+      );
+
+      if (responseCode !== 200) {
+
+        console.log(
+          '❌ HTTP ERROR:',
+          response.getContentText()
+        );
+
+        failCount++;
+        continue;
+
+      }
+
+      let result = {};
+
+      try {
+
+        result =
+          JSON.parse(response.getContentText());
+
+      } catch(parseError) {
+
+        console.log(
+          '❌ JSON PARSE ERROR'
+        );
+
+        console.log(
+          response.getContentText()
+        );
+
+        failCount++;
+        continue;
+
+      }
+
+      console.log(
+        '📨 Response dari Fonnte:',
+        JSON.stringify(result)
+      );
+
+      if (result.status === true) {
+        successCount++;
+        console.log(`✅ WA terkirim ke: ${targetNumber}`);
+      } else {
+        failCount++;
+        console.log(`❌ Gagal kirim ke ${targetNumber}: ${result.reason || 'Unknown error'}`);
+      }
+      
+      // Jeda 0.5 detik antar pengiriman (hindari spam)
+      Utilities.sleep(500);
+      
+    } catch (error) {
+      failCount++;
+      console.error(`❌ Error kirim ke ${targetNumber}: ${error.toString()}`);
+    }
+  }
+  
+  console.log('\n==========================================');
+  console.log(`📊 RINGKASAN NOTIFIKASI:`);
+  console.log(`   ✅ Berhasil: ${successCount}`);
+  console.log(`   ❌ Gagal: ${failCount}`);
+  console.log(`   📞 Total pembeli: ${numberList.length}`);
+  console.log('==========================================');
+}
+
+// ========== FUNGSI UNTUK TEST (MANUAL) ==========
+function testSendNotification() {
+  // Gunakan untuk testing - ganti dengan data properti uji coba
+  const testProperty = {
+    nama_property: 'Rumah Mewah Test',
+    lokasi: 'Batam Center',
+    harga: '1500000000',
+    kt: '4',
+    km: '3',
+    lt: '120',
+    sales: 'Budi'
+  };
+  
+  const testTimestamp ='628123456789_1779851226308';
+  const testCategory = 'primary';
+  
+  sendWhatsAppNotificationToBuyers(testProperty, testCategory, testTimestamp);
+}
+
+// =====================================================
+// KODE INI MEMBUAT TANDA ' UNTUK 0 SUPAYA SHEET MENYIMPAN NO.KONTAK PAKAI 0
+// =====================================================
+function forceTextPhone(raw) {
+  if (!raw) return '';
+
+  let s = String(raw).trim().replace(/\D/g, '');
+
+  if (s.startsWith('62')) {
+    s = '0' + s.substring(2);
+  }
+
+  if (!s.startsWith('0')) {
+    s = '0' + s;
+  }
+
+  return "'" + s;
+}
+
+
+// =====================================================
+// TAMBAH VIEWER PROPERTY
+// =====================================================
+function incrementViewer(params) {
+
+  try {
+
+    const { category, timestamp } = params;
+
+    const ss =
+      SpreadsheetApp.openById(SPREADSHEET_ID);
+
+    const sheet =
+      ss.getSheetByName(category);
+
+    if (!sheet) {
+      return respond(false, 'Sheet tidak ditemukan');
+    }
+
+    const data =
+    sheet.getDataRange().getDisplayValues();
+
+    const headers = data[0];
+
+    const timestampCol =
+      headers.indexOf('timestamp');
+
+    const viewerCol =
+      headers.indexOf('viewer');
+
+    if (timestampCol === -1) {
+      return respond(false, 'Kolom timestamp tidak ditemukan');
+    }
+
+    if (viewerCol === -1) {
+      return respond(false, 'Kolom viewer tidak ditemukan');
+    }
+
+    for (let i = 1; i < data.length; i++) {
+
+      const rowTimestamp =
+        String(data[i][timestampCol]).trim();
+
+      if (rowTimestamp === String(timestamp).trim()) {
+
+        let currentViewer =
+          parseInt(data[i][viewerCol]) || 0;
+
+        currentViewer++;
+
+        sheet
+          .getRange(i + 1, viewerCol + 1)
+          .setValue(currentViewer);
+
+        return respond(
+          true,
+          'Viewer berhasil ditambah',
+          { viewer: currentViewer }
+        );
+
+      }
+
+    }
+
+    return respond(false, 'Property tidak ditemukan');
+
+  } catch(error) {
+
+    return respond(
+      false,
+      error.toString()
+    );
+
+  }
+
+}
+
+// =====================================================
+// DO POST - MAIN HANDLER
+// =====================================================
+function doPost(e) {
+  try {
+    const params = e.parameter;
+    const action = params.action;
+    
+    console.log('Action:', action);
+    
+    if (action === 'login') {return handleLogin(params.username, params.kontak
+      );
+
+    }
+    
+    if (action === 'savePropertyWithImages') {
+      const result = savePropertyWithImages(params);
+      return result;
+    }
+    
+    if (action === 'getProperties') {
+      const user = {
+        role: params.role,
+        kontak: params.kontak
+      };
+
+      const result = getPropertiesFromSheet(params.category, user);
+
+      return respond(
+        result.success,
+        result.success ? 'Success' : result.error,
+        result.data
+      );
+    }
+    
+    if (action === 'updatePropertyWithImages') {
+      const result = updatePropertyWithImages(params);
+      return respond(result.success, result.message);
+    }
+    
+    if (action === 'deleteProperty') {
+      const result = deletePropertyWithImages(params);
+      return respond(result.success, result.message);
+    }
+
+    if (action === 'updateNotif') {
+      return updateNotifStatus(
+        params.kontak,
+        params.notif
+      );
+    }
+
+    if (action === 'incrementViewer') {
+      return incrementViewer(params);
+    }
+    
+    return respond(false, 'Action tidak dikenal: ' + action);
+  } catch (error) {
+    console.log('Error:', error.toString());
+    return respond(false, error.toString());
+  }
+}
+
+// =====================================================
+// DO GET
+// =====================================================
+function doGet() {
+  return respond(true, 'BMpro API is running');
+}
