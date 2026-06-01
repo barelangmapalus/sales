@@ -80,6 +80,29 @@
       font-size: 0.7rem;
       color: #888;
     }
+
+    .password-group{
+      position: relative;
+    }
+
+    .password-group input{
+      padding-right: 45px;
+    }
+
+    .toggle-password{
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #888;
+      font-size: 0.95rem;
+    }
+
+    .toggle-password:hover{
+      color: #3498db;
+    }
+
   </style>
 </head>
 <body>
@@ -94,9 +117,19 @@
         <input type="text" id="username" placeholder="Masukkan username">
       </div>
       
-      <div class="input-group">
-        <label>Password Host</label>
-        <input type="password" id="password" placeholder="Masukkan password host">
+      <div class="input-group password-group">
+        <i class="fas fa-lock"></i>
+      
+        <input
+          type="password"
+          id="password"
+          placeholder="Password"
+          required
+        >
+      
+        <span class="toggle-password" onclick="togglePassword()">
+          <i class="fas fa-eye" id="eyeIcon"></i>
+        </span>
       </div>
       
       <button id="loginBtn" onclick="doLogin()">
@@ -209,6 +242,35 @@
               '<i class="fas fa-sign-in-alt"></i> Login';
           }
         }
+
+        function togglePassword() {
+
+          const passwordInput =
+            document.getElementById('password');
+
+          const eyeIcon =
+            document.getElementById('eyeIcon');
+
+          if (passwordInput.type === 'password') {
+
+            passwordInput.type = 'text';
+
+            eyeIcon.classList.remove('fa-eye');
+
+            eyeIcon.classList.add('fa-eye-slash');
+
+          } else {
+
+            passwordInput.type = 'password';
+
+            eyeIcon.classList.remove('fa-eye-slash');
+
+            eyeIcon.classList.add('fa-eye');
+
+          }
+
+        }
+
       
         // CEK SESSION LOGIN
         function checkLogin() {
