@@ -95,8 +95,8 @@
       </div>
       
       <div class="input-group">
-        <label>Nomor HP Host</label>
-        <input type="text" id="kontak" placeholder="Contoh: 08123456789">
+        <label>Password Host</label>
+        <input type="password" id="kontak" placeholder="Masukkan password host">
       </div>
       
       <button id="loginBtn" onclick="doLogin()">
@@ -128,7 +128,7 @@
       
           if (!username || !kontak) {
             errorMsg.style.display = 'block';
-            errorMsg.innerHTML = 'Username dan kontak wajib diisi!';
+            errorMsg.innerHTML = 'Username dan password wajib diisi!';
             return;
           }
       
@@ -184,7 +184,7 @@
       
               errorMsg.style.display = 'block';
               errorMsg.innerHTML =
-                result.message || 'Username atau kontak salah!';
+              result.message || 'Username atau password salah!';
       
               loginBtn.disabled = false;
               loginBtn.innerHTML =
