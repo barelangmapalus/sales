@@ -829,12 +829,20 @@ displayData(filteredData);
           }
         });
         
-        // 🔥 PAKAI APPS SCRIPT UNTUK UPDATE
         const response = await fetch(APPS_SCRIPT_URL, { 
-          method: 'POST', 
-          body: formData 
-        });
-        const result = await response.json();
+            method: 'POST', 
+            body: formData 
+          });
+
+          const text = await response.text();
+
+          let result;
+
+          try {
+            result = JSON.parse(text);
+          } catch {
+            throw new Error('Response bukan JSON');
+          }
         
         if (result.success) {
           closeModal();
@@ -899,6 +907,7 @@ displayData(filteredData);
         );
 
         formData.append('role', currentUser.role);
+        
         formData.append('kontak_user', currentUser.kontak);
 
         const response = await fetch(APPS_SCRIPT_URL, {
@@ -906,7 +915,15 @@ displayData(filteredData);
           body: formData
         });
 
-        const result = await response.json();
+        const text = await response.text();
+
+          let result;
+
+          try {
+            result = JSON.parse(text);
+          } catch {
+            throw new Error('Response bukan JSON');
+          }
 
         if (result.success) {
 
