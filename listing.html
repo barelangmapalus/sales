@@ -507,19 +507,6 @@
     }
 
     // =====================================================
-    // TAB NAVIGATION
-    // =====================================================
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (isLoading) return;
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentCategory = btn.dataset.category;
-        loadData();
-      });
-    });
-
-    // =====================================================
     // LOAD DATA PAKAI OPENSHEET (GAMBAR LANGSUNG MUNCUL)
     // =====================================================
     async function loadData() {
@@ -751,7 +738,7 @@ displayData(filteredData);
       document.getElementById('editKm').value = item.km || '';
       document.getElementById('editLt').value = item.lt || '';
       document.getElementById('editSpecification').value = item.spesifikasi || '';
-      
+      document.getElementById('editYoutube').value = item.youtube || '';
       document.getElementById('editOldMainImage').value = item['gambar utama'] || '';
       document.getElementById('editOldImage2').value = item.gambar2 || '';
       document.getElementById('editOldImage3').value = item.gambar3 || '';
@@ -812,6 +799,7 @@ displayData(filteredData);
         km: document.getElementById('editKm').value,
         lt: document.getElementById('editLt').value,
         spesifikasi: document.getElementById('editSpecification').value.trim(),
+        youtube: document.getElementById('editYoutube').value.trim(),
         old_gambar_utama: document.getElementById('editOldMainImage').value,
         old_gambar2: document.getElementById('editOldImage2').value,
         old_gambar3: document.getElementById('editOldImage3').value,
@@ -831,7 +819,6 @@ displayData(filteredData);
         return; 
       }
       
-      closeModal();
       showToast('🔄 Menyimpan perubahan...');
       
       try {
@@ -850,6 +837,7 @@ displayData(filteredData);
         const result = await response.json();
         
         if (result.success) {
+          closeModal();
           showToast('✅ Data berhasil diupdate');
           await loadData(); // Refresh data dari OpenSheet
         } else {
