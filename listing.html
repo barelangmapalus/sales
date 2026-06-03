@@ -563,6 +563,24 @@ displayData(filteredData);
       }
     }
 
+    // =====================================================
+    // FORCE REFRESH DATA (BYPASS CACHE)
+    // =====================================================
+    async function refreshData() {
+      console.log('🔄 Force refresh data...');
+      
+      // Bersihkan cache
+      currentData = [];
+      
+      // Reload dari OpenSheet
+      await loadData();
+      
+      // Scroll ke atas
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      showToast('✅ Data telah diperbarui');
+    }
+
     // ========== KONVERSI URL GOOGLE DRIVE KE THUMBNAIL ==========
     function convertDriveUrl(url) {
       if (!url) return '';
@@ -925,13 +943,19 @@ displayData(filteredData);
             throw new Error('Response bukan JSON');
           }
 
-        if (result.success) {
-
-          showToast('✅ Data berhasil dihapus');
-
-          await loadData();
-
-        } else {
+          if (result.success) {
+            showToast('✅ Data berhasil dihapus');
+            
+            // 🔥 FORCE REFRESH DATA
+            currentData = [];
+            await loadData();
+            
+            // 🔥 TAMBAHKAN INI UNTUK MEMASTIKAN UI UPDATE
+            const container = document.getElementById('propertyList');
+            if (currentData.length === 0) {
+              container.innerHTML = `<div class="empty-state"><i class="fas fa-building"></i><p>Belum ada properti di ${currentCategory}</p></div>`;
+            }
+          } else {
 
           showToast(
             '❌ Gagal hapus: ' +
