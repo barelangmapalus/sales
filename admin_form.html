@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <link rel="icon" type="image/png"href="https://lh3.googleusercontent.com/d/1a3cJptxJTSHksm9D7tN3us_7Ii7dQxxG=s64">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
   <title>BMpro - Tambah Properti</title>
@@ -548,7 +547,7 @@ body {
   </div>
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzb_g7In64f1dicVyPzZsCRqvJ0RoUPW3hOU08LQWHzSFhoKaHBxSdzZq_417X6GxYW/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxUbylqFmLDu4dTUgN9AZqZfnBJI1yTzOUsEBm8KAycWLJmmTT2MKOJ0w1wVuvMn_64/exec';
 
     // State untuk menyimpan base64 gambar
     let uploadedImages = {
@@ -805,164 +804,64 @@ body {
       return isValid;
     }
 
+    async function submitPropertyData() {
+      if (!validateForm()) return;
 
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      const submitBtn = document.getElementById('submitBtn');
 
+      loadingOverlay.style.visibility = 'visible';
+      submitBtn.disabled = true;
 
+      try {
+        const payload = {
+          action: 'savePropertyWithImages',
+          category: document.getElementById('categorySelect').value,
+          timestamp: new Date().toISOString(),
+          sales: document.getElementById('salesName').value.trim(),
+          nama_property: document.getElementById('propertyName').value.trim(),
+          harga: document.getElementById('price').value.trim(),
+          kontak: safePhoneInput(document.getElementById('contact').value),
+          kt: document.getElementById('kt').value,
+          km: document.getElementById('km').value,
+          lt: document.getElementById('lt').value,
+          lokasi: document.getElementById('location').value.trim(),
+          spesifikasi: document.getElementById('specification').value.trim(),
+          youtube: document.getElementById('youtube').value.trim(),
+          gambar_utama: uploadedImages.main || '',
+          gambar2: uploadedImages.img2 || '',
+          gambar3: uploadedImages.img3 || '',
+          gambar4: uploadedImages.img4 || '',
+          gambar5: uploadedImages.img5 || ''
+        };
 
+        const formData = new URLSearchParams();
+        Object.keys(payload).forEach(key => {
+          formData.append(key, payload[key]);
+        });
 
+        const response = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: formData
+        });
 
+        const result = await response.json();
 
+        if (result.success) {
+          alert('✅ Data berhasil disimpan!');
+          resetForm();
+        } else {
+          throw new Error(result.message);
+        }
 
-
-    
-    let isSubmitting = false;
-
-  async function submitPropertyData() {
-
-    if (isSubmitting) return;
-
-    if (!validateForm()) return;
-
-    isSubmitting = true;
-
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    const submitBtn = document.getElementById('submitBtn');
-
-    loadingOverlay.style.visibility = 'visible';
-    submitBtn.disabled = true;
-
-    try {
-
-      const propertyName =
-        document.getElementById('propertyName').value.trim();
-
-      // =========================
-      // SLUG PROPERTY
-      // =========================
-      const slug =
-        propertyName
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .substring(0, 50);
-
-      // =========================
-      // DETAIL LINK
-      // =========================
-      const detailLink =
-        `https://www.bmproperti.online/property/${slug}-${Date.now().toString().slice(-6)}`;
-
-      const payload = {
-        action: 'savePropertyWithImages',
-
-        category:
-          document.getElementById('categorySelect').value,
-
-        timestamp: new Date().toISOString(),
-
-        sales:
-          document.getElementById('salesName').value.trim(),
-
-        nama_property: propertyName,
-
-        harga:
-          document.getElementById('price').value.trim(),
-
-        kontak:
-          safePhoneInput(
-            document.getElementById('contact').value
-          ),
-
-        kt:
-          document.getElementById('kt').value,
-
-        km:
-          document.getElementById('km').value,
-
-        lt:
-          document.getElementById('lt').value,
-
-        lokasi:
-          document.getElementById('location').value.trim(),
-
-        spesifikasi:
-          document.getElementById('specification').value.trim(),
-
-        youtube:
-          document.getElementById('youtube').value.trim(),
-
-        detail_link: detailLink,
-
-        gambar_utama:
-          uploadedImages.main || '',
-
-        gambar2:
-          uploadedImages.img2 || '',
-
-        gambar3:
-          uploadedImages.img3 || '',
-
-        gambar4:
-          uploadedImages.img4 || '',
-
-        gambar5:
-          uploadedImages.img5 || ''
-      };
-
-      const formData = new URLSearchParams();
-
-      Object.keys(payload).forEach(key => {
-        formData.append(key, payload[key]);
-      });
-
-      const response = await fetch(SCRIPT_URL, {
-        method: 'POST',
-        body: formData
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-
-        alert('✅ Data berhasil disimpan!');
-
-        resetForm();
-
-      } else {
-
-        throw new Error(
-          result.message || 'Gagal menyimpan data'
-        );
-
+      } catch (error) {
+        console.error(error);
+        alert('❌ ERROR: ' + error.message);
+      } finally {
+        loadingOverlay.style.visibility = 'hidden';
+        submitBtn.disabled = false;
       }
-
-    } catch (error) {
-
-      console.error(error);
-
-      alert('❌ ERROR: ' + error.message);
-
-    } finally {
-
-      loadingOverlay.style.visibility = 'hidden';
-
-      submitBtn.disabled = false;
-
-      isSubmitting = false;
     }
-  }
-
-
-
-
-
-
-
-
-
-
-
-    
 
     function safePhoneInput(v) {
       return String(v || '').replace(/\s+/g,'').trim();
@@ -975,21 +874,12 @@ body {
         if (input) input.value = '';
       });
 
-      const inputMap = {
-        main: 'mainImageInput',
-        img2: 'image2Input',
-        img3: 'image3Input',
-        img4: 'image4Input',
-        img5: 'image5Input'
-      };
-
-      Object.keys(inputMap).forEach(img => {
-        const input = document.getElementById(inputMap[img]);
+      const images = ['main', 'img2', 'img3', 'img4', 'img5'];
+      images.forEach(img => {
+        const input = document.getElementById(`file-${img}`);
         if (input) input.value = '';
-
         const preview = document.getElementById(`preview-${img}`);
         if (preview) preview.innerHTML = '';
-
         uploadedImages[img] = null;
       });
 
