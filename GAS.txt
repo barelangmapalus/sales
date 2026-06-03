@@ -1,4 +1,4 @@
-UPDATE 31 MEI 2026 BERHASIL TIDAKADA BUG:
+UPDATE 3 JUNI 2026
 
 // =====================================================
 // GOOGLE APPS SCRIPT - BMpro (LENGKAP dengan DELETE FILE)
@@ -160,7 +160,7 @@ function updatePropertyWithImages(params) {
   try {
     const {
       category, property_id,
-      nama_property, harga, lokasi, kontak, kt, km, lt, spesifikasi,
+      nama_property, harga, lokasi, kontak, kt, km, lt, spesifikasi, youtube,
       old_gambar_utama, old_gambar2, old_gambar3, old_gambar4, old_gambar5,
       new_gambar_utama, new_gambar2, new_gambar3, new_gambar4, new_gambar5
     } = params;
@@ -283,6 +283,7 @@ function updatePropertyWithImages(params) {
     if (colMap['km']) sheet.getRange(rowIndex, colMap['km']).setValue(km || '');
     if (colMap['lt']) sheet.getRange(rowIndex, colMap['lt']).setValue(lt || '');
     if (colMap['spesifikasi']) sheet.getRange(rowIndex, colMap['spesifikasi']).setValue(spesifikasi || '');
+    if (colMap['youtube']) sheet.getRange(rowIndex, colMap['youtube']).setValue(youtube || '');
     if (colMap['gambar utama']) sheet.getRange(rowIndex, colMap['gambar utama']).setValue(finalGambarUtama);
     if (colMap['gambar2']) sheet.getRange(rowIndex, colMap['gambar2']).setValue(finalGambar2);
     if (colMap['gambar3']) sheet.getRange(rowIndex, colMap['gambar3']).setValue(finalGambar3);
@@ -442,7 +443,7 @@ function savePropertyWithImages(params) {
   try {
     const {
       category, timestamp, sales, nama_property, harga, kontak,
-      kt, km, lt, lokasi, spesifikasi,
+      kt, km, lt, lokasi, spesifikasi, youtube,
       gambar_utama, gambar2, gambar3, gambar4, gambar5
     } = params;
 
@@ -499,7 +500,8 @@ function savePropertyWithImages(params) {
           'gambar4',
           'gambar5',
           'viewer',
-          'property_id'
+          'property_id',
+          'youtube'
         ];
 
         sheet
@@ -531,7 +533,8 @@ function savePropertyWithImages(params) {
       img4Res.url,
       img5Res.url,
       0,
-      propertyId
+      propertyId,
+      youtube || ''
     ];
 
     let targetRow = -1;
@@ -622,7 +625,7 @@ const rowData = sheet.getRange(row, 1, 1, sheet.getLastColumn()).getValues()[0];
 // =====================================================
 // HANDLE LOGIN
 // =====================================================
-function handleLogin(username, kontak) {
+function handleLogin(username, password) {
 
   try {
 
@@ -646,30 +649,31 @@ function handleLogin(username, kontak) {
       const dbUsername =
       String(data[i][0]).trim();
 
-      const dbKontak =
+      const dbPassword =
       String(data[i][1]).trim();
 
       const dbRole =
       String(data[i][2]).trim();
 
       const dbStatus =
-      String(data[i][4]).trim();
+      String(data[i][3]).trim();
 
       // skip user nonaktif
       if (dbStatus.toLowerCase() !== 'active') {
         continue;
       }
 
-      // username + kontak harus cocok
+      // username + password harus cocok
       if (
         dbUsername === username &&
-        dbKontak === kontak
+        dbPassword === password
       ) {
 
         userFound = {
           username: dbUsername,
-          kontak: dbKontak,
-          role: dbRole
+          password: dbPassword,
+          role: dbRole,
+          kontak: data[i][4]
         };
 
         break;
@@ -681,7 +685,7 @@ function handleLogin(username, kontak) {
 
       return respond(
         false,
-        'Username atau nomor HP salah'
+        'Username atau password salah'
       );
 
     }
@@ -692,15 +696,15 @@ function handleLogin(username, kontak) {
     );
 
     return respond(
-      true,
-      'Login berhasil',
-      {
-        username: userFound.username,
-        kontak: userFound.kontak,
-        role: userFound.role,
-        token: token
-      }
-    );
+        true,
+        'Login berhasil',
+        {
+          username: userFound.username,
+          kontak: userFound.kontak,
+          role: userFound.role,
+          token: token
+        }
+      );
 
   } catch (error) {
 
@@ -770,13 +774,23 @@ function updateNotifStatus(kontak, notif) {
 
     for (let i = 1; i < data.length; i++) {
 
+      // KOLOM USERS:
+      // 0 = timestamp
+      // 1 = nama
+      // 2 = kontak
+      // 3 = notif
+
       const dbKontak =
         String(data[i][2]).trim();
 
-      if (dbKontak === String(kontak).trim()) {
+      if (
+        dbKontak ===
+        String(kontak).trim()
+      ) {
 
-        // kolom notif = index 4
-        sheet.getRange(i + 1, 4)
+        // kolom notif = index 3
+        sheet
+          .getRange(i + 1, 4)
           .setValue(notif);
 
         return respond(
@@ -788,7 +802,10 @@ function updateNotifStatus(kontak, notif) {
 
     }
 
-    return respond(false, 'User tidak ditemukan');
+    return respond(
+      false,
+      'User tidak ditemukan'
+    );
 
   } catch (error) {
 
@@ -1177,8 +1194,7 @@ function doPost(e) {
     
     console.log('Action:', action);
     
-    if (action === 'login') {return handleLogin(params.username, params.kontak
-      );
+    if (action === 'login') {return handleLogin(params.username, params.password);
 
     }
     
