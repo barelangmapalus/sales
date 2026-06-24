@@ -312,16 +312,16 @@
     </div>
 
 
-    <div class="nav-item" onclick="window.location.href='https://www.bmproperti.online/'">
-  <i class="fas fa-home"></i>
-  <span>Beranda</span>
+    <div class="nav-item" onclick="window.location.href='https://bmproperti.online'">
+  <i class="fas fa-globe"></i>
+  <span>Website</span>
 </div>
 
 
-    <div class="nav-item" onclick="logout()">
-      <i class="fas fa-sign-out-alt"></i><span>Logout</span>
-    </div>
-  </nav>
+    <div class="nav-item" onclick="confirmLogout()">
+  <i class="fas fa-sign-out-alt"></i>
+  <span>Logout</span>
+</div>
 
   <!-- Modal Edit -->
   <div id="editModal" class="modal-overlay">
@@ -483,6 +483,19 @@
       return false;
     }
     }
+
+
+function confirmLogout() {
+
+  const confirmExit = confirm(
+    'Anda yakin mau Logout?'
+  );
+
+  if (confirmExit) {
+    logout();
+  }
+
+}
 
     function logout() { 
     localStorage.removeItem('bmpro_user'); 
