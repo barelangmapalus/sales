@@ -423,6 +423,44 @@ body {
       .download-card { flex-direction: column; text-align: center; }
       .download-btn { width: 100%; justify-content: center; }
     }
+
+    /* Download Progress */
+    .download-progress {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.7rem;
+      color: #667eea;
+      font-weight: 600;
+    }
+
+    .download-progress.active {
+      display: flex;
+    }
+
+    .download-progress .fa-spinner {
+      animation: spin 1s linear infinite;
+    }
+
+    .download-btn.downloaded {
+      background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+    }
+
+    .download-btn.downloaded i {
+      animation: none;
+    }
+
+    .download-status-text {
+      font-size: 0.65rem;
+      color: #27ae60;
+      font-weight: 600;
+      display: none;
+      margin-top: 4px;
+    }
+
+    .download-status-text.show {
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -459,11 +497,14 @@ body {
           <i class="fas fa-download"></i>
         </div>
         <div class="download-info">
-          <h4>📱 Download Aplikasi BMpro</h4>
-          <p>Dapatkan pengalaman terbaik dengan aplikasi mobile</p>
-          <a href="https://www.dropbox.com/scl/fi/fkweq8p9pd2h9tyshvefs/ListingPlus-BMpro.apk?rlkey=uuv7mpou6i0mdcry9685fhdig&st=rwf0jehs&dl=1" class="download-btn" target="_blank">
-            <i class="fas fa-google-drive"></i> Download APK
+          <h4>📱 Download aplikasi ListingPlus</h4>
+          <p>Anda dapat meng-Install Aplikasi ini supaya lebih cepat & mudah tanpa membuka Browser Chrome</p>
+          <a href="https://www.dropbox.com/scl/fi/fkweq8p9pd2h9tyshvefs/ListingPlus-BMpro.apk?rlkey=uuv7mpou6i0mdcry9685fhdig&st=rwf0jehs&dl=1" class="download-btn" id="downloadBtn" target="_blank">
+            <i class="fas fa-dropbox"></i> <span id="downloadText">Download APK</span>
           </a>
+          <div class="download-status-text" id="downloadStatus">
+            <i class="fas fa-check-circle"></i> ✅ APK sudah didownload!
+          </div>
         </div>
       </div>
 
@@ -639,7 +680,7 @@ body {
   </div>
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AGGxxxxxxxxxxxxxxxxxxxxx/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw9P0EarrVJjrYOtvvAbveyUoFrH8rN2re-zkcx25DBrjshpjJ5Qsd7U2U7xb8dkO5q/exec';
 
     // State untuk menyimpan base64 gambar
     let uploadedImages = {
@@ -651,6 +692,36 @@ body {
     };
 
     let currentUser = null;
+
+    // Download APK dengan indikator
+      document.addEventListener('DOMContentLoaded', function() {
+        const downloadBtn = document.getElementById('downloadBtn');
+        const downloadText = document.getElementById('downloadText');
+        const downloadStatus = document.getElementById('downloadStatus');
+        
+        if (downloadBtn) {
+          downloadBtn.addEventListener('click', function(e) {
+            // Tampilkan status downloading
+            downloadText.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Mengunduh...';
+            downloadBtn.classList.add('downloading');
+            
+            // Setelah 3 detik, anggap sudah terdownload
+            setTimeout(function() {
+              downloadText.innerHTML = '✅ Sudah Terdownload';
+              downloadBtn.classList.add('downloaded');
+              downloadBtn.classList.remove('downloading');
+              downloadStatus.classList.add('show');
+              
+              // Reset setelah 5 detik (opsional)
+              setTimeout(function() {
+                // Kembali ke teks normal (tapi status tetap menunjukkan sudah download)
+                downloadText.innerHTML = 'Download APK';
+                downloadBtn.classList.remove('downloaded');
+              }, 5000);
+            }, 3000);
+          });
+        }
+      });
 
     async function checkAuth() {
 
