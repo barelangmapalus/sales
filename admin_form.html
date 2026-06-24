@@ -141,6 +141,82 @@ body {
 
     textarea { resize: vertical; min-height: 70px; }
 
+    /* Download Card Premium */
+    .download-card {
+      background: linear-gradient(135deg, #f8f9ff 0%, #eef1ff 100%);
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin: 15px 0 10px 0;
+      border: 1.5px dashed #667eea;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .download-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102,126,234,0.15);
+    }
+
+    .download-icon {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .download-icon i {
+      font-size: 24px;
+      color: white;
+    }
+
+    .download-info {
+      flex: 1;
+    }
+
+    .download-info h4 {
+      font-size: 0.85rem;
+      color: #333;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    .download-info p {
+      font-size: 0.7rem;
+      color: #666;
+      margin-bottom: 6px;
+    }
+
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 6px 16px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-size: 0.7rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .download-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+    }
+
+    .download-btn i {
+      font-size: 0.8rem;
+    }
+
     /* Specs Grid - VERTIKAL */
 .specs-grid {
   display: flex;
@@ -344,6 +420,8 @@ body {
       .form-card { padding: 15px; }
       .specs-grid { gap: 8px; }
       .specs-grid input { padding: 6px 6px; }
+      .download-card { flex-direction: column; text-align: center; }
+      .download-btn { width: 100%; justify-content: center; }
     }
   </style>
 </head>
@@ -373,6 +451,20 @@ body {
           <option value="rent">🔑 Rent</option>
         </select>
         <div class="error-text" id="categoryError">Kategori wajib dipilih</div>
+      </div>
+
+      <!-- DOWNLOAD APK CARD - DITAMBAHKAN DI BAWAH KATEGORI -->
+      <div class="download-card">
+        <div class="download-icon">
+          <i class="fas fa-download"></i>
+        </div>
+        <div class="download-info">
+          <h4>📱 Download Aplikasi BMpro</h4>
+          <p>Dapatkan pengalaman terbaik dengan aplikasi mobile</p>
+          <a href="https://www.dropbox.com/scl/fi/fkweq8p9pd2h9tyshvefs/ListingPlus-BMpro.apk?rlkey=uuv7mpou6i0mdcry9685fhdig&st=rwf0jehs&dl=1" class="download-btn" target="_blank">
+            <i class="fas fa-google-drive"></i> Download APK
+          </a>
+        </div>
       </div>
 
       <div id="formFields" style="display: none;">
@@ -547,7 +639,7 @@ body {
   </div>
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw9P0EarrVJjrYOtvvAbveyUoFrH8rN2re-zkcx25DBrjshpjJ5Qsd7U2U7xb8dkO5q/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AGGxxxxxxxxxxxxxxxxxxxxx/exec';
 
     // State untuk menyimpan base64 gambar
     let uploadedImages = {
