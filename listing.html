@@ -739,18 +739,21 @@ displayData(filteredData);
               <i class="fas fa-user"></i> ${escapeHtml(item.sales || '-')} &nbsp;|&nbsp;
               <i class="fab fa-whatsapp"></i> ${escapeHtml(item.kontak || '-')}
             </div>
-
-
-        <button class="btn-note ${localStorage.getItem('note_'+item.property_id)?'has-note':''}"
-        onclick="openNote(${idx})">
-        <i class="fas fa-sticky-note"></i>
-        ${localStorage.getItem('note_'+item.property_id)?'Note ✓':'Note'}
-        </button>
-
-            <div class="action-buttons">
-              <button class="btn-edit" onclick="openEditModal(${idx})"><i class="fas fa-edit"></i> Update</button>
-              <button class="btn-delete" onclick="deleteItem(${idx})"><i class="fas fa-trash"></i> Delete</button>
             </div>
+
+        <div class="action-buttons">
+
+    <button
+        class="btn-note ${localStorage.getItem('note_'+item.property_id)?'has-note':''}"
+        onclick="openNote(${idx})"><i class="fas fa-sticky-note"></i>${localStorage.getItem('note_'+item.property_id)?'Note ✓':'Note'}
+    </button>
+</div>
+
+<div class="action-buttons">
+
+    <button class="btn-edit"onclick="openEditModal(${idx})"><i class="fas fa-edit"></i>Update</button>
+    <button class="btn-delete"onclick="deleteItem(${idx})"><i class="fas fa-trash"></i>Delete</button>
+     </div>
           </div>
         </div>
       `).join('');
