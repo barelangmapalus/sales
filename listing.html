@@ -446,11 +446,9 @@
 
       <button class="btn-save" id="saveChangesBtn" onclick="saveEdit()"><i class="fas fa-save"></i> Simpan Perubahan</button>
     </div>
-  </div
+  </div>
 
-// =====================================================
-// NOTE
-// =====================================================
+
 <div id="noteModal" class="modal-overlay">
 
     <div class="modal-content">
@@ -1137,23 +1135,18 @@ function closeNote(){
 
 function saveNote(){
 
-    const propertyId=
+    const propertyId =
         document.getElementById("notePropertyId").value;
-
-    const note=
+    const note =
         document.getElementById("noteText").value.trim();
-
-    localStorage.setItem(
-        "note_"+propertyId,
-        note
-    );
-
+    if(note){
+        localStorage.setItem("note_"+propertyId, note);
+    }else{
+        localStorage.removeItem("note_"+propertyId);
+    }
     closeNote();
-
     loadData();
-
     showToast("✅ Catatan berhasil disimpan");
-
 }
 
 // =====================================================
