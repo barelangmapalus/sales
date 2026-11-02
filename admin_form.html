@@ -657,7 +657,7 @@ body {
           <div class="form-group">
             <div class="field-label-row">
               <label for="discountPercent"><i class="fas fa-percent"></i> Diskon (%)</label>
-              <button class="field-help-button" type="button" data-help-title="Diskon" data-help-text="Persentase potongan dari total sewa bulanan. Contoh 10 berarti diskon 10% jika syarat durasi dan kuota terpenuhi." aria-label="Bantuan tentang diskon">
+              <button class="field-help-button" type="button" data-help-title="Diskon" data-help-text="Persentase potongan dari total sewa bulanan. Contoh 10 berarti diskon 10% jika syarat durasi dan kuota terpenuhi." data-help-example="discount-calculation" aria-label="Bantuan tentang diskon">
                 <i class="fas fa-question" aria-hidden="true"></i>
               </button>
             </div>
@@ -683,15 +683,6 @@ body {
             </div>
             <input type="number" id="discountMinDuration" min="1" step="1" inputmode="numeric" placeholder="Contoh: 3">
             <div class="error-text" id="discountMinDurationError">Masukkan durasi berupa bilangan bulat minimal 1 bulan</div>
-          </div>
-          <div class="discount-example" aria-label="Contoh perhitungan diskon">
-            <strong>Contoh perhitungan diskon bulanan</strong>
-            Tarif per bulan: Rp1.000.000<br>
-            Durasi sewa: 6 bulan<br>
-            Subtotal: Rp6.000.000<br>
-            Diskon: 10%<br>
-            Potongan: Rp600.000<br>
-            Total akhir: Rp5.400.000
           </div>
         </div>
 
@@ -828,6 +819,15 @@ body {
   <dialog class="field-help-dialog" id="fieldHelpDialog" aria-labelledby="fieldHelpTitle" aria-describedby="fieldHelpText">
     <h2 id="fieldHelpTitle">Petunjuk</h2>
     <p id="fieldHelpText"></p>
+    <div class="discount-example" id="discountHelpExample" aria-label="Contoh perhitungan diskon bulanan" hidden>
+      <strong>Contoh perhitungan diskon bulanan</strong>
+      Tarif per bulan: Rp1.000.000<br>
+      Durasi sewa: 6 bulan<br>
+      Subtotal: Rp6.000.000<br>
+      Diskon: 10%<br>
+      Potongan: Rp600.000<br>
+      Total akhir: Rp5.400.000
+    </div>
     <button class="field-help-close" type="button" id="closeFieldHelpButton">Mengerti</button>
   </dialog>
 
@@ -1319,11 +1319,15 @@ function confirmLogout() {
     const fieldHelpDialog = document.getElementById('fieldHelpDialog');
     const fieldHelpTitle = document.getElementById('fieldHelpTitle');
     const fieldHelpText = document.getElementById('fieldHelpText');
+    const discountHelpExample = document.getElementById('discountHelpExample');
     document.querySelectorAll('.field-help-button').forEach(button => {
       button.addEventListener('click', () => {
         if (!fieldHelpDialog || !fieldHelpTitle || !fieldHelpText) return;
         fieldHelpTitle.textContent = button.dataset.helpTitle || 'Petunjuk';
         fieldHelpText.textContent = button.dataset.helpText || '';
+        if (discountHelpExample) {
+          discountHelpExample.hidden = button.dataset.helpExample !== 'discount-calculation';
+        }
         fieldHelpDialog.showModal();
       });
     });
