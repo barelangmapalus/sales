@@ -192,6 +192,23 @@ body {
       cursor: pointer;
     }
 
+    .discount-example {
+      margin: 2px 0 14px;
+      padding: 12px;
+      border-left: 3px solid #20a464;
+      border-radius: 8px;
+      background: #f2fbf6;
+      color: #46534b;
+      font-size: 0.7rem;
+      line-height: 1.65;
+    }
+
+    .discount-example strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #286344;
+    }
+
     input, select, textarea {
       width: 100%;
       padding: 8px 12px;
@@ -666,6 +683,15 @@ body {
             </div>
             <input type="number" id="discountMinDuration" min="1" step="1" inputmode="numeric" placeholder="Contoh: 3">
             <div class="error-text" id="discountMinDurationError">Masukkan durasi berupa bilangan bulat minimal 1 bulan</div>
+          </div>
+          <div class="discount-example" aria-label="Contoh perhitungan diskon">
+            <strong>Contoh perhitungan diskon bulanan</strong>
+            Tarif per bulan: Rp1.000.000<br>
+            Durasi sewa: 6 bulan<br>
+            Subtotal: Rp6.000.000<br>
+            Diskon: 10%<br>
+            Potongan: Rp600.000<br>
+            Total akhir: Rp5.400.000
           </div>
         </div>
 
