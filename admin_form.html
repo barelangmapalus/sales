@@ -544,25 +544,25 @@ body {
         </div>
 
         <div class="form-group">
-          <label><i class="fas fa-money-bill-wave"></i> Harga <span class="required">*</span></label>
+          <label><i class="fas fa-money-bill-wave"></i> Harga permalam <span class="required" id="priceRequiredMarker">*</span></label>
           <input 
                 type="text"
                 id="price"
                 inputmode="numeric"
                 pattern="[0-9.]*"
-                placeholder="Rp 850.000.000">
+                placeholder="Rp 100.000">
           <div class="error-text" id="priceError">Wajib diisi</div>
         </div>
 
         <div class="form-group" id="monthlyPriceField" style="display: none;">
-          <label><i class="fas fa-money-bill-wave"></i> Harga perbulan <span class="required">*</span></label>
+          <label><i class="fas fa-money-bill-wave"></i> Harga perbulan</label>
           <input
                 type="text"
                 id="monthlyPrice"
                 inputmode="numeric"
                 pattern="[0-9.]*"
-                placeholder="Rp 5.000.000">
-          <div class="error-text" id="monthlyPriceError">Harga perbulan wajib diisi untuk properti sewa</div>
+                placeholder="Rp 1.000.000">
+          <div class="error-text" id="monthlyPriceError">Isi harga per malam dan/atau harga perbulan</div>
         </div>
 
         <div class="specs-grid">
@@ -696,7 +696,7 @@ body {
   </div>
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyHaO6DQUqgmWZXVtadWJ3E9sJeWyhmoEe85rrXIgkdHbdE4WYWT0cCzKvpvzisobw/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw63uYrOSm0OUJgfn032OG7xPIw0J1DJa4TV1Lvt3sZa-Pe8JKqAIfIc5HhpNI9srCc/exec';
 
     // State untuk menyimpan base64 gambar
     let uploadedImages = {
@@ -966,7 +966,7 @@ function confirmLogout() {
         if (categoryError) categoryError.style.display = 'none';
       }
 
-      const fields = ['salesName', 'propertyName', 'price', 'contact', 'kt', 'km', 'lt', 'location', 'specification'];
+      const fields = ['salesName', 'propertyName', 'contact', 'kt', 'km', 'lt', 'location', 'specification'];
       fields.forEach(field => {
         const input = document.getElementById(field);
         const errorEl = document.getElementById(`${field}Error`);
@@ -989,13 +989,28 @@ function confirmLogout() {
         }
       });
 
+      const priceInput = document.getElementById('price');
+      const priceError = document.getElementById('priceError');
       const monthlyPriceInput = document.getElementById('monthlyPrice');
       const monthlyPriceError = document.getElementById('monthlyPriceError');
-      if (categorySelect.value === 'rent' && !monthlyPriceInput?.value.trim()) {
-        if (monthlyPriceError) monthlyPriceError.style.display = 'block';
-        isValid = false;
-      } else if (monthlyPriceError) {
-        monthlyPriceError.style.display = 'none';
+      if (categorySelect.value === 'rent') {
+        const hasNightlyPrice = Boolean(priceInput?.value.trim());
+        const hasMonthlyPrice = Boolean(monthlyPriceInput?.value.trim());
+        if (!hasNightlyPrice && !hasMonthlyPrice) {
+          if (monthlyPriceError) monthlyPriceError.style.display = 'block';
+          isValid = false;
+        } else if (monthlyPriceError) {
+          monthlyPriceError.style.display = 'none';
+        }
+        if (priceError) priceError.style.display = 'none';
+      } else {
+        if (!priceInput?.value.trim()) {
+          if (priceError) priceError.style.display = 'block';
+          isValid = false;
+        } else if (priceError) {
+          priceError.style.display = 'none';
+        }
+        if (monthlyPriceError) monthlyPriceError.style.display = 'none';
       }
 
       const mainError = document.getElementById('mainImageError');
@@ -1071,6 +1086,7 @@ function confirmLogout() {
       }
     }
 
+
     function safePhoneInput(v) {
       return String(v || '').replace(/\s+/g,'').trim();
       }
@@ -1104,8 +1120,13 @@ function confirmLogout() {
         const formFields = document.getElementById('formFields');
         const categoryError = document.getElementById('categoryError');
         const monthlyPriceField = document.getElementById('monthlyPriceField');
+        const priceRequiredMarker = document.getElementById('priceRequiredMarker');
+        const isRent = this.value === 'rent';
         if (monthlyPriceField) {
-          monthlyPriceField.style.display = this.value === 'rent' ? 'block' : 'none';
+          monthlyPriceField.style.display = isRent ? 'block' : 'none';
+        }
+        if (priceRequiredMarker) {
+          priceRequiredMarker.style.display = isRent ? 'none' : '';
         }
         if (this.value) {
           if (formFields) formFields.style.display = 'block';
