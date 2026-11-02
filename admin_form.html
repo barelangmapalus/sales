@@ -554,6 +554,17 @@ body {
           <div class="error-text" id="priceError">Wajib diisi</div>
         </div>
 
+        <div class="form-group" id="monthlyPriceField" style="display: none;">
+          <label><i class="fas fa-money-bill-wave"></i> Harga perbulan <span class="required">*</span></label>
+          <input
+                type="text"
+                id="monthlyPrice"
+                inputmode="numeric"
+                pattern="[0-9.]*"
+                placeholder="Rp 5.000.000">
+          <div class="error-text" id="monthlyPriceError">Harga perbulan wajib diisi untuk properti sewa</div>
+        </div>
+
         <div class="specs-grid">
           <div class="form-group">
             <label><i class="fas fa-bed"></i> KT <span class="required">*</span></label>
@@ -978,6 +989,15 @@ function confirmLogout() {
         }
       });
 
+      const monthlyPriceInput = document.getElementById('monthlyPrice');
+      const monthlyPriceError = document.getElementById('monthlyPriceError');
+      if (categorySelect.value === 'rent' && !monthlyPriceInput?.value.trim()) {
+        if (monthlyPriceError) monthlyPriceError.style.display = 'block';
+        isValid = false;
+      } else if (monthlyPriceError) {
+        monthlyPriceError.style.display = 'none';
+      }
+
       const mainError = document.getElementById('mainImageError');
       if (!uploadedImages.main) {
         if (mainError) mainError.style.display = 'block';
@@ -1006,6 +1026,9 @@ function confirmLogout() {
           sales: document.getElementById('salesName').value.trim(),
           nama_property: document.getElementById('propertyName').value.trim(),
           harga: document.getElementById('price').value.trim(),
+          harga_perbulan: document.getElementById('categorySelect').value === 'rent'
+            ? document.getElementById('monthlyPrice').value.trim()
+            : '',
           kontak: safePhoneInput(document.getElementById('contact').value),
           kt: document.getElementById('kt').value,
           km: document.getElementById('km').value,
@@ -1053,7 +1076,7 @@ function confirmLogout() {
       }
 
     function resetForm() {
-      const fields = ['salesName', 'propertyName', 'price', 'contact', 'kt', 'km', 'lt', 'location', 'specification', 'youtube'];
+      const fields = ['salesName', 'propertyName', 'price', 'monthlyPrice', 'contact', 'kt', 'km', 'lt', 'location', 'specification', 'youtube'];
       fields.forEach(field => {
         const input = document.getElementById(field);
         if (input) input.value = '';
@@ -1080,6 +1103,10 @@ function confirmLogout() {
       categorySelect.addEventListener('change', function() {
         const formFields = document.getElementById('formFields');
         const categoryError = document.getElementById('categoryError');
+        const monthlyPriceField = document.getElementById('monthlyPriceField');
+        if (monthlyPriceField) {
+          monthlyPriceField.style.display = this.value === 'rent' ? 'block' : 'none';
+        }
         if (this.value) {
           if (formFields) formFields.style.display = 'block';
           if (categoryError) categoryError.style.display = 'none';
