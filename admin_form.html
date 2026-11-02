@@ -121,6 +121,77 @@ body {
       margin-left: 3px;
     }
 
+    .field-label-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 5px;
+    }
+
+    .field-label-row label {
+      margin-bottom: 0;
+    }
+
+    .field-help-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: #20a464;
+      color: #fff;
+      font: inherit;
+      font-size: 0.6rem;
+      cursor: pointer;
+    }
+
+    .field-help-button:hover,
+    .field-help-button:focus-visible {
+      background: #16834e;
+      outline: 2px solid rgba(32, 164, 100, 0.25);
+      outline-offset: 2px;
+    }
+
+    .field-help-dialog {
+      width: min(360px, calc(100% - 32px));
+      margin: auto;
+      padding: 20px;
+      border: 0;
+      border-radius: 16px;
+      color: #333;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+    }
+
+    .field-help-dialog::backdrop {
+      background: rgba(25, 30, 45, 0.48);
+    }
+
+    .field-help-dialog h2 {
+      margin-bottom: 8px;
+      font-size: 1rem;
+    }
+
+    .field-help-dialog p {
+      color: #555;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .field-help-close {
+      display: block;
+      margin: 16px 0 0 auto;
+      padding: 8px 16px;
+      border: 0;
+      border-radius: 8px;
+      background: #667eea;
+      color: white;
+      font: inherit;
+      cursor: pointer;
+    }
+
     input, select, textarea {
       width: 100%;
       padding: 8px 12px;
@@ -565,6 +636,39 @@ body {
           <div class="error-text" id="monthlyPriceError">Isi harga per malam dan/atau harga perbulan</div>
         </div>
 
+        <div id="rentDiscountFields" style="display: none;">
+          <div class="form-group">
+            <div class="field-label-row">
+              <label for="discountPercent"><i class="fas fa-percent"></i> Diskon (%)</label>
+              <button class="field-help-button" type="button" data-help-title="Diskon" data-help-text="Persentase potongan dari total sewa bulanan. Contoh 10 berarti diskon 10% jika syarat durasi dan kuota terpenuhi." aria-label="Bantuan tentang diskon">
+                <i class="fas fa-question" aria-hidden="true"></i>
+              </button>
+            </div>
+            <input type="number" id="discountPercent" min="0" max="100" step="0.01" inputmode="decimal" placeholder="Contoh: 10">
+            <div class="error-text" id="discountPercentError">Masukkan diskon angka 0 sampai 100</div>
+          </div>
+          <div class="form-group">
+            <div class="field-label-row">
+              <label for="discountQuota"><i class="fas fa-ticket-alt"></i> Kuota diskon (jumlah booking)</label>
+              <button class="field-help-button" type="button" data-help-title="Kuota diskon" data-help-text="Batas jumlah booking yang bisa mendapat diskon. Contoh 10 berarti maksimal 10 booking memperoleh diskon." aria-label="Bantuan tentang kuota diskon">
+                <i class="fas fa-question" aria-hidden="true"></i>
+              </button>
+            </div>
+            <input type="number" id="discountQuota" min="0" step="1" inputmode="numeric" placeholder="Contoh: 10">
+            <div class="error-text" id="discountQuotaError">Masukkan kuota berupa bilangan bulat minimal 0</div>
+          </div>
+          <div class="form-group">
+            <div class="field-label-row">
+              <label for="discountMinDuration"><i class="far fa-calendar"></i> Durasi sewa minimum (bulan)</label>
+              <button class="field-help-button" type="button" data-help-title="Durasi sewa minimum" data-help-text="Lama sewa bulanan minimum agar memenuhi syarat diskon. Contoh 3 berarti sewa 3 bulan atau lebih." aria-label="Bantuan tentang durasi sewa minimum">
+                <i class="fas fa-question" aria-hidden="true"></i>
+              </button>
+            </div>
+            <input type="number" id="discountMinDuration" min="1" step="1" inputmode="numeric" placeholder="Contoh: 3">
+            <div class="error-text" id="discountMinDurationError">Masukkan durasi berupa bilangan bulat minimal 1 bulan</div>
+          </div>
+        </div>
+
         <div class="specs-grid">
           <div class="form-group">
             <label><i class="fas fa-bed"></i> KT <span class="required">*</span></label>
@@ -695,8 +799,14 @@ body {
     </div>
   </div>
 
+  <dialog class="field-help-dialog" id="fieldHelpDialog" aria-labelledby="fieldHelpTitle" aria-describedby="fieldHelpText">
+    <h2 id="fieldHelpTitle">Petunjuk</h2>
+    <p id="fieldHelpText"></p>
+    <button class="field-help-close" type="button" id="closeFieldHelpButton">Mengerti</button>
+  </dialog>
+
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw63uYrOSm0OUJgfn032OG7xPIw0J1DJa4TV1Lvt3sZa-Pe8JKqAIfIc5HhpNI9srCc/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyFwn9FRGMoFf8-hw_TYYOVFTXSjd56_B9Z7dAlTEYiBnXGsEIZNkYfN2fkhzc2E6Qj/exec';
 
     // State untuk menyimpan base64 gambar
     let uploadedImages = {
@@ -1003,6 +1113,32 @@ function confirmLogout() {
           monthlyPriceError.style.display = 'none';
         }
         if (priceError) priceError.style.display = 'none';
+
+        const discountPercentInput = document.getElementById('discountPercent');
+        const discountQuotaInput = document.getElementById('discountQuota');
+        const discountMinDurationInput = document.getElementById('discountMinDuration');
+        const validateOptionalNumber = (input, errorId, isValidValue) => {
+          const value = input?.value.trim() || '';
+          const error = document.getElementById(errorId);
+          const isFieldValid = !value || isValidValue(Number(value));
+          if (error) error.style.display = isFieldValid ? 'none' : 'block';
+          if (!isFieldValid) isValid = false;
+        };
+        validateOptionalNumber(
+          discountPercentInput,
+          'discountPercentError',
+          value => Number.isFinite(value) && value >= 0 && value <= 100
+        );
+        validateOptionalNumber(
+          discountQuotaInput,
+          'discountQuotaError',
+          value => Number.isSafeInteger(value) && value >= 0
+        );
+        validateOptionalNumber(
+          discountMinDurationInput,
+          'discountMinDurationError',
+          value => Number.isSafeInteger(value) && value >= 1
+        );
       } else {
         if (!priceInput?.value.trim()) {
           if (priceError) priceError.style.display = 'block';
@@ -1043,6 +1179,15 @@ function confirmLogout() {
           harga: document.getElementById('price').value.trim(),
           harga_perbulan: document.getElementById('categorySelect').value === 'rent'
             ? document.getElementById('monthlyPrice').value.trim()
+            : '',
+          diskon: document.getElementById('categorySelect').value === 'rent'
+            ? document.getElementById('discountPercent').value.trim()
+            : '',
+          kuota_diskon: document.getElementById('categorySelect').value === 'rent'
+            ? document.getElementById('discountQuota').value.trim()
+            : '',
+          durasi_sewa: document.getElementById('categorySelect').value === 'rent'
+            ? document.getElementById('discountMinDuration').value.trim()
             : '',
           kontak: safePhoneInput(document.getElementById('contact').value),
           kt: document.getElementById('kt').value,
@@ -1092,7 +1237,11 @@ function confirmLogout() {
       }
 
     function resetForm() {
-      const fields = ['salesName', 'propertyName', 'price', 'monthlyPrice', 'contact', 'kt', 'km', 'lt', 'location', 'specification', 'youtube'];
+      const fields = [
+        'salesName', 'propertyName', 'price', 'monthlyPrice',
+        'discountPercent', 'discountQuota', 'discountMinDuration',
+        'contact', 'kt', 'km', 'lt', 'location', 'specification', 'youtube'
+      ];
       fields.forEach(field => {
         const input = document.getElementById(field);
         if (input) input.value = '';
@@ -1120,10 +1269,14 @@ function confirmLogout() {
         const formFields = document.getElementById('formFields');
         const categoryError = document.getElementById('categoryError');
         const monthlyPriceField = document.getElementById('monthlyPriceField');
+        const rentDiscountFields = document.getElementById('rentDiscountFields');
         const priceRequiredMarker = document.getElementById('priceRequiredMarker');
         const isRent = this.value === 'rent';
         if (monthlyPriceField) {
           monthlyPriceField.style.display = isRent ? 'block' : 'none';
+        }
+        if (rentDiscountFields) {
+          rentDiscountFields.style.display = isRent ? 'block' : 'none';
         }
         if (priceRequiredMarker) {
           priceRequiredMarker.style.display = isRent ? 'none' : '';
@@ -1136,6 +1289,21 @@ function confirmLogout() {
         }
       });
     }
+
+    const fieldHelpDialog = document.getElementById('fieldHelpDialog');
+    const fieldHelpTitle = document.getElementById('fieldHelpTitle');
+    const fieldHelpText = document.getElementById('fieldHelpText');
+    document.querySelectorAll('.field-help-button').forEach(button => {
+      button.addEventListener('click', () => {
+        if (!fieldHelpDialog || !fieldHelpTitle || !fieldHelpText) return;
+        fieldHelpTitle.textContent = button.dataset.helpTitle || 'Petunjuk';
+        fieldHelpText.textContent = button.dataset.helpText || '';
+        fieldHelpDialog.showModal();
+      });
+    });
+
+    const closeFieldHelpButton = document.getElementById('closeFieldHelpButton');
+    closeFieldHelpButton?.addEventListener('click', () => fieldHelpDialog?.close());
 
     const submitBtn = document.getElementById('submitBtn');
     if (submitBtn) submitBtn.onclick = submitPropertyData;
