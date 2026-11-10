@@ -1242,7 +1242,7 @@ function confirmLogout() {
         const result = await response.json();
 
         if (result.success) {
-          alert('✅ Data berhasil disimpan!');
+          alert(result.data?.warning ? `⚠️ ${result.message}` : '✅ Data berhasil disimpan!');
           resetForm();
         } else {
           throw new Error(result.message);
