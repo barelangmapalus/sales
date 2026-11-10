@@ -184,6 +184,12 @@
       border-radius: 10px;
       font-family: 'Inter', sans-serif;
     }
+    .edit-field-error {
+      display: none;
+      margin-top: 5px;
+      color: #c0392b;
+      font-size: 0.7rem;
+    }
     .image-upload-area {
       border: 2px dashed #ccc;
       border-radius: 12px;
@@ -366,6 +372,28 @@
         <label>Harga</label>
         <input type="text" id="editPrice">
       </div>
+      <div id="rentEditFields" style="display: none;">
+        <div class="section-divider"><i class="fas fa-key"></i> Detail Sewa</div>
+        <div class="modal-form-group">
+          <label for="editMonthlyPrice">Harga perbulan</label>
+          <input type="text" id="editMonthlyPrice" inputmode="numeric" pattern="[0-9.]*">
+        </div>
+        <div class="modal-form-group">
+          <label for="editDiscountPercent">Diskon (%)</label>
+          <input type="number" id="editDiscountPercent" min="0" max="100" step="0.01" inputmode="decimal">
+          <small class="edit-field-error" id="editDiscountPercentError">Diskon harus angka antara 0 sampai 100.</small>
+        </div>
+        <div class="modal-form-group">
+          <label for="editDiscountQuota">Kuota diskon (jumlah booking)</label>
+          <input type="number" id="editDiscountQuota" min="0" step="1" inputmode="numeric">
+          <small class="edit-field-error" id="editDiscountQuotaError">Kuota harus bilangan bulat minimal 0.</small>
+        </div>
+        <div class="modal-form-group">
+          <label for="editDiscountMinDuration">Durasi sewa minimum (bulan)</label>
+          <input type="number" id="editDiscountMinDuration" min="1" step="1" inputmode="numeric">
+          <small class="edit-field-error" id="editDiscountMinDurationError">Durasi harus bilangan bulat minimal 1 bulan.</small>
+        </div>
+      </div>
       <div class="modal-form-group">
         <label>Lokasi</label>
         <input type="text" id="editLocation">
@@ -506,7 +534,7 @@
     // =====================================================
     const SHEET_ID = '1mosLZD23_3YDcuzi2diUY2TRNBSigJ2HNiiiFGPWtzo';
     const OPENSHEET_URL = `https://opensheet.elk.sh/${SHEET_ID}`;
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw9P0EarrVJjrYOtvvAbveyUoFrH8rN2re-zkcx25DBrjshpjJ5Qsd7U2U7xb8dkO5q/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyobIJh-bAda4xU3ASK5yX-c2pn5ZbBMnufIdjks08mRlQcU_1vyuLCBCk8CjCfpOAa/exec';
     
     let currentCategory = 'primary';
     let currentUser = null;
@@ -850,6 +878,14 @@ displayData(filteredData);
       document.getElementById('editCategory').value = currentCategory;
       document.getElementById('editPropertyName').value = item['nama property'] || '';
       document.getElementById('editPrice').value = item.harga || '';
+      const isRent = currentCategory === 'rent';
+      document.getElementById('rentEditFields').style.display = isRent ? 'block' : 'none';
+      document.getElementById('editMonthlyPrice').value = item['harga perbulan'] || '';
+      document.getElementById('editDiscountPercent').value = item.diskon ?? '';
+      document.getElementById('editDiscountQuota').value = item['kuota diskon'] ?? '';
+      document.getElementById('editDiscountMinDuration').value = item['durasi sewa'] ?? '';
+      ['editDiscountPercentError', 'editDiscountQuotaError', 'editDiscountMinDurationError']
+        .forEach(id => { document.getElementById(id).style.display = 'none'; });
       document.getElementById('editLocation').value = item.lokasi || '';
       document.getElementById('editContact').value = item.kontak || '';
       document.getElementById('editKt').value = item.kt || '';
@@ -911,6 +947,12 @@ displayData(filteredData);
         property_id: currentData[index].property_id,
         nama_property: document.getElementById('editPropertyName').value.trim(),
         harga: document.getElementById('editPrice').value.trim(),
+        ...(category === 'rent' ? {
+          harga_perbulan: document.getElementById('editMonthlyPrice').value.trim(),
+          diskon: document.getElementById('editDiscountPercent').value.trim(),
+          kuota_diskon: document.getElementById('editDiscountQuota').value.trim(),
+          durasi_sewa: document.getElementById('editDiscountMinDuration').value.trim()
+        } : {}),
         lokasi: document.getElementById('editLocation').value.trim(),
         kontak: document.getElementById('editContact').value.trim(),
         kt: document.getElementById('editKt').value,
@@ -936,13 +978,39 @@ displayData(filteredData);
         setCardLoading(index, false);
         return; 
       }
+
+      if (category === 'rent') {
+        const discountChecks = [
+          ['diskon', 'editDiscountPercentError', value => Number.isFinite(value) && value >= 0 && value <= 100],
+          ['kuota_diskon', 'editDiscountQuotaError', value => Number.isSafeInteger(value) && value >= 0],
+          ['durasi_sewa', 'editDiscountMinDurationError', value => Number.isSafeInteger(value) && value >= 1]
+        ];
+        let isRentDataValid = Boolean(payload.harga.trim() || payload.harga_perbulan.trim());
+        discountChecks.forEach(([key, errorId, isValidValue]) => {
+          const value = payload[key];
+          const isValid = !value || isValidValue(Number(value));
+          document.getElementById(errorId).style.display = isValid ? 'none' : 'block';
+          if (!isValid) isRentDataValid = false;
+        });
+        if (!isRentDataValid) {
+          if (!payload.harga.trim() && !payload.harga_perbulan.trim()) {
+            showToast('Isi harga per malam dan/atau harga perbulan.');
+          } else {
+            showToast('Periksa kembali nilai diskon, kuota, dan durasi sewa.');
+          }
+          setButtonLoading(saveBtn, false, originalBtnText);
+          setCardLoading(index, false);
+          return;
+        }
+      }
       
       showToast('🔄 Menyimpan perubahan...');
       
       try {
         const formData = new URLSearchParams();
         Object.keys(payload).forEach(key => {
-          if (payload[key] !== undefined && payload[key] !== '') {
+          const isRentField = ['harga_perbulan', 'diskon', 'kuota_diskon', 'durasi_sewa'].includes(key);
+          if (payload[key] !== undefined && (payload[key] !== '' || (category === 'rent' && isRentField))) {
             formData.append(key, payload[key]);
           }
         });
