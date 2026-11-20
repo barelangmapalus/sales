@@ -2,543 +2,1369 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <meta name="theme-color" content="#0f172a">
-  
-  <title>Detail Properti - BMpro</title>
-  
-  <!-- Font Awesome -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>BMpro - Listing Properti</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <!-- CSS Global -->
-  <link rel="stylesheet" href="css/style.css">
-  
-  <!-- Library untuk PDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f5f7fb;
+      min-height: 100vh;
+      padding: 20px;
+      padding-bottom: 90px;
+    }
+    .container { max-width: 600px; margin: 0 auto; }
+    .header { text-align: center; margin-bottom: 25px; }
+    .header h3 { color: #2c3e50; font-size: 1.0rem; font-weight: 700; }
+    .header p { color: #666; font-size: 0.85rem; }
+    
+    /* Tabs lebih kecil */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      background: white;
+      padding: 6px;
+      border-radius: 40px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 6px 10px;
+      border: none;
+      background: transparent;
+      border-radius: 30px;
+      font-weight: 500;
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .tab-btn.active {
+      background: linear-gradient(135deg, #2c3e50, #3498db);
+      color: white;
+    }
+    .property-card {
+      background: white;
+      border-radius: 20px;
+      margin-bottom: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      transition: opacity 0.3s ease;
+    }
+    .property-card.loading {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    .property-image {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      background: #f0f0f0;
+    }
+    .property-info { padding: 12px; }
+    .property-title { font-size: 1rem; font-weight: 700; color: #2c3e50; }
+    .property-location { font-size: 0.7rem; color: #888; margin: 4px 0; }
+    .property-price { font-size: 1rem; font-weight: 700; color: #3498db; margin: 4px 0; }
+    .property-specs { display: flex; gap: 12px; font-size: 0.65rem; color: #666; margin: 6px 0; }
+    .property-specs span i { margin-right: 4px; color: #3498db; }
+    .property-sales { font-size: 0.65rem; color: #888; border-top: 1px solid #eee; padding-top: 8px; margin-top: 5px; }
+    .action-buttons { display: flex; gap: 10px; margin-top: 10px; }
+    .btn-edit {
+      flex: 1;
+      background: linear-gradient(135deg, #f39c12, #e67e22);
+      color: white;
+      border: none;
+      padding: 8px;
+      border-radius: 10px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .btn-edit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .btn-delete {
+      flex: 1;
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      color: white;
+      border: none;
+      padding: 8px;
+      border-radius: 10px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .btn-delete:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+      /* TOMBOL NOTE */
+  .btn-note{
+  width:100%;
+  background:linear-gradient(135deg,#3498db,#2980b9);
+  color:#fff;
+  border:none;
+  padding:9px;
+  border-radius:10px;
+  font-size:.72rem;
+  font-weight:600;
+  cursor:pointer;
+  margin-bottom:8px;
+  transition:.3s;
+}
+
+.btn-note:hover{
+  transform:translateY(-1px);
+}
+
+.btn-note.has-note{
+  background:linear-gradient(135deg,#27ae60,#229954);
+}
+    .empty-state { text-align: center; padding: 50px 20px; background: white; border-radius: 20px; }
+    .empty-state i { font-size: 3rem; color: #ccc; margin-bottom: 15px; }
+    .loading-state { text-align: center; padding: 50px; }
+    
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      visibility: hidden;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 24px;
+      max-width: 550px;
+      width: 95%;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #3498db;
+    }
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 1.8rem;
+      cursor: pointer;
+      color: #999;
+    }
+    .modal-form-group { margin-bottom: 15px; }
+    .modal-form-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 5px;
+    }
+    .modal-form-group input, .modal-form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-family: 'Inter', sans-serif;
+    }
+    .edit-field-error {
+      display: none;
+      margin-top: 5px;
+      color: #c0392b;
+      font-size: 0.7rem;
+    }
+    .edit-field-label-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 5px;
+    }
+    .edit-field-label-row label {
+      margin-bottom: 0;
+    }
+    .edit-field-help-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: #20a464;
+      color: #fff;
+      font: inherit;
+      font-size: 0.6rem;
+      cursor: pointer;
+    }
+    .edit-field-help-button:hover,
+    .edit-field-help-button:focus-visible {
+      background: #16834e;
+      outline: 2px solid rgba(32, 164, 100, 0.25);
+      outline-offset: 2px;
+    }
+    .edit-field-help-dialog {
+      width: min(360px, calc(100% - 32px));
+      margin: auto;
+      padding: 20px;
+      border: 0;
+      border-radius: 16px;
+      color: #333;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+    }
+    .edit-field-help-dialog::backdrop {
+      background: rgba(25, 30, 45, 0.48);
+    }
+    .edit-field-help-dialog h2 {
+      margin-bottom: 8px;
+      font-size: 1rem;
+    }
+    .edit-field-help-dialog p {
+      color: #555;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    .edit-discount-example {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 10px;
+      background: #eef6ff;
+      color: #555;
+      font-size: 0.8rem;
+      line-height: 1.6;
+    }
+    .edit-field-help-close {
+      display: block;
+      margin: 16px 0 0 auto;
+      padding: 8px 16px;
+      border: 0;
+      border-radius: 8px;
+      background: #667eea;
+      color: #fff;
+      cursor: pointer;
+    }
+    .image-upload-area {
+      border: 2px dashed #ccc;
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      background: #fafafa;
+    }
+    .image-preview-container { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    .preview-item {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #f0f0f0;
+    }
+    .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+    .preview-label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 9px;
+      padding: 2px;
+      color: white;
+    }
+    .preview-label.old { background: #3498db; }
+    .preview-label.new { background: #27ae60; }
+    .btn-save {
+      width: 100%;
+      background: linear-gradient(135deg, #2c3e50, #3498db);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    .btn-save:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .section-divider {
+      font-weight: 700;
+      margin: 15px 0 10px 0;
+      padding-bottom: 5px;
+      border-bottom: 1px solid #ddd;
+      color: #2c3e50;
+    }
+    
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 16px 18px;
+      box-shadow: 0 -3px 15px rgba(0,0,0,0.1);
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      z-index: 100;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: #888;
+      font-size: 0.65rem;
+      cursor: pointer;
+    }
+    .nav-item.active { color: #3498db; }
+    .nav-item i { font-size: 1.2rem; }
+    .toast {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #2c3e50;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      z-index: 200;
+      display: none;
+    }
+    .btn-spinner {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid white;
+      border-top: 2px solid transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 6px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .property-viewers{
+        display:flex;
+        align-items:center;
+        gap:6px;
+        font-size:12px;
+        color:#666;
+        margin-top:4px;
+        margin-bottom:6px;
+      }
+      
+      .property-viewers i{
+        color:#3498db;
+        font-size:11px;
+      }
+  </style>
 </head>
 <body>
-  <div class="mobile-shell">
-  <div class="detail-page">
-    <div class="detail-header">
-      <a href="javascript:history.back()" class="back-btn"><i class="fas fa-arrow-left"></i></a>
-      <h2 id="detailTitle">Detail Properti</h2>
-      <div style="width: 36px;"></div>
+  <div class="container">
+    <div class="header">
+      <h3><i class="fas fa-list-alt"></i> Listing Properti</h3>
+      <p>Kelola properti & update gambar</p>
     </div>
-    
-    <div id="detailContent">
-      <div class="loading"><i class="fas fa-spinner fa-pulse"></i><p>Memuat detail...</p></div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-category="primary">🏠 Primary</button>
+      <button class="tab-btn" data-category="secondary">🏡 Secondary</button>
+      <button class="tab-btn" data-category="rent">🔑 Rent</button>
+    </div>
+
+    <div id="propertyList">
+      <div class="loading-state"><i class="fas fa-spinner fa-pulse"></i> Memuat data Primary...</div>
     </div>
   </div>
 
-  <script src="js/script.js"></script>
-  
-  <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw9P0EarrVJjrYOtvvAbveyUoFrH8rN2re-zkcx25DBrjshpjJ5Qsd7U2U7xb8dkO5q/exec';
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href='admin_form.html'">
+      <i class="fas fa-plus-circle"></i><span>Tambah</span>
+    </div>
+    <div class="nav-item active" onclick="window.location.href='listing.html'">
+      <i class="fas fa-list"></i><span>Listing</span>
+    </div>
 
-    let allImages = [];
-    let currentImageIndex = 0;
-    let currentProperty = null;
-    
-    // Fungsi showError dengan safe check
-    function showError(message) {
-      const contentDiv = document.getElementById('detailContent');
-      if (contentDiv) {
-        contentDiv.innerHTML = `
-          <div class="empty-state" style="margin-top: 40px;">
-            <i class="fas fa-exclamation-triangle"></i>
-            <p>${message}</p>
-            <a href="index.html" style="display: inline-block; margin-top: 16px; color: #3498db;">Kembali ke Beranda</a>
+
+    <div class="nav-item" onclick="window.location.href='https://bmproperti.online'">
+  <i class="fas fa-globe"></i>
+  <span>Website</span>
+</div>
+
+
+    <div class="nav-item" onclick="confirmLogout()">
+      <i class="fas fa-sign-out-alt"></i>
+      <span>Logout</span>
+    </div>
+
+    </nav>
+
+  <!-- Modal Edit -->
+  <div id="editModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-edit"></i> Edit Properti</h3>
+        <button class="close-modal" onclick="closeModal()">&times;</button>
+      </div>
+      <input type="hidden" id="editRowIndex">
+      <input type="hidden" id="editCategory">
+      
+      <div class="modal-form-group">
+        <label>Nama Properti</label>
+        <input type="text" id="editPropertyName">
+      </div>
+      <div class="modal-form-group">
+        <label>Harga</label>
+        <input type="text" id="editPrice">
+      </div>
+      <div id="rentEditFields" style="display: none;">
+        <div class="section-divider"><i class="fas fa-key"></i> Detail Sewa</div>
+        <div class="modal-form-group">
+          <label for="editMonthlyPrice">Harga perbulan</label>
+          <input type="text" id="editMonthlyPrice" inputmode="numeric" pattern="[0-9.]*">
+        </div>
+        <div class="modal-form-group">
+          <div class="edit-field-label-row">
+            <label for="editDiscountPercent">Diskon (%)</label>
+            <button class="edit-field-help-button" type="button" data-help-title="Diskon" data-help-text="Persentase potongan dari total sewa bulanan. Contoh 10 berarti diskon 10% jika syarat durasi dan kuota terpenuhi." data-help-example="discount-calculation" aria-label="Bantuan tentang diskon">
+              <i class="fas fa-question" aria-hidden="true"></i>
+            </button>
           </div>
-        `;
-      }
-    }
+          <input type="number" id="editDiscountPercent" min="0" max="100" step="0.01" inputmode="decimal">
+          <small class="edit-field-error" id="editDiscountPercentError">Diskon harus angka antara 0 sampai 100.</small>
+        </div>
+        <div class="modal-form-group">
+          <div class="edit-field-label-row">
+            <label for="editDiscountQuota">Kuota diskon (jumlah booking)</label>
+            <button class="edit-field-help-button" type="button" data-help-title="Kuota diskon" data-help-text="Batas jumlah booking yang bisa mendapat diskon. Contoh 10 berarti maksimal 10 booking memperoleh diskon." aria-label="Bantuan tentang kuota diskon">
+              <i class="fas fa-question" aria-hidden="true"></i>
+            </button>
+          </div>
+          <input type="number" id="editDiscountQuota" min="0" step="1" inputmode="numeric">
+          <small class="edit-field-error" id="editDiscountQuotaError">Kuota harus bilangan bulat minimal 0.</small>
+        </div>
+        <div class="modal-form-group">
+          <div class="edit-field-label-row">
+            <label for="editDiscountMinDuration">Durasi sewa minimum (bulan)</label>
+            <button class="edit-field-help-button" type="button" data-help-title="Durasi sewa minimum" data-help-text="Lama sewa bulanan minimum agar memenuhi syarat diskon. Contoh 3 berarti sewa 3 bulan atau lebih." aria-label="Bantuan tentang durasi sewa minimum">
+              <i class="fas fa-question" aria-hidden="true"></i>
+            </button>
+          </div>
+          <input type="number" id="editDiscountMinDuration" min="1" step="1" inputmode="numeric">
+          <small class="edit-field-error" id="editDiscountMinDurationError">Durasi harus bilangan bulat minimal 1 bulan.</small>
+        </div>
+      </div>
+      <div class="modal-form-group">
+        <label>Lokasi</label>
+        <input type="text" id="editLocation">
+      </div>
+      <div class="modal-form-group">
+        <label>Kontak (WhatsApp)</label>
+        <input type="tel" id="editContact">
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+        <div class="modal-form-group"><label>KT</label><input type="number" id="editKt"></div>
+        <div class="modal-form-group"><label>KM</label><input type="number" id="editKm"></div>
+        <div class="modal-form-group"><label>LT (m²)</label><input type="number" id="editLt"></div>
+      </div>
+     <div class="modal-form-group">
+  <label>Spesifikasi</label>
+  <textarea id="editSpecification" rows="3"></textarea>
+</div>
+
+<div class="modal-form-group">
+  <label>Link YouTube</label>
+  <input 
+    type="url" 
+    id="editYoutube" 
+    placeholder="https://youtube.com/watch?v=..."
+  >
+</div>
+
+      <div class="section-divider"><i class="fas fa-star"></i> Gambar Utama</div>
+      <div class="modal-form-group">
+        <div class="image-upload-area" onclick="document.getElementById('editMainImage').click()">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <p>Tap untuk ganti gambar (lama akan terhapus)</p>
+        </div>
+        <input type="file" id="editMainImage" accept="image/*" style="display: none;" onchange="previewEditImage(this, 'main')">
+        <div id="editPreviewMain" class="image-preview-container"></div>
+        <input type="hidden" id="editOldMainImage">
+      </div>
+
+      <div class="section-divider"><i class="fas fa-image"></i> Gambar 2</div>
+      <div class="modal-form-group">
+        <div class="image-upload-area" onclick="document.getElementById('editImage2').click()">
+          <i class="fas fa-cloud-upload-alt"></i><p>Tap untuk ganti</p>
+        </div>
+        <input type="file" id="editImage2" accept="image/*" style="display: none;" onchange="previewEditImage(this, 'img2')">
+        <div id="editPreviewImg2" class="image-preview-container"></div>
+        <input type="hidden" id="editOldImage2">
+      </div>
+
+      <div class="section-divider"><i class="fas fa-image"></i> Gambar 3</div>
+      <div class="modal-form-group">
+        <div class="image-upload-area" onclick="document.getElementById('editImage3').click()">
+          <i class="fas fa-cloud-upload-alt"></i><p>Tap untuk ganti</p>
+        </div>
+        <input type="file" id="editImage3" accept="image/*" style="display: none;" onchange="previewEditImage(this, 'img3')">
+        <div id="editPreviewImg3" class="image-preview-container"></div>
+        <input type="hidden" id="editOldImage3">
+      </div>
+
+      <div class="section-divider"><i class="fas fa-image"></i> Gambar 4</div>
+      <div class="modal-form-group">
+        <div class="image-upload-area" onclick="document.getElementById('editImage4').click()">
+          <i class="fas fa-cloud-upload-alt"></i><p>Tap untuk ganti</p>
+        </div>
+        <input type="file" id="editImage4" accept="image/*" style="display: none;" onchange="previewEditImage(this, 'img4')">
+        <div id="editPreviewImg4" class="image-preview-container"></div>
+        <input type="hidden" id="editOldImage4">
+      </div>
+
+      <div class="section-divider"><i class="fas fa-image"></i> Gambar 5</div>
+      <div class="modal-form-group">
+        <div class="image-upload-area" onclick="document.getElementById('editImage5').click()">
+          <i class="fas fa-cloud-upload-alt"></i><p>Tap untuk ganti</p>
+        </div>
+        <input type="file" id="editImage5" accept="image/*" style="display: none;" onchange="previewEditImage(this, 'img5')">
+        <div id="editPreviewImg5" class="image-preview-container"></div>
+        <input type="hidden" id="editOldImage5">
+      </div>
+
+      <button class="btn-save" id="saveChangesBtn" onclick="saveEdit()"><i class="fas fa-save"></i> Simpan Perubahan</button>
+    </div>
+  </div>
+
+  <dialog class="edit-field-help-dialog" id="editFieldHelpDialog" aria-labelledby="editFieldHelpTitle" aria-describedby="editFieldHelpText">
+    <h2 id="editFieldHelpTitle">Petunjuk</h2>
+    <p id="editFieldHelpText"></p>
+    <div class="edit-discount-example" id="editDiscountHelpExample" hidden>
+      <strong>Contoh perhitungan diskon bulanan</strong><br>
+      Tarif per bulan: Rp1.000.000<br>
+      Durasi sewa: 6 bulan<br>
+      Subtotal: Rp6.000.000<br>
+      Diskon: 10%<br>
+      Potongan: Rp600.000<br>
+      Total akhir: Rp5.400.000
+    </div>
+    <button class="edit-field-help-close" type="button" id="closeEditFieldHelpButton">Mengerti</button>
+  </dialog>
+
+<div id="noteModal" class="modal-overlay">
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h3>
+                <i class="fas fa-sticky-note"></i>
+                Catatan Properti
+            </h3>
+
+            <button
+                class="close-modal"
+                onclick="closeNote()">
+
+                &times;
+
+            </button>
+
+        </div>
+
+        <input
+            type="hidden"
+            id="notePropertyId">
+
+        <textarea
+            id="noteText"
+            rows="8"
+            style="
+            width:100%;
+            border:1px solid #ddd;
+            border-radius:12px;
+            padding:12px;
+            resize:vertical;"
+            placeholder="Tulis catatan disini..."></textarea>
+
+        <button
+            class="btn-save"
+            onclick="saveNote()">
+
+            <i class="fas fa-save"></i>
+            Simpan Catatan
+
+        </button>
+
+    </div>
+
+</div>
+  
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // =====================================================
+    // KONFIGURASI HYBRID: OpenSheet untuk Load, Apps Script untuk Update/Delete
+    // =====================================================
+    const SHEET_ID = '1mosLZD23_3YDcuzi2diUY2TRNBSigJ2HNiiiFGPWtzo';
+    const OPENSHEET_URL = `https://opensheet.elk.sh/${SHEET_ID}`;
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyFwn9FRGMoFf8-hw_TYYOVFTXSjd56_B9Z7dAlTEYiBnXGsEIZNkYfN2fkhzc2E6Qj/exec';
     
-    function loadDetail() {
-      const params = new URLSearchParams(window.location.search);
-      const id = params.get('id');
-      
-      if (!id) {
-        showError('ID properti tidak ditemukan');
-        return;
+    let currentCategory = 'primary';
+    let currentUser = null;
+    let currentData = [];
+    let editNewImages = { main: null, img2: null, img3: null, img4: null, img5: null };
+    let isLoading = false;
+
+    // =====================================================
+    // AUTHENTICATION
+    // =====================================================
+    async function checkAuth() {
+
+    try {
+
+      const userStr = localStorage.getItem('bmpro_user');
+
+      console.log('LOCAL USER:', userStr);
+
+      if (!userStr) {
+        window.location.href = 'login.html';
+        return false;
       }
-      
-      const storedData = sessionStorage.getItem(id) || localStorage.getItem(`bmpro_property_${id}`);
-      if (!storedData) {
-        showError('Data properti tidak ditemukan');
-        return;
+
+      currentUser = JSON.parse(userStr);
+
+      console.log('PARSED USER:', currentUser);
+
+      if (!currentUser) {
+        logout();
+        return false;
       }
+
+      if (
+        currentUser.role !== 'admin' &&
+        currentUser.role !== 'host'
+      ) {
+        logout();
+        return false;
+      }
+
+      return true;
+
+    } catch (err) {
+
+      console.error('CHECK AUTH ERROR:', err);
+
+      logout();
+
+      return false;
+    }
+    }
+
+
+function confirmLogout() {
+
+  const confirmExit = confirm(
+    'Anda yakin mau Logout?'
+  );
+
+  if (confirmExit) {
+    logout();
+  }
+
+}
+
+    function logout() { 
+    localStorage.removeItem('bmpro_user'); 
+    window.location.href = 'login.html'; 
+    }
+
+
+    function normalizePhone(phone) {
+
+    if (!phone) return '';
+
+    let cleaned =
+      phone.toString().replace(/\D/g, '');
+
+    // 08123 -> 628123
+    if (cleaned.startsWith('0')) {
+      cleaned = '62' + cleaned.substring(1);
+    }
+
+    // 8123 -> 628123
+    if (!cleaned.startsWith('62')) {
+      cleaned = '62' + cleaned;
+    }
+
+    return cleaned;
+
+    }
+
+    // =====================================================
+    // LOAD DATA PAKAI OPENSHEET (GAMBAR LANGSUNG MUNCUL)
+    // =====================================================
+    async function loadData() {
+      if (isLoading) return;
+      isLoading = true;
+      
+      const container = document.getElementById('propertyList');
+      container.innerHTML = `<div class="loading-state"><i class="fas fa-spinner fa-pulse"></i> Memuat data ${currentCategory}...</div>`;
       
       try {
-        const property = JSON.parse(storedData);
-        currentProperty = property;
+        // 🔥 PAKAI OPENSHEET UNTUK AMBIL DATA
+        const response = await fetch(`${OPENSHEET_URL}/${currentCategory}`);
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
 
-        displayDetail(property);
+// FILTER DATA KOSONG
+let filteredData = data.filter(row =>
+  row['nama property'] &&
+  row['nama property'].trim() !== ''
+);
 
-        // ===== Viewer dihitung maksimal 1x setiap 24 jam =====
-        const viewedKey = `bmpro_viewed_${property.property_id}`;
-        const lastViewed = parseInt(localStorage.getItem(viewedKey) || "0");
-        
-        const now = Date.now();
-        const oneDay = 24 * 60 * 60 * 1000;
-        
-        if (now - lastViewed >= oneDay) {
-        
-          localStorage.setItem(viewedKey, now);
-        
-          fetch(SCRIPT_URL, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: new URLSearchParams({
-              action: 'incrementViewer',
-              category: property._tab || 'primary',
-              property_id: property.property_id
-            })
-          })
-          .then(res => res.json())
-          .then(result => {
-            console.log('👁️ Viewer updated:', result);
-        
-            if (property && result.success) {
-              property['viewer'] = parseInt(property['viewer'] || 0) + 1;
-        
-              const viewerEl = document.getElementById('viewerCount');
-        
-              if (viewerEl) {
-                viewerEl.textContent = property['viewer'];
-              }
-            }
-          })
-          .catch(err => console.log('❌ Viewer gagal:', err));
-        
+// FILTER PROPERTY ID
+filteredData = filteredData.filter(
+  row => row.property_id
+);
+
+// FILTER KHUSUS HOST
+if (currentUser.role === 'host') {
+
+filteredData = filteredData.filter(row => {
+
+  return (
+    normalizePhone(row.kontak) ===
+    normalizePhone(currentUser.kontak)
+  );
+
+});
+
+}
+
+currentData = filteredData;
+
+displayData(filteredData);
+
+} else {
+          container.innerHTML = `<div class="empty-state"><i class="fas fa-building"></i><p>Belum ada properti di ${currentCategory}</p></div>`;
         }
-      } catch (e) {
-        console.error('Load detail error:', e);
-        showError('Gagal memuat data properti');
+      } catch (error) {
+        console.error('OpenSheet error:', error);
+        container.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Gagal memuat data</p></div>`;
+      } finally {
+        isLoading = false;
       }
     }
-    
-    function saveSelectedProperty(property) {
-      if (!property) return;
-      const propertyId = property.property_id || property.id || 'selected';
-      localStorage.setItem(`bmpro_property_${propertyId}`, JSON.stringify(property));
-      localStorage.setItem('bmpro_last_selected_property_id', propertyId);
+
+    // =====================================================
+    // FORCE REFRESH DATA (BYPASS CACHE)
+    // =====================================================
+    async function refreshData() {
+      console.log('🔄 Force refresh data...');
+      
+      // Bersihkan cache
+      currentData = [];
+      
+      // Reload dari OpenSheet
+      await loadData();
+      
+      // Scroll ke atas
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      showToast('✅ Data telah diperbarui');
     }
 
-    document.addEventListener('click', function (event) {
-      const bookingLink = event.target.closest('.btn-booking');
-      if (!bookingLink || !currentProperty) return;
-      saveSelectedProperty(currentProperty);
-    });
-
-    function displayDetail(property) {
-      saveSelectedProperty(property);
-      allImages = [];
-      if (property['gambar utama']) allImages.push(convertDriveUrl(property['gambar utama']));
-      if (property['gambar2']) allImages.push(convertDriveUrl(property['gambar2']));
-      if (property['gambar3']) allImages.push(convertDriveUrl(property['gambar3']));
-      if (property['gambar4']) allImages.push(convertDriveUrl(property['gambar4']));
-      if (property['gambar5']) allImages.push(convertDriveUrl(property['gambar5']));
-      
-      const titleEl = document.getElementById('detailTitle');
-      if (titleEl) titleEl.textContent = property['nama property'] || 'Detail Properti';
-      
-      const content = document.getElementById('detailContent');
-      if (!content) return;
-      
-      const hargaValue = property['harga'] || '0';
-      const rawTimestamp = property.timestamp || '';
-      const date = new Date(rawTimestamp);
-      const formattedDate = date.toLocaleString('id-ID', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        timeZone: 'Asia/Jakarta'
-      }) + ' WIB';
-      
-      content.innerHTML = `
-        <div class="posted-date">
-          Diposting ${formattedDate.replace(',', ' •')}
-        </div>
-        <div class="detail-main-image">
-          <img src="${allImages[0] || 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=600'}" 
-               alt="${property['nama property'] || 'Properti'}" id="mainImage">
-          ${allImages.length > 1 ? `<span class="image-counter" id="imageCounter">1/${allImages.length}</span>` : ''}
-        </div>
-        ${property['youtube'] ? `
-          <div class="youtube-wrapper">
-            <iframe src="${convertYoutubeEmbed(property['youtube'])}" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-          </div>
-        ` : ''}
-        ${allImages.length > 1 ? `
-          <div class="detail-thumbnails">
-            ${allImages.map((img, i) => `
-              <div class="thumbnail ${i === 0 ? 'active' : ''}" onclick="changeImage(${i})">
-                <img src="${img}" alt="Thumbnail ${i+1}">
-              </div>
-            `).join('')}
-          </div>
-        ` : ''}
-        <div class="detail-info">
-          <div class="detail-price">${formatPrice(hargaValue)}</div>
-          <h2 class="detail-title">${escapeHtml(property['nama property'] || '-')}</h2>
-          <div class="detail-viewer">👁️ <span id="viewerCount">${property['viewer'] || '0'}</span>x dilihat</div>
-          <div class="detail-location"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(property['lokasi'] || '-')}</div>
-          <div class="detail-features">
-            <div class="detail-feature"><i class="fas fa-bed"></i><div class="value">${property['kt'] || '0'}</div><div class="label">Kamar Tidur</div></div>
-            <div class="detail-feature"><i class="fas fa-bath"></i><div class="value">${property['km'] || '0'}</div><div class="label">Kamar Mandi</div></div>
-            <div class="detail-feature"><i class="fas fa-layer-group"></i><div class="value">${property['lt'] || '0'}</div><div class="label">Lantai</div></div>
-          </div>
-        </div>
-        ${property['spesifikasi'] ? `
-          <div class="detail-description">
-            <h3>Deskripsi</h3>
-            <p>${escapeHtml(property['spesifikasi'])}</p>
-          </div>
-        ` : ''}
-        <div class="detail-specs">
-          <div class="spec-item"><span class="spec-label">Kategori</span><span class="spec-value">${property._tab || 'primary'}</span></div>
-          <div class="spec-item"><span class="spec-label">Sales</span><span class="spec-value">${escapeHtml(property['sales'] || '-')}</span></div>
-          <div class="spec-item"><span class="spec-label">Kontak</span><span class="spec-value">${escapeHtml(property['kontak'] || '-')}</span></div>
-        </div>
-        <div class="detail-contact">
-          <h3 style="margin-bottom:12px;">Hubungi Marketing</h3>
-          <button class="share-btn" id="sharePdfBtn" onclick="generateAndSharePDF()">
-            <i class="fas fa-file-pdf"></i> Share PDF Properti
-          </button>
-          <div class="contact-buttons">
-            <a href="tel:${property['kontak'] || '081234567890'}" class="btn-call">
-              <i class="fas fa-phone"></i> Telepon
-            </a>
-            <a href="https://wa.me/${convertToWaNumber(property['kontak'] || '081234567890')}?text=Halo, saya tertarik dengan properti ${encodeURIComponent(property['nama property'] || '')}" class="btn-wa" target="_blank">
-              <i class="fab fa-whatsapp"></i> WhatsApp
-            </a>
-          </div>
-          ${property._tab === 'rent' ? `
-            <a href="register_payment.html?property_id=${encodeURIComponent(property['property_id'] || property['id'] || '')}&property_name=${encodeURIComponent(property['nama property'] || property['name'] || '')}&property_image=${encodeURIComponent(property['gambar utama'] || '')}&price=${encodeURIComponent(property['harga'] || '')}" class="btn-booking" target="_blank" rel="noopener noreferrer">
-              <i class="fas fa-calendar-check"></i> Booking
-            </a>
-          ` : ''}
-        </div>
-      `;
-    }
-
-    function changeImage(index) {
-      if (!allImages[index]) return;
-      currentImageIndex = index;
-      const mainImage = document.getElementById('mainImage');
-      if (mainImage) mainImage.src = allImages[index];
-      
-      document.querySelectorAll('.thumbnail').forEach((thumb, i) => {
-        thumb.classList.toggle('active', i === index);
-      });
-      const counter = document.getElementById('imageCounter');
-      if (counter) counter.textContent = `${index + 1}/${allImages.length}`;
-    }
-
-    function convertYoutubeEmbed(url) {
+    // ========== KONVERSI URL GOOGLE DRIVE KE THUMBNAIL ==========
+    function convertDriveUrl(url) {
       if (!url) return '';
-      if (url.includes('youtu.be/')) {
-        const id = url.split('youtu.be/')[1].split('?')[0];
-        return `https://www.youtube.com/embed/${id}`;
+      if (url.includes('lh3.googleusercontent.com')) return url;
+      
+      // Pattern: /d/FILE_ID/
+      const fileIdMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (fileIdMatch) {
+        return `https://lh3.googleusercontent.com/d/${fileIdMatch[1]}=w400`;
       }
-      if (url.includes('watch?v=')) {
-        const id = url.split('watch?v=')[1].split('&')[0];
-        return `https://www.youtube.com/embed/${id}`;
+      
+      // Pattern: ?id=FILE_ID
+      const ucIdMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+      if (ucIdMatch) {
+        return `https://lh3.googleusercontent.com/d/${ucIdMatch[1]}=w400`;
       }
+      
+      // Pattern: langsung FILE_ID
+      if (url.match(/^[a-zA-Z0-9_-]{25,}$/)) {
+        return `https://lh3.googleusercontent.com/d/${url}=w400`;
+      }
+      
       return url;
+    }
+
+    // =====================================================
+    // FORMATTER & HELPER
+    // =====================================================
+    function formatPrice(price) {
+      if (!price) return 'Rp 0';
+      const num = parseInt(price.toString().replace(/[^0-9]/g, '') || 0);
+      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
     }
 
     function escapeHtml(str) {
       if (!str) return '';
-      return str
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+      return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
     }
 
-    function getDriveImageUrl(url) {
-      if (!url) return '';
-      if (url.includes('lh3.googleusercontent.com')) return url;
-      
-      let fileId = null;
-      let match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-      if (match && match[1]) fileId = match[1];
-      if (!fileId) {
-        match = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-        if (match && match[1]) fileId = match[1];
-      }
-      if (!fileId && url.match(/^[a-zA-Z0-9_-]{25,}$/)) fileId = url;
-      
-      if (fileId) {
-        return `https://lh3.googleusercontent.com/d/${fileId}=w800`;
-      }
-      return url;
+    // =====================================================
+    // DISPLAY DATA (dengan referrerpolicy agar gambar muncul)
+    // =====================================================
+          function displayData(data) {
+        const container = document.getElementById('propertyList');
+        container.innerHTML = data.map((item, idx) => `
+          <div class="property-card" data-idx="${idx}">
+            <img class="property-image" src="${convertDriveUrl(item['gambar utama']) || 'https://via.placeholder.com/400x200?text=No+Image'}" 
+                onerror="this.src='https://via.placeholder.com/400x200?text=No+Image'">
+            <div class="property-info">
+
+            <div class="property-title">${escapeHtml(item['nama property'] || '-')}</div>
+
+            <div class="property-viewers"><i class="fas fa-eye"></i>${item['viewer'] || 0} Dilihat</div>
+
+            <div class="property-location"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(item.lokasi || '-')}</div>
+            <div class="property-price">${formatPrice(item.harga)}</div>
+            <div class="property-specs">
+              <span><i class="fas fa-bed"></i> ${item.kt || 0} KT</span>
+              <span><i class="fas fa-bath"></i> ${item.km || 0} KM</span>
+              <span><i class="fas fa-vector-square"></i> ${item.lt || 0} m²</span>
+            </div>
+            <div class="property-sales">
+              <i class="fas fa-user"></i> ${escapeHtml(item.sales || '-')} &nbsp;|&nbsp;
+              <i class="fab fa-whatsapp"></i> ${escapeHtml(item.kontak || '-')}
+            </div>
+
+        <div class="action-buttons">
+    <button class="btn-note ${localStorage.getItem('note_'+item.property_id)?'has-note':''}"
+        onclick="openNote(${idx})"><i class="fas fa-sticky-note"></i>${localStorage.getItem('note_'+item.property_id)?'Note ✓':'Note'}
+    </button>
+</div>
+
+<div class="action-buttons">
+    <button class="btn-edit"onclick="openEditModal(${idx})"><i class="fas fa-edit"></i>Update</button>
+    <button class="btn-delete"onclick="deleteItem(${idx})"><i class="fas fa-trash"></i>Delete</button>
+     </div>
+          </div>
+        </div>
+      `).join('');
     }
 
-    function loadImageWithRetry(src, maxRetries = 3, delay = 1000) {
+    // =====================================================
+    // COMPRESS IMAGE
+    // =====================================================
+    async function compressImage(file) {
       return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.crossOrigin = 'Anonymous';
-        img.referrerPolicy = 'no-referrer';
-        let attempt = 0;
-        
-        function attemptLoad() {
-          img.onload = () => resolve(img);
-          img.onerror = () => {
-            if (attempt < maxRetries) {
-              attempt++;
-              console.log(`Gagal memuat, percobaan ${attempt}/${maxRetries}...`);
-              setTimeout(attemptLoad, delay);
-            } else {
-              reject(new Error(`Gagal memuat gambar: ${src}`));
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (e) => {
+          const img = new Image();
+          img.src = e.target.result;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width, height = img.height;
+            const maxSize = 800;
+            if (width > maxSize || height > maxSize) {
+              if (width > height) { height = (height * maxSize) / width; width = maxSize; }
+              else { width = (width * maxSize) / height; height = maxSize; }
             }
+            canvas.width = width; canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', 0.7));
           };
-          img.src = src;
-        }
-        attemptLoad();
+          img.onerror = reject;
+        };
+        reader.onerror = reject;
       });
     }
 
-    let isGeneratingPDF = false;
-
-    async function generateAndSharePDF() {
-      if (isGeneratingPDF) {
-        showToast('⏳ Sedang membuat PDF, tunggu sebentar...', 2000);
-        return;
-      }
+    // =====================================================
+    // PREVIEW EDIT IMAGE
+    // =====================================================
+    async function previewEditImage(input, imageKey) {
+      const file = input.files[0];
+      if (!file) return;
+      if (file.size > 10 * 1024 * 1024) { alert('Maksimal 10MB'); input.value = ''; return; }
       
-      if (!currentProperty) {
-        showToast('❌ Data properti belum dimuat', 2000);
-        return;
-      }
+      const previewMap = { main:'editPreviewMain', img2:'editPreviewImg2', img3:'editPreviewImg3', img4:'editPreviewImg4', img5:'editPreviewImg5' };
+      const previewDiv = document.getElementById(previewMap[imageKey]);
       
-      const property = currentProperty;
-      isGeneratingPDF = true;
-      const shareBtn = document.getElementById('sharePdfBtn');
-      const originalText = shareBtn ? shareBtn.innerHTML : 'Share PDF';
-      if (shareBtn) {
-        shareBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Memuat gambar...';
-        shareBtn.disabled = true;
-      }
-      
-      showToast('📸 Memuat gambar properti...', 1500);
+      previewDiv.innerHTML = `<div class="preview-item"><i class="fas fa-spinner fa-pulse"></i></div>`;
       
       try {
-        const imageUrls = [];
-        const mainImageUrl = getDriveImageUrl(property['gambar utama']);
-        if (mainImageUrl) imageUrls.push(mainImageUrl);
-        
-        const galleryImages = [];
-        ['gambar2', 'gambar3', 'gambar4', 'gambar5'].forEach(key => {
-          const url = property[key];
-          if (url && url.trim() !== '') {
-            const converted = getDriveImageUrl(url);
-            galleryImages.push(converted);
-            imageUrls.push(converted);
-          }
-        });
-        
-        const logoUrl = 'https://drive.google.com/thumbnail?id=1a3cJptxJTSHksm9D7tN3us_7Ii7dQxxG&sz=w100';
-        imageUrls.push(logoUrl);
-        
-        showToast(`📥 Memuat ${imageUrls.length} gambar...`, 2000);
-        for (let i = 0; i < imageUrls.length; i++) {
-          try {
-            await loadImageWithRetry(imageUrls[i], 3, 1500);
-          } catch (err) {
-            console.warn(`Gagal memuat gambar: ${imageUrls[i]}`);
-          }
-        }
-        
-        showToast('📄 Membuat layout PDF...', 1500);
-        
-        const pdfElement = document.createElement('div');
-        pdfElement.style.position = 'fixed';
-        pdfElement.style.left = '-9999px';
-        pdfElement.style.top = '0';
-        pdfElement.style.width = '800px';
-        pdfElement.style.backgroundColor = 'white';
-        pdfElement.style.padding = '20px';
-        pdfElement.style.fontFamily = "'Poppins', sans-serif";
-        
-        const hargaFormatted = formatPrice(property['harga']);
-        const date = new Date(property.timestamp || Date.now());
-        const formattedDate = date.toLocaleDateString('id-ID', {
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric'
-        });
-        
-        pdfElement.innerHTML = `
-          <div style="max-width: 600px; margin: 0 auto; background: white;">
-            <div style="text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #3498db;">
-              <img src="${logoUrl}" style="width: 50px; border-radius: 12px; margin-bottom: 8px;">
-              <h1 style="margin: 0; color: #2c3e50; font-size: 1.5rem;">BMpro</h1>
-              <p style="color: #7f8c8d; font-size: 0.7rem; margin: 4px 0 0;">Properti Batam</p>
-            </div>
-            <div style="margin-bottom: 20px;">
-              <img src="${mainImageUrl}" style="width: 100%; border-radius: 16px; object-fit: cover; aspect-ratio: 16/9;" onerror="this.src='https://via.placeholder.com/600x400?text=No+Image'">
-            </div>
-            <div style="margin-bottom: 16px;">
-              <h2 style="color: #3498db; font-size: 1.6rem; margin: 0 0 8px;">${hargaFormatted}</h2>
-              <h3 style="color: #2c3e50; font-size: 1.2rem; margin: 0 0 4px;">${escapeHtml(property['nama property'] || '-')}</h3>
-              <p style="color: #7f8c8d; font-size: 0.75rem; margin: 0;">📍 ${escapeHtml(property['lokasi'] || '-')}</p>
-            </div>
-            <div style="display: flex; gap: 16px; padding: 16px 0; border-top: 1px solid #eee; border-bottom: 1px solid #eee; margin-bottom: 20px;">
-              <div style="flex: 1; text-align: center;"><div style="font-size: 1.5rem;">🛏️</div><div style="font-weight: 700;">${property['kt'] || '0'}</div><div style="font-size: 0.65rem;">Kamar Tidur</div></div>
-              <div style="flex: 1; text-align: center;"><div style="font-size: 1.5rem;">🚿</div><div style="font-weight: 700;">${property['km'] || '0'}</div><div style="font-size: 0.65rem;">Kamar Mandi</div></div>
-              <div style="flex: 1; text-align: center;"><div style="font-size: 1.5rem;">📐</div><div style="font-weight: 700;">${property['lt'] || '0'} m²</div><div style="font-size: 0.65rem;">Luas Tanah</div></div>
-            </div>
-            ${galleryImages.length > 0 ? `
-              <div style="margin-bottom: 20px;">
-                <h4 style="color: #2c3e50; font-size: 0.85rem; margin: 0 0 8px;">📸 Galeri Properti</h4>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                  ${galleryImages.map(img => `<img src="${img}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 12px;" onerror="this.style.display='none'">`).join('')}
-                </div>
-              </div>
-            ` : ''}
-            ${property['spesifikasi'] ? `
-              <div style="margin-bottom: 20px;">
-                <h4 style="color: #2c3e50; font-size: 0.85rem; margin: 0 0 8px;">📋 Deskripsi</h4>
-                <p style="color: #555; font-size: 0.75rem; line-height: 1.5; margin: 0;">${escapeHtml(property['spesifikasi'])}</p>
-              </div>
-            ` : ''}
-            <div style="background: #f8f9fa; padding: 16px; border-radius: 12px; margin-bottom: 20px;">
-              <table style="width: 100%; font-size: 0.7rem;">
-                <tr><td style="padding: 6px 0;">Kategori</td><td style="text-align: right;">${property._tab || 'primary'}</td></tr>
-                <tr><td style="padding: 6px 0;">Sales Marketing</td><td style="text-align: right;">${escapeHtml(property['sales'] || '-')}</td></tr>
-                <tr><td style="padding: 6px 0;">Kontak</td><td style="text-align: right;">${escapeHtml(property['kontak'] || '-')}</td></tr>
-                <tr><td style="padding: 6px 0;">Diposting</td><td style="text-align: right;">${formattedDate}</td></tr>
-              </table>
-            </div>
-            <div style="text-align: center; padding-top: 16px; border-top: 1px solid #eee; font-size: 0.6rem; color: #aaa;">
-              Dokumen ini dibuat otomatis oleh BMpro
-            </div>
-          </div>
-        `;
-        
-        document.body.appendChild(pdfElement);
-        showToast('📸 Meng-capture halaman...', 1500);
-        
-        const canvas = await html2canvas(pdfElement, {
-          scale: 2,
-          backgroundColor: '#ffffff',
-          logging: false,
-          useCORS: true,
-          allowTaint: false,
-          imageTimeout: 30000
-        });
-        
-        document.body.removeChild(pdfElement);
-        showToast('📑 Membuat file PDF...', 1500);
-        
-        const imgData = canvas.toDataURL('image/png');
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-        
-        const imgWidth = 190;
-        const pageHeight = 277;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        let position = 10;
-        
-        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-        
-        let heightLeft = imgHeight - pageHeight + position;
-        while (heightLeft > 0) {
-          position = heightLeft - imgHeight;
-          pdf.addPage();
-          pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-          heightLeft -= pageHeight;
-        }
-        
-        const pdfBlob = pdf.output('blob');
-        const fileName = `${(property['nama property'] || 'properti').replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.pdf`;
-        const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
-        
-        try {
-          if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
-            await navigator.share({
-              title: property['nama property'] || 'Properti BMpro',
-              text: `🏠 ${property['nama property'] || 'Properti'}\n💰 ${hargaFormatted}\n📍 ${property['lokasi'] || '-'}`,
-              files: [pdfFile]
-            });
-            showToast('✅ PDF berhasil dibagikan', 2000);
-          } else {
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(pdfBlob);
-            link.download = fileName;
-            link.click();
-            URL.revokeObjectURL(link.href);
-            showToast('✅ PDF berhasil diunduh', 2000);
-          }
-        } catch (shareError) {
-          if (shareError.name !== 'AbortError') {
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(pdfBlob);
-            link.download = fileName;
-            link.click();
-            URL.revokeObjectURL(link.href);
-            showToast('✅ PDF berhasil diunduh', 2000);
-          }
-        }
-        
-      } catch (error) {
-        console.error('PDF Error:', error);
-        showToast('❌ Gagal membuat PDF: ' + error.message, 4000);
-      } finally {
-        isGeneratingPDF = false;
-        const btn = document.getElementById('sharePdfBtn');
-        if (btn) {
-          btn.innerHTML = '<i class="fas fa-file-pdf"></i> Share PDF Properti';
-          btn.disabled = false;
+        const compressed = await compressImage(file);
+        // 🔥 PERUBAHAN: tambahkan referrerpolicy dan crossorigin
+        previewDiv.innerHTML = `<div class="preview-item"><img src="${compressed}" referrerpolicy="no-referrer" crossorigin="anonymous"><div class="preview-label new">Baru</div></div>`;
+        editNewImages[imageKey] = compressed;
+      } catch(e) { 
+        previewDiv.innerHTML = '<div class="preview-item" style="color:red;">Gagal</div>'; 
+        input.value = ''; 
+      }
+    }
+
+    // =====================================================
+    // LOADING STATE HELPER
+    // =====================================================
+    function setCardLoading(index, isLoading) {
+      const card = document.querySelector(`.property-card[data-idx="${index}"]`);
+      if (card) {
+        if (isLoading) {
+          card.classList.add('loading');
+        } else {
+          card.classList.remove('loading');
         }
       }
     }
 
-    function showToast(message, duration = 2000) {
-      let toast = document.getElementById('dynamicToast');
-      if (!toast) {
-        toast = document.createElement('div');
-        toast.id = 'dynamicToast';
-        toast.style.cssText = `
-          position: fixed;
-          bottom: 100px;
-          left: 50%;
-          transform: translateX(-50%);
-          background: #2c3e50;
-          color: white;
-          padding: 10px 20px;
-          border-radius: 30px;
-          font-size: 0.8rem;
-          z-index: 1000;
-          display: none;
-          white-space: nowrap;
-          font-family: 'Poppins', sans-serif;
-        `;
-        document.body.appendChild(toast);
+    function setButtonLoading(button, isLoading, originalText) {
+      if (isLoading) {
+        button.disabled = true;
+        button.innerHTML = `<span class="btn-spinner"></span> ${originalText || 'Processing...'}`;
+      } else {
+        button.disabled = false;
+        button.innerHTML = originalText || button.innerHTML;
       }
-      toast.textContent = message;
+    }
+
+    // =====================================================
+    // OPEN EDIT MODAL (data dari OpenSheet sudah benar)
+    // =====================================================
+    function openEditModal(index) {
+      const item = currentData[index];
+      if (!item) return;
+      editNewImages = { main: null, img2: null, img3: null, img4: null, img5: null };
+      
+      document.getElementById('editMainImage').value = '';
+      document.getElementById('editImage2').value = '';
+      document.getElementById('editImage3').value = '';
+      document.getElementById('editImage4').value = '';
+      document.getElementById('editImage5').value = '';
+      
+      document.getElementById('editRowIndex').value = index;
+      document.getElementById('editCategory').value = currentCategory;
+      document.getElementById('editPropertyName').value = item['nama property'] || '';
+      document.getElementById('editPrice').value = item.harga || '';
+      const isRent = currentCategory === 'rent';
+      document.getElementById('rentEditFields').style.display = isRent ? 'block' : 'none';
+      document.getElementById('editMonthlyPrice').value = item['harga perbulan'] || '';
+      document.getElementById('editDiscountPercent').value = item.diskon ?? '';
+      document.getElementById('editDiscountQuota').value = item['kuota diskon'] ?? '';
+      document.getElementById('editDiscountMinDuration').value = item['durasi sewa'] ?? '';
+      ['editDiscountPercentError', 'editDiscountQuotaError', 'editDiscountMinDurationError']
+        .forEach(id => { document.getElementById(id).style.display = 'none'; });
+      document.getElementById('editLocation').value = item.lokasi || '';
+      document.getElementById('editContact').value = item.kontak || '';
+      document.getElementById('editKt').value = item.kt || '';
+      document.getElementById('editKm').value = item.km || '';
+      document.getElementById('editLt').value = item.lt || '';
+      document.getElementById('editSpecification').value = item.spesifikasi || '';
+      document.getElementById('editYoutube').value = item.youtube || '';
+      document.getElementById('editOldMainImage').value = item['gambar utama'] || '';
+      document.getElementById('editOldImage2').value = item.gambar2 || '';
+      document.getElementById('editOldImage3').value = item.gambar3 || '';
+      document.getElementById('editOldImage4').value = item.gambar4 || '';
+      document.getElementById('editOldImage5').value = item.gambar5 || '';
+      
+      displayOldPreview('editPreviewMain', item['gambar utama']);
+      displayOldPreview('editPreviewImg2', item.gambar2);
+      displayOldPreview('editPreviewImg3', item.gambar3);
+      displayOldPreview('editPreviewImg4', item.gambar4);
+      displayOldPreview('editPreviewImg5', item.gambar5);
+      
+      document.getElementById('editModal').style.visibility = 'visible';
+    }
+
+        function displayOldPreview(containerId, url) {
+      const container = document.getElementById(containerId);
+      if (url && url !== '') {
+        container.innerHTML = `<div class="preview-item"><img src="${convertDriveUrl(url)}" onerror="this.src='https://via.placeholder.com/80'"><div class="preview-label old">Lama</div></div>`;
+      } else {
+        container.innerHTML = `<div class="preview-item" style="display:flex;align-items:center;justify-content:center;"><i class="fas fa-image"></i></div>`;
+      }
+    }
+
+    function closeModal() { 
+      document.getElementById('editModal').style.visibility = 'hidden'; 
+    }
+
+    const editFieldHelpDialog = document.getElementById('editFieldHelpDialog');
+    const editFieldHelpTitle = document.getElementById('editFieldHelpTitle');
+    const editFieldHelpText = document.getElementById('editFieldHelpText');
+    const editDiscountHelpExample = document.getElementById('editDiscountHelpExample');
+    document.querySelectorAll('.edit-field-help-button').forEach(button => {
+      button.addEventListener('click', () => {
+        if (!editFieldHelpDialog || !editFieldHelpTitle || !editFieldHelpText) return;
+        editFieldHelpTitle.textContent = button.dataset.helpTitle || 'Petunjuk';
+        editFieldHelpText.textContent = button.dataset.helpText || '';
+        if (editDiscountHelpExample) {
+          editDiscountHelpExample.hidden = button.dataset.helpExample !== 'discount-calculation';
+        }
+        editFieldHelpDialog.showModal();
+      });
+    });
+    document.getElementById('closeEditFieldHelpButton')?.addEventListener('click', () => {
+      editFieldHelpDialog?.close();
+    });
+
+    // =====================================================
+    // SAVE EDIT PAKAI APPS SCRIPT (untuk update data & gambar)
+    // =====================================================
+    async function saveEdit() {
+      const saveBtn = document.getElementById('saveChangesBtn');
+      const originalBtnText = saveBtn.innerHTML;
+      
+      setButtonLoading(saveBtn, true, 'Menyimpan...');
+      
+      const index = parseInt(document.getElementById('editRowIndex').value);
+      const category = document.getElementById('editCategory').value;
+      
+      setCardLoading(index, true);
+      console.log('CURRENT USER:', currentUser);
+      console.log('UPDATE INDEX:', index);
+      console.log('UPDATE ITEM:', currentData[index]);
+      console.log('UPDATE PROPERTY ID:', currentData[index].property_id);
+      
+      const payload = {
+        action: 'updatePropertyWithImages',
+        role: currentUser.role,
+        kontak_user: currentUser.kontak,
+        category: category,
+        property_id: currentData[index].property_id,
+        nama_property: document.getElementById('editPropertyName').value.trim(),
+        harga: document.getElementById('editPrice').value.trim(),
+        ...(category === 'rent' ? {
+          harga_perbulan: document.getElementById('editMonthlyPrice').value.trim(),
+          diskon: document.getElementById('editDiscountPercent').value.trim(),
+          kuota_diskon: document.getElementById('editDiscountQuota').value.trim(),
+          durasi_sewa: document.getElementById('editDiscountMinDuration').value.trim()
+        } : {}),
+        lokasi: document.getElementById('editLocation').value.trim(),
+        kontak: document.getElementById('editContact').value.trim(),
+        kt: document.getElementById('editKt').value,
+        km: document.getElementById('editKm').value,
+        lt: document.getElementById('editLt').value,
+        spesifikasi: document.getElementById('editSpecification').value.trim(),
+        youtube: document.getElementById('editYoutube').value.trim(),
+        old_gambar_utama: document.getElementById('editOldMainImage').value,
+        old_gambar2: document.getElementById('editOldImage2').value,
+        old_gambar3: document.getElementById('editOldImage3').value,
+        old_gambar4: document.getElementById('editOldImage4').value,
+        old_gambar5: document.getElementById('editOldImage5').value,
+        new_gambar_utama: editNewImages.main || '',
+        new_gambar2: editNewImages.img2 || '',
+        new_gambar3: editNewImages.img3 || '',
+        new_gambar4: editNewImages.img4 || '',
+        new_gambar5: editNewImages.img5 || ''
+      };
+      
+      if (!payload.nama_property) { 
+        showToast('Nama properti wajib diisi');
+        setButtonLoading(saveBtn, false, originalBtnText);
+        setCardLoading(index, false);
+        return; 
+      }
+
+      if (category === 'rent') {
+        const discountChecks = [
+          ['diskon', 'editDiscountPercentError', value => Number.isFinite(value) && value >= 0 && value <= 100],
+          ['kuota_diskon', 'editDiscountQuotaError', value => Number.isSafeInteger(value) && value >= 0],
+          ['durasi_sewa', 'editDiscountMinDurationError', value => Number.isSafeInteger(value) && value >= 1]
+        ];
+        let isRentDataValid = Boolean(payload.harga.trim() || payload.harga_perbulan.trim());
+        discountChecks.forEach(([key, errorId, isValidValue]) => {
+          const value = payload[key];
+          const isValid = !value || isValidValue(Number(value));
+          document.getElementById(errorId).style.display = isValid ? 'none' : 'block';
+          if (!isValid) isRentDataValid = false;
+        });
+        if (!isRentDataValid) {
+          if (!payload.harga.trim() && !payload.harga_perbulan.trim()) {
+            showToast('Isi harga per malam dan/atau harga perbulan.');
+          } else {
+            showToast('Periksa kembali nilai diskon, kuota, dan durasi sewa.');
+          }
+          setButtonLoading(saveBtn, false, originalBtnText);
+          setCardLoading(index, false);
+          return;
+        }
+      }
+      
+      showToast('🔄 Menyimpan perubahan...');
+      
+      try {
+        const formData = new URLSearchParams();
+        Object.keys(payload).forEach(key => {
+          const isRentField = ['harga_perbulan', 'diskon', 'kuota_diskon', 'durasi_sewa'].includes(key);
+          if (payload[key] !== undefined && (payload[key] !== '' || (category === 'rent' && isRentField))) {
+            formData.append(key, payload[key]);
+          }
+        });
+        
+        const response = await fetch(APPS_SCRIPT_URL, { 
+            method: 'POST', 
+            body: formData 
+          });
+
+          const text = await response.text();
+
+          let result;
+
+          try {
+            result = JSON.parse(text);
+          } catch {
+            throw new Error('Response bukan JSON');
+          }
+        
+        if (result.success) {
+          closeModal();
+          showToast(result.data?.warning ? `⚠️ ${result.message}` : '✅ Data berhasil diupdate');
+          await loadData(); // Refresh data dari OpenSheet
+        } else {
+          showToast('❌ Gagal: ' + (result.message || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Save error:', error);
+        showToast('❌ Error: ' + error.message);
+      } finally {
+        setButtonLoading(saveBtn, false, originalBtnText);
+        setCardLoading(index, false);
+      }
+    }
+
+    // =====================================================
+    // DELETE ITEM PAKAI APPS SCRIPT (hapus data & gambar)
+    // =====================================================
+    async function deleteItem(index) {
+
+      const item = currentData[index];
+
+      if (!item) {
+        showToast('Data tidak ditemukan');
+        return;
+      }
+
+      if (!confirm(
+        `Hapus properti "${item['nama property']}"?\n\nSEMUA GAMBAR akan dihapus dari Drive!`
+      )) return;
+
+      setCardLoading(index, true);
+
+      const card =
+        document.querySelector(`.property-card[data-idx="${index}"]`);
+
+      const deleteBtn = card?.querySelector('.btn-delete');
+
+      if (deleteBtn) {
+        setButtonLoading(
+          deleteBtn,
+          true,
+          'Menghapus...'
+        );
+      }
+
+      showToast('🔄 Menghapus data dan gambar...');
+
+      try {
+
+        const formData = new URLSearchParams();
+
+        formData.append('action', 'deleteProperty');
+        formData.append('category', currentCategory);
+
+        // 🔥 PAKAI PROPERTY ID
+        formData.append(
+          'property_id',
+          item.property_id
+        );
+
+        formData.append('role', currentUser.role);
+        
+        formData.append('kontak_user', currentUser.kontak);
+
+        const response = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: formData
+        });
+
+        const text = await response.text();
+
+          let result;
+
+          try {
+            result = JSON.parse(text);
+          } catch {
+            throw new Error('Response bukan JSON');
+          }
+
+          if (result.success) {
+            showToast('✅ Data berhasil dihapus');
+            
+            // 🔥 FORCE REFRESH DATA
+            currentData = [];
+            await loadData();
+            
+            // 🔥 TAMBAHKAN INI UNTUK MEMASTIKAN UI UPDATE
+            const container = document.getElementById('propertyList');
+            if (currentData.length === 0) {
+              container.innerHTML = `<div class="empty-state"><i class="fas fa-building"></i><p>Belum ada properti di ${currentCategory}</p></div>`;
+            }
+          } else {
+
+          showToast(
+            '❌ Gagal hapus: ' +
+            (result.message || 'Unknown error')
+          );
+
+          setCardLoading(index, false);
+
+          if (deleteBtn) {
+
+            setButtonLoading(
+              deleteBtn,
+              false,
+              '<i class="fas fa-trash"></i> Delete'
+            );
+
+          }
+
+        }
+
+      } catch (error) {
+
+        console.error(error);
+
+        showToast('❌ Error: ' + error.message);
+
+        setCardLoading(index, false);
+
+        if (deleteBtn) {
+
+          setButtonLoading(
+            deleteBtn,
+            false,
+            '<i class="fas fa-trash"></i> Delete'
+          );
+
+        }
+
+      }
+
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.innerText = message;
       toast.style.display = 'block';
       setTimeout(() => {
         toast.style.display = 'none';
-      }, duration);
+      }, 2500);
     }
-    
-    // Jalankan setelah DOM siap
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', loadDetail);
-    } else {
-      loadDetail();
+
+//--------------------------------------------------
+// NOTE PROPERTY
+//--------------------------------------------------
+
+function openNote(index){
+
+    const item=currentData[index];
+
+    if(!item) return;
+
+    document.getElementById("notePropertyId").value=item.property_id;
+
+    document.getElementById("noteText").value=
+        localStorage.getItem("note_"+item.property_id)||"";
+
+    document.getElementById("noteModal").style.visibility="visible";
+
+}
+
+function closeNote(){
+
+    document.getElementById("noteModal").style.visibility="hidden";
+
+}
+
+function saveNote(){
+
+    const propertyId =
+        document.getElementById("notePropertyId").value;
+    const note =
+        document.getElementById("noteText").value.trim();
+    if(note){
+        localStorage.setItem("note_"+propertyId, note);
+    }else{
+        localStorage.removeItem("note_"+propertyId);
     }
+    closeNote();
+    loadData();
+    showToast("✅ Catatan berhasil disimpan");
+}
+
+// =====================================================
+// INITIALIZE
+// =====================================================
+window.addEventListener('DOMContentLoaded', async () => {
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+
+  btn.addEventListener('click', () => {
+
+    if (isLoading) return;
+
+    document.querySelectorAll('.tab-btn')
+      .forEach(b => b.classList.remove('active'));
+
+    btn.classList.add('active');
+
+    currentCategory = btn.dataset.category;
+
+    loadData();
+
+  });
+
+});
+
+  const isAuth = await checkAuth();
+
+  if (!isAuth) return;
+
+  loadData();
+
+  });
   </script>
 </body>
 </html>
