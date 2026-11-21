@@ -797,7 +797,7 @@ body {
       <span>Listing</span>
     </div>
 
-    <div class="nav-item" onclick="window.location.href='https://bmproperti.online/admin-bookings.html'">
+    <div class="nav-item" id="adminBookingNav" style="display: none;" onclick="window.location.href='https://bmproperti.online/admin-bookings.html'">
       <i class="fas fa-calendar-check"></i>
       <span>Booking</span>
     </div>
@@ -918,6 +918,11 @@ body {
         alert('Akses ditolak');
         window.location.href = 'login.html';
         return false;
+      }
+
+      const bookingNav = document.getElementById('adminBookingNav');
+      if (bookingNav) {
+        bookingNav.style.display = currentUser.role === 'admin' ? 'flex' : 'none';
       }
 
       const usernameDisplay =
